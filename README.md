@@ -6,7 +6,7 @@ Scripts e dados utilizados na análise bibliométrica apresentada no Capítulo 2
 
 ## Contexto da pesquisa
 
-Esta análise bibliométrica tem por objetivo mapear o estado da produção acadêmica brasileira sobre inteligência artificial nas ciências humanas, demonstrando o caráter emergente desse campo de estudos. Os dados sustentam o argumento de que a Antropologia Social — em particular — ocupa posição marginal num debate que cresce aceleradamente, e fundamentam o posicionamento desta tese como trabalho pioneiro no campo das ciências sociais brasileiras sobre inteligência artificial.
+Esta análise bibliométrica mapeia a produção acadêmica brasileira sobre inteligência artificial nas ciências humanas, documentando o caráter emergente desse campo de estudos. Os dados sustentam o argumento de que a Antropologia Social ocupa posição marginal num debate que cresce aceleradamente, e fundamentam o posicionamento desta tese no início dos estudos antropológicos brasileiros sobre inteligência artificial.
 
 A análise combina dois repositórios:
 
@@ -22,25 +22,25 @@ Os dados foram coletados em **6 de novembro de 2025**.
 ```
 analise_bibliometrica_ia_ciencias_humanas/
 │
-├── README.md                          ← Este arquivo
+├── README.md                              ← Este arquivo
 │
 ├── scripts/
-│   ├── analise_scielo_ia.py           ← Análise dos artigos SciELO
-│   └── analise_capes_ia.py            ← Análise do catálogo CAPES
+│   ├── analise_scielo_ia.py               ← Análise dos artigos SciELO
+│   └── analise_capes_ia.py                ← Análise do catálogo CAPES
 │
 ├── dados/
 │   ├── scielo/
-│   │   ├── export_scielo.ris          ← Exportação RIS do SciELO (não incluída por tamanho)
-│   │   ├── scielo_publi_ano.csv       ← Publicações por ano
-│   │   ├── scielo_periódicos.csv      ← Distribuição por periódico
-│   │   ├── scielo_tipo__literatura.csv ← Tipo de documento
-│   │   └── scielo_citavel_naocitavel.csv ← Citável vs. não citável
+│   │   ├── export_scielo.ris              ← Exportação RIS do SciELO (não incluída por tamanho)
+│   │   ├── scielo_publi_ano.csv           ← Publicações por ano
+│   │   ├── scielo_periódicos.csv          ← Distribuição por periódico
+│   │   ├── scielo_tipo__literatura.csv    ← Tipo de documento
+│   │   └── scielo_citavel_naocitavel.csv  ← Citável vs. não citável
 │   │
 │   └── capes/
-│       ├── catalogo_teses_analise.xlsx ← Dataset completo CAPES (não incluído por tamanho)
-│       └── resultados_detalhados_CAPES.xlsx ← Resultados consolidados
+│       ├── catalogo_teses_analise.xlsx           ← Dataset completo CAPES (não incluído por tamanho)
+│       └── resultados_detalhados_teses_ia.xlsx   ← Resultados consolidados
 │
-└── graficos/                          ← Gráficos gerados pelos scripts
+└── graficos/                              ← Gráficos gerados pelos scripts
 ```
 
 > **Nota:** Os arquivos de dados brutos (`export_scielo.ris` e `catalogo_teses_analise.xlsx`) não estão incluídos neste repositório por conta do tamanho. As instruções para reprodução da coleta estão na seção [Reprodutibilidade](#reprodutibilidade).
@@ -58,6 +58,7 @@ analise_bibliometrica_ia_ciencias_humanas/
 | Publicados em 2024–2025 | 96 (63,2%) |
 | Publicados a partir de 2020 | 136 (89,5%) |
 | Tipo predominante | Artigo (136; 89,5%) |
+| Citáveis | 140 (92,1%) |
 
 **Periódicos com maior volume:**
 
@@ -69,6 +70,8 @@ analise_bibliometrica_ia_ciencias_humanas/
 | Revista Bioética | 9 |
 | Trans/Form/Ação | 9 |
 | Educação e Pesquisa | 7 |
+| Educação em Revista | 6 |
+| Brazilian Journal of Political Economy | 5 |
 
 **Presença da Antropologia:** *Horizontes Antropológicos* contribuiu com 1 artigo; *Sociologia & Antropologia*, com 2. A ausência da Antropologia não é apenas numérica: é estrutural, revelada pelo tipo de veículo em que o campo publicou quando publicou.
 
@@ -84,6 +87,7 @@ analise_bibliometrica_ia_ciencias_humanas/
 | Doutorados | 39 (39%) |
 | Foco central em IA | 59 (59%) |
 | Foco relacionado | 5 (5%) |
+| Outros temas | 36 (36%) |
 | Número de áreas | 29 |
 | Número de instituições | 48 |
 | Crescimento (2013→2023) | 3.000% |
@@ -102,13 +106,24 @@ analise_bibliometrica_ia_ciencias_humanas/
 | **Antropologia Social** | **3** |
 | Relações Internacionais | 3 |
 
+> **Nota de normalização:** A categoria "Ciência Política" aparece nos dados brutos com duas grafias distintas (com um e com dois espaços entre palavras), totalizando 5 registros. Os scripts consolidam essas entradas em uma única categoria. O valor 3 na tabela acima refere-se à grafia normalizada; os 2 registros adicionais estão incluídos nos totais gerais.
+
 ---
 
 ## Nota metodológica sobre a categoria "ciências humanas"
 
-O termo **ciências humanas** segue a taxonomia adotada pelo SciELO e pela CAPES como filtro de busca. Na classificação da CAPES, a grande área *Ciências Humanas* engloba Antropologia, Ciência Política, Educação, Filosofia, Geografia, História, Psicologia e Sociologia. Isso significa que usar *ciências sociais* como filtro teria excluído justamente Antropologia e Sociologia, que a CAPES não classifica em *Ciências Sociais Aplicadas* — área reservada a Direito, Comunicação, Economia e Administração, entre outras.
+O termo **ciências humanas** segue a taxonomia adotada pelo SciELO e pela CAPES como filtro de busca. Na classificação da CAPES, a grande área *Ciências Humanas* engloba Antropologia, Ciência Política, Educação, Filosofia, Geografia, História, Psicologia e Sociologia. O uso de *ciências sociais* como filtro teria excluído Antropologia e Sociologia, que a CAPES não classifica em *Ciências Sociais Aplicadas* — área reservada a Direito, Comunicação, Economia e Administração, entre outras.
 
-A escolha do filtro foi determinada pela arquitetura taxonômica das bases consultadas. Ela revela também a **interdisciplinaridade constitutiva do tema**: a inteligência artificial como objeto de pesquisa nas humanidades aparece distribuída por categorias tão distintas quanto Educação, Filosofia, Direito, Comunicação e Sociologia — disciplinas que, na CAPES, habitam grandes áreas diferentes.
+A escolha do filtro foi determinada pela arquitetura taxonômica das bases consultadas, não por uma delimitação disciplinar prévia. Ela revela a interdisciplinaridade constitutiva do tema: a inteligência artificial como objeto de pesquisa nas humanidades aparece distribuída por categorias tão distintas quanto Educação, Filosofia e Sociologia, disciplinas que na CAPES habitam grandes áreas diferentes.
+
+---
+
+## Limitações
+
+- A análise cobre apenas materiais indexados nas fontes escolhidas, excluindo livros, capítulos de livros e anais de congressos — restrição significativa num campo onde parte da produção relevante circula nessas formas.
+- A classificação por foco em IA no CAPES foi realizada com base nos títulos dos trabalhos, dado que resumos não são indexados pelo catálogo.
+- Os dados do SciELO são dinâmicos: consultas futuras podem apresentar resultados diferentes.
+- A ênfase em quantidade em detrimento de qualidade é limitação inerente ao método bibliométrico.
 
 ---
 
@@ -131,7 +146,7 @@ OUTPUT_DIR = r'caminho/para/resultados'
 python analise_scielo_ia.py
 ```
 
-**Arquivos de entrada necessários** (na pasta `BASE_DIR`):
+**Arquivos de entrada necessários:**
 - `export_scielo.ris` — exportação RIS do SciELO
 - `scielo_publi_ano.csv`
 - `scielo_periódicos.csv`
@@ -153,7 +168,7 @@ python analise_capes_ia.py
 ```
 
 **Saídas geradas:**
-- 9 gráficos PNG na pasta `graficos/`
+- Gráficos PNG na pasta `graficos/`
 - `resultados_detalhados_teses_ia.xlsx` com todas as análises em abas separadas
 
 ---
@@ -174,15 +189,6 @@ python analise_capes_ia.py
 2. Busque por `inteligência artificial` com filtro de grande área **Ciências Humanas**
 3. Use uma ferramenta de extração automatizada (ex: extensão de raspagem de dados para navegador) para exportar os resultados em CSV
 4. Importe o CSV, limpe e organize no Excel; salve como `.xlsx` com aba `Dados Completos`
-
----
-
-## Limitações
-
-- A análise cobre apenas materiais indexados nas fontes escolhidas, **excluindo livros, capítulos de livros e anais de congressos** — restrição significativa num campo onde parte da produção relevante circula nessas formas.
-- A classificação por foco em IA no CAPES foi realizada com base nos **títulos dos trabalhos**, dado que resumos não são indexados no catálogo.
-- Os dados do SciELO são dinâmicos: consultas futuras podem apresentar resultados diferentes.
-- A ênfase em quantidade em detrimento de qualidade é limitação inerente ao método bibliométrico.
 
 ---
 
