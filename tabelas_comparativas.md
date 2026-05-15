@@ -2,6 +2,15 @@
 
 Geradas automaticamente por `analise_comparativa.py` a partir dos XLSX consolidados.
 
+## Figura `comparativo_scielo_capes.{png,svg}` — descrição dos painéis
+
+Os gráficos não contêm título embutido (o nome do arquivo serve de identificador). A figura tem quatro painéis, lidos em sentido de leitura (canto superior esquerdo → canto inferior direito):
+
+- **Superior esquerdo** — Evolução temporal das publicações (linhas sobrepostas SciELO e CAPES).
+- **Superior direito** — Concentração nos últimos anos: % do total da base publicado em 2022 ou depois.
+- **Inferior esquerdo** — CAPES: top 10 áreas de conhecimento (número de defesas).
+- **Inferior direito** — SciELO: top 10 periódicos (número de artigos).
+
 ## Tabela 1. Sumário comparativo
 
 | Indicador                  | SciELO (artigos)       | CAPES (teses/dissertações)   |

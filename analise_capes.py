@@ -337,8 +337,6 @@ try:
                 f'{int(row.quantidade)}', ha='center', va='bottom', 
                 fontweight='bold', fontsize=9)
     
-    ax.set_title(f'Distribuição Temporal das Publicações - CAPES (Barras Simples)',
-                 fontweight='bold', fontsize=13, pad=20)
     ax.set_xlabel('Ano de Defesa', fontsize=12)
     ax.set_ylabel('Quantidade de Publicações', fontsize=12)
     ax.set_facecolor('white')
@@ -366,8 +364,6 @@ try:
                 f'{int(row.quantidade)}', ha='center', va='bottom', 
                 fontweight='bold', fontsize=9)
     
-    ax.set_title(f'Distribuição Temporal das Publicações - CAPES (Barras com Destaque)',
-                 fontweight='bold', fontsize=13, pad=20)
     ax.set_xlabel('Ano de Defesa', fontsize=12)
     ax.set_ylabel('Quantidade de Publicações', fontsize=12)
     ax.set_facecolor('white')
@@ -391,8 +387,6 @@ try:
                 str(int(row['quantidade'])), ha='center', va='bottom', 
                 fontweight='bold', fontsize=9)
 
-    ax.set_title(f'Distribuição Temporal das Publicações - CAPES (Linha Simples)',
-                 fontweight='bold', fontsize=13, pad=20)
     ax.set_xlabel('Ano de Defesa', fontsize=12)
     ax.set_ylabel('Quantidade de Publicações', fontsize=12)
     ax.set_facecolor('white')
@@ -418,8 +412,6 @@ try:
                 str(int(row['quantidade'])), ha='center', va='bottom', 
                 fontweight='bold', fontsize=9)
 
-    ax.set_title(f'Distribuição Temporal das Publicações - CAPES (Linha com Área)',
-                 fontweight='bold', fontsize=13, pad=20)
     ax.set_xlabel('Ano de Defesa', fontsize=12)
     ax.set_ylabel('Quantidade de Publicações', fontsize=12)
     ax.set_facecolor('white')
@@ -447,8 +439,6 @@ try:
 
     ax.set_xticks(range(len(nivel_counts_sorted)))
     ax.set_xticklabels(nivel_counts_sorted.index, fontsize=11)
-    ax.set_title(f'Distribuição por nível acadêmico',
-                 fontweight='bold', fontsize=13, pad=20)
     ax.set_ylabel('Quantidade', fontsize=12)
     ax.set_facecolor('white')
     ax.grid(True, alpha=0.3, axis='y', linestyle='--')
@@ -482,8 +472,6 @@ try:
         ax.set_yticklabels(areas_display.index, fontsize=9)
         ax.invert_yaxis()
 
-        ax.set_title(f'Distribuição por áreas temáticas',
-                     fontweight='bold', fontsize=13, pad=20)
         ax.set_xlabel('Quantidade de Publicações', fontsize=11)
         ax.set_facecolor('white')
         ax.grid(True, alpha=0.3, axis='x', linestyle='--')
@@ -529,8 +517,6 @@ try:
         ax.set_yticklabels(inst_display.index, fontsize=9)
         ax.invert_yaxis()
 
-        ax.set_title(f'Distribuição por instituições',
-                     fontweight='bold', fontsize=13, pad=20)
         ax.set_xlabel('Quantidade de Publicações', fontsize=11)
         ax.set_facecolor('white')
         ax.grid(True, alpha=0.3, axis='x', linestyle='--')
@@ -572,8 +558,6 @@ try:
 
     ax.set_xticks(range(len(foco_counts_ordered)))
     ax.set_xticklabels(foco_counts_ordered.index, fontsize=11, rotation=15, ha='right')
-    ax.set_title(f'Classificação por foco em Inteligência Artificial',
-                 fontweight='bold', fontsize=13, pad=20)
     ax.set_ylabel('Quantidade', fontsize=12)
     ax.set_facecolor('white')
     ax.grid(True, alpha=0.3, axis='y', linestyle='--')
@@ -600,8 +584,6 @@ try:
             ax.plot(nivel_ano.index, nivel_ano[nivel], marker='o',
                     label=nivel, linewidth=3, color=colors_nivel[i], markersize=10)
 
-    ax.set_title(f'Evolução temporal por nível acadêmico',
-                 fontweight='bold', fontsize=13, pad=20)
     ax.set_xlabel('Ano', fontsize=12)
     ax.set_ylabel('Publicações', fontsize=12)
     ax.legend(fontsize=11, loc='upper left')
@@ -628,8 +610,6 @@ try:
         media = paginas_limpo.mean()
         mediana = paginas_limpo.median()
 
-        ax.set_title(f'Distribuição do Número de Páginas',
-                     fontweight='bold', fontsize=13, pad=20)
         ax.set_xlabel('Número de Páginas', fontsize=12)
         ax.set_ylabel('Frequência', fontsize=12)
         ax.axvline(mediana, color=COR_MEDIANA, linestyle='--',
@@ -666,8 +646,6 @@ try:
         ax.set_yticklabels(top10_cidades.index, fontsize=10)
         ax.invert_yaxis()
 
-        ax.set_title(f'Top 10 Cidades com Mais Publicações',
-                     fontweight='bold', fontsize=13, pad=20)
         ax.set_xlabel('Quantidade de Publicações', fontsize=11)
         ax.set_facecolor('white')
         ax.grid(True, alpha=0.3, axis='x', linestyle='--')
@@ -699,8 +677,6 @@ try:
                 ax.plot(evolucao.index, evolucao.values, marker='o', label=area,
                         linewidth=3, color=colors_top3[i], markersize=10)
 
-        ax.set_title(f'Evolução Temporal - Top 3 Áreas temáticas',
-                     fontweight='bold', fontsize=13, pad=20)
         ax.set_xlabel('Ano', fontsize=12)
         ax.set_ylabel('Publicações', fontsize=12)
         ax.legend(fontsize=11, loc='upper left')

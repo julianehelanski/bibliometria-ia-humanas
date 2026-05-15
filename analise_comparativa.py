@@ -77,9 +77,6 @@ def carregar_dados():
 def construir_figura(scielo, capes, destino_sem_extensao):
     """Monta uma figura 2x2 com os comparativos. Salva em PNG e SVG."""
     fig, axes = plt.subplots(2, 2, figsize=(13, 10), constrained_layout=True)
-    fig.suptitle('Produção brasileira sobre Inteligência Artificial '
-                 'nas Ciências Humanas: SciELO × CAPES',
-                 fontsize=13)
 
     # ----- (A) Evolução temporal: ambas as bases sobrepostas -----
     ax = axes[0, 0]
@@ -94,7 +91,6 @@ def construir_figura(scielo, capes, destino_sem_extensao):
             color=COR_SCIELO, linewidth=2)
     ax.plot(cp['ano'], cp['n'], marker='s', label=f"CAPES (n={int(cp['n'].sum())})",
             color=COR_CAPES, linewidth=2)
-    ax.set_title('A. Evolução temporal das publicações')
     ax.set_xlabel('Ano')
     ax.set_ylabel('Publicações')
     ax.legend(frameon=False)
@@ -113,7 +109,6 @@ def construir_figura(scielo, capes, destino_sem_extensao):
     for bar, v in zip(bars, valores):
         ax.text(bar.get_x() + bar.get_width() / 2, v, f'{v:.1f}%',
                 ha='center', va='bottom', fontsize=10)
-    ax.set_title('B. Concentração nos últimos anos (≥ 2022)')
     ax.set_ylabel('% do total da base')
     ax.set_ylim(0, max(valores) * 1.25 if max(valores) > 0 else 1)
 
@@ -124,7 +119,6 @@ def construir_figura(scielo, capes, destino_sem_extensao):
             top_areas['Quantidade'], color=COR_CAPES)
     for i, v in enumerate(top_areas['Quantidade']):
         ax.text(v, i, f' {int(v)}', va='center', fontsize=9)
-    ax.set_title('C. CAPES — Top 10 áreas de conhecimento')
     ax.set_xlabel('Defesas')
 
     # ----- (D) Top 10 periódicos SciELO -----
@@ -134,7 +128,6 @@ def construir_figura(scielo, capes, destino_sem_extensao):
     ax.barh(nomes, top_per['quantidade'], color=COR_SCIELO)
     for i, v in enumerate(top_per['quantidade']):
         ax.text(v, i, f' {int(v)}', va='center', fontsize=9)
-    ax.set_title('D. SciELO — Top 10 periódicos')
     ax.set_xlabel('Artigos')
 
     png = destino_sem_extensao + '.png'
@@ -221,6 +214,19 @@ def gerar_tabelas(scielo, capes, destino_md):
     buf.write('# Tabelas comparativas SciELO × CAPES\n\n')
     buf.write('Geradas automaticamente por `analise_comparativa.py` a partir '
               'dos XLSX consolidados.\n\n')
+
+    buf.write('## Figura `comparativo_scielo_capes.{png,svg}` — descrição dos painéis\n\n')
+    buf.write('Os gráficos não contêm título embutido (o nome do arquivo serve '
+              'de identificador). A figura tem quatro painéis, lidos em sentido '
+              'de leitura (canto superior esquerdo → canto inferior direito):\n\n')
+    buf.write('- **Superior esquerdo** — Evolução temporal das publicações '
+              '(linhas sobrepostas SciELO e CAPES).\n')
+    buf.write('- **Superior direito** — Concentração nos últimos anos: % do '
+              'total da base publicado em 2022 ou depois.\n')
+    buf.write('- **Inferior esquerdo** — CAPES: top 10 áreas de conhecimento '
+              '(número de defesas).\n')
+    buf.write('- **Inferior direito** — SciELO: top 10 periódicos '
+              '(número de artigos).\n\n')
 
     buf.write('## Tabela 1. Sumário comparativo\n\n')
     buf.write(sumario.to_markdown(index=False))
