@@ -52,6 +52,14 @@ COR_VERDE_CLA = '#81C784'
 
 
 def salvar(nome):
+    if nome.startswith('capes'):
+        titulo = 'CAPES'
+    elif nome.startswith('scielo'):
+        titulo = 'SciELO'
+    else:
+        titulo = None
+    if titulo:
+        plt.gca().set_title(titulo, fontsize=14, fontweight='bold', pad=15)
     plt.tight_layout()
     plt.savefig(os.path.join(FIG_DIR, nome), dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
@@ -101,7 +109,6 @@ bars = ax.bar(anos, qtd, color=COR_ROXO, edgecolor='black', linewidth=1.5, alpha
 for b, v in zip(bars, qtd):
     ax.text(b.get_x() + b.get_width() / 2, b.get_height(), str(v),
             ha='center', va='bottom', fontweight='bold', fontsize=10)
-ax.set_title('Distribuição Temporal das Publicações – CAPES (Barras Simples)', fontsize=13, pad=20)
 ax.set_xlabel('Ano de Defesa'); ax.set_ylabel('Quantidade de Publicações')
 ax.set_xticks(anos)
 ax.grid(True, alpha=0.3, axis='y', linestyle='--'); ax.set_axisbelow(True)
@@ -115,7 +122,6 @@ bars[idx_max].set_color(COR_ROXO_ESC); bars[idx_max].set_alpha(1.0)
 for b, v in zip(bars, qtd):
     ax.text(b.get_x() + b.get_width() / 2, b.get_height(), str(v),
             ha='center', va='bottom', fontweight='bold', fontsize=10)
-ax.set_title('Distribuição Temporal das Publicações – CAPES (Barras com Destaque)', fontsize=13, pad=20)
 ax.set_xlabel('Ano de Defesa'); ax.set_ylabel('Quantidade de Publicações')
 ax.set_xticks(anos)
 ax.grid(True, alpha=0.3, axis='y', linestyle='--'); ax.set_axisbelow(True)
@@ -127,7 +133,6 @@ ax.plot(anos, qtd, marker='o', linewidth=3, markersize=9, color=COR_ROXO,
         markerfacecolor=COR_ROXO_ESC, markeredgecolor='black', markeredgewidth=1.5)
 for x, y in zip(anos, qtd):
     ax.text(x, y + max(qtd) * 0.02, str(y), ha='center', va='bottom', fontweight='bold', fontsize=10)
-ax.set_title('Distribuição Temporal das Publicações – CAPES (Linha Simples)', fontsize=13, pad=20)
 ax.set_xlabel('Ano de Defesa'); ax.set_ylabel('Quantidade de Publicações')
 ax.set_xticks(anos)
 ax.grid(True, alpha=0.3, linestyle='--')
@@ -140,7 +145,6 @@ ax.plot(anos, qtd, marker='o', linewidth=3, markersize=9, color=COR_ROXO_ESC,
 ax.fill_between(anos, qtd, alpha=0.3, color=COR_ROXO)
 for x, y in zip(anos, qtd):
     ax.text(x, y + max(qtd) * 0.02, str(y), ha='center', va='bottom', fontweight='bold', fontsize=10)
-ax.set_title('Distribuição Temporal das Publicações – CAPES (Linha com Área)', fontsize=13, pad=20)
 ax.set_xlabel('Ano de Defesa'); ax.set_ylabel('Quantidade de Publicações')
 ax.set_xticks(anos)
 ax.grid(True, alpha=0.3, linestyle='--'); ax.legend(loc='upper left')
@@ -156,7 +160,6 @@ for b, v in zip(bars, vals):
     pct = v / total_capes * 100
     ax.text(b.get_x() + b.get_width() / 2, v + 0.5, f'{v}\n({pct:.1f}%)',
             ha='center', fontweight='bold', fontsize=11)
-ax.set_title('Distribuição por nível acadêmico – CAPES', fontsize=13, pad=20)
 ax.set_ylabel('Quantidade'); ax.grid(True, alpha=0.3, axis='y', linestyle='--')
 salvar('capes_02_nivel_academico.png')
 
@@ -175,7 +178,6 @@ for b, v in zip(bars, areas_2['Quantidade'].values):
     pct = v / total_capes * 100
     ax.text(v + 0.15, b.get_y() + b.get_height() / 2, f'{int(v)} ({pct:.1f}%)',
             va='center', fontweight='bold', fontsize=9)
-ax.set_title('Distribuição por áreas temáticas (≥2 publicações) – CAPES', fontsize=13, pad=20)
 ax.set_xlabel('Quantidade de Publicações')
 ax.grid(True, alpha=0.3, axis='x', linestyle='--')
 nota = f'* Áreas com 1 publicação: {len(areas_1)} categorias adicionais'
@@ -195,7 +197,6 @@ for b, v in zip(bars, foco_vals):
     pct = v / total_capes * 100
     ax.text(b.get_x() + b.get_width() / 2, v + 0.5, f'{v}\n({pct:.1f}%)',
             ha='center', fontweight='bold', fontsize=11)
-ax.set_title('Classificação por foco em Inteligência Artificial – CAPES', fontsize=13, pad=20)
 ax.set_ylabel('Quantidade'); ax.grid(True, alpha=0.3, axis='y', linestyle='--')
 plt.xticks(rotation=15, ha='right')
 salvar('capes_04_foco_ia.png')
@@ -214,7 +215,6 @@ for b, v in zip(bars, top_inst['Quantidade'].values):
     pct = v / total_capes * 100
     ax.text(v + 0.1, b.get_y() + b.get_height() / 2, f'{int(v)} ({pct:.1f}%)',
             va='center', fontweight='bold', fontsize=9)
-ax.set_title('Top 15 instituições – CAPES', fontsize=13, pad=20)
 ax.set_xlabel('Quantidade de Publicações')
 ax.grid(True, alpha=0.3, axis='x', linestyle='--')
 salvar('capes_05_top_instituicoes.png')
@@ -228,7 +228,6 @@ for nivel in ['Mestrado', 'Doutorado']:
         ax.plot(nivel_ano.index, nivel_ano[nivel], marker='o', label=nivel,
                 linewidth=3, color=cores_n[nivel], markersize=10,
                 markeredgecolor='black', markeredgewidth=1)
-ax.set_title('Evolução temporal por nível acadêmico – CAPES', fontsize=13, pad=20)
 ax.set_xlabel('Ano'); ax.set_ylabel('Publicações')
 ax.set_xticks(nivel_ano.index)
 ax.legend(loc='upper left')
@@ -243,7 +242,6 @@ if len(paginas) > 0:
     mediana = paginas.median()
     ax.axvline(mediana, color=COR_MEDIANA, linestyle='--', linewidth=3,
                label=f'Mediana: {mediana:.0f} páginas')
-    ax.set_title('Distribuição do Número de Páginas – CAPES', fontsize=13, pad=20)
     ax.set_xlabel('Número de Páginas'); ax.set_ylabel('Frequência')
     ax.legend(loc='upper right')
     ax.grid(True, alpha=0.3, axis='y', linestyle='--')
@@ -264,7 +262,6 @@ if 'cidade' in capes_dataset.columns:
         pct = v / total_capes * 100
         ax.text(v + 0.1, b.get_y() + b.get_height() / 2, f'{int(v)} ({pct:.1f}%)',
                 va='center', fontweight='bold', fontsize=10)
-    ax.set_title('Top 10 Cidades com Mais Publicações – CAPES', fontsize=13, pad=20)
     ax.set_xlabel('Quantidade de Publicações')
     ax.grid(True, alpha=0.3, axis='x', linestyle='--')
     salvar('capes_08_top10_cidades.png')
@@ -282,7 +279,6 @@ ax.invert_yaxis()
 for b, v in zip(bars, top_termos['Frequência'].values):
     ax.text(v + 0.3, b.get_y() + b.get_height() / 2, str(int(v)),
             va='center', fontweight='bold', fontsize=10)
-ax.set_title('Top 15 termos mais frequentes nos títulos – CAPES', fontsize=13, pad=20)
 ax.set_xlabel('Frequência')
 ax.grid(True, alpha=0.3, axis='x', linestyle='--')
 salvar('capes_09_top_termos.png')
@@ -297,7 +293,6 @@ for i, area in enumerate(top3_areas_nomes):
         ax.plot(evol.index, evol.values, marker='o', label=area,
                 linewidth=3, color=cores_top3[i], markersize=10,
                 markeredgecolor='black', markeredgewidth=1)
-ax.set_title('Evolução temporal – Top 3 Áreas temáticas (CAPES)', fontsize=13, pad=20)
 ax.set_xlabel('Ano'); ax.set_ylabel('Publicações')
 ax.legend(loc='upper left')
 ax.grid(True, alpha=0.3, linestyle='--')
@@ -317,7 +312,6 @@ bars = ax.bar(anos_s, qtd_s, color=COR_VERDE, edgecolor='black', linewidth=1.5, 
 for b, v in zip(bars, qtd_s):
     ax.text(b.get_x() + b.get_width() / 2, b.get_height(), str(v),
             ha='center', va='bottom', fontweight='bold', fontsize=9)
-ax.set_title('Distribuição Temporal das Publicações – SciELO (Barras Simples)', fontsize=14, pad=20)
 ax.set_xlabel('Ano', fontweight='bold'); ax.set_ylabel('Número de Artigos', fontweight='bold')
 ax.grid(axis='y', alpha=0.3, linestyle='--'); ax.set_axisbelow(True)
 ax.set_ylim(0, max(qtd_s) * 1.15)
@@ -332,7 +326,6 @@ bars[idx_max].set_color(COR_VERDE_ESC); bars[idx_max].set_alpha(1.0)
 for b, v in zip(bars, qtd_s):
     ax.text(b.get_x() + b.get_width() / 2, b.get_height(), str(v),
             ha='center', va='bottom', fontweight='bold', fontsize=9)
-ax.set_title('Distribuição Temporal das Publicações – SciELO (Barras com Destaque)', fontsize=14, pad=20)
 ax.set_xlabel('Ano', fontweight='bold'); ax.set_ylabel('Número de Artigos', fontweight='bold')
 ax.grid(axis='y', alpha=0.3, linestyle='--'); ax.set_axisbelow(True)
 ax.set_ylim(0, max(qtd_s) * 1.15)
@@ -346,7 +339,6 @@ ax.plot(anos_s, qtd_s, marker='o', linewidth=3, markersize=9,
 for x, y in zip(anos_s, qtd_s):
     ax.text(x, y + max(qtd_s) * 0.02, str(y), ha='center', va='bottom',
             fontweight='bold', fontsize=9)
-ax.set_title('Distribuição Temporal das Publicações – SciELO (Linha Simples)', fontsize=14, pad=20)
 ax.set_xlabel('Ano', fontweight='bold'); ax.set_ylabel('Número de Artigos', fontweight='bold')
 ax.grid(True, alpha=0.3, linestyle='--'); ax.set_ylim(0, max(qtd_s) * 1.15)
 plt.xticks(anos_s, rotation=45, ha='right')
@@ -361,7 +353,6 @@ ax.fill_between(anos_s, qtd_s, alpha=0.3, color=COR_VERDE)
 for x, y in zip(anos_s, qtd_s):
     ax.text(x, y + max(qtd_s) * 0.02, str(y), ha='center', va='bottom',
             fontweight='bold', fontsize=9)
-ax.set_title('Distribuição Temporal das Publicações – SciELO (Linha com Área)', fontsize=14, pad=20)
 ax.set_xlabel('Ano', fontweight='bold'); ax.set_ylabel('Número de Artigos', fontweight='bold')
 ax.grid(True, alpha=0.3, linestyle='--'); ax.set_ylim(0, max(qtd_s) * 1.15)
 ax.legend(loc='upper left')
@@ -385,7 +376,6 @@ ax.set_yticks(range(N))
 ax.set_yticklabels(nomes, fontsize=10)
 ax.invert_yaxis()
 ax.set_xlabel('Número de Artigos', fontweight='bold')
-ax.set_title('Top 15 periódicos – SciELO', fontsize=14, pad=20)
 ax.grid(axis='x', alpha=0.3, linestyle='--')
 ax.set_xlim(0, max(top_per['quantidade'].values) * 1.18)
 salvar('scielo_02_top_periodicos.png')
@@ -408,7 +398,6 @@ if len(outros_2) > 0:
     ax.set_yticklabels(nomes_o, fontsize=10)
     ax.invert_yaxis()
     ax.set_xlabel('Número de Artigos', fontweight='bold')
-    ax.set_title('Periódicos menos frequentes (≥2 artigos, fora do top 15) – SciELO', fontsize=14, pad=20)
     ax.grid(axis='x', alpha=0.3, linestyle='--')
     ax.set_xlim(0, max(outros_2['quantidade'].values) * 1.25)
     salvar('scielo_03_outros_periodicos.png')
@@ -424,7 +413,6 @@ for at in autotexts:
     at.set_color('white'); at.set_fontsize(14)
 for t, s in zip(texts, sizes):
     t.set_text(f'{t.get_text()}\n({s} docs)')
-ax.set_title('Documentos citáveis – SciELO', fontsize=14, pad=20)
 salvar('scielo_04_citavel.png')
 
 # 05 — Tipo de literatura
@@ -437,7 +425,6 @@ for b, v in zip(bars, vals):
     pct = v / sum(vals) * 100
     ax.text(b.get_x() + b.get_width() / 2, v + 0.5, f'{v}\n({pct:.1f}%)',
             ha='center', fontweight='bold', fontsize=11)
-ax.set_title('Tipo de literatura – SciELO', fontsize=14, pad=20)
 ax.set_ylabel('Quantidade')
 ax.grid(True, alpha=0.3, axis='y', linestyle='--')
 plt.xticks(rotation=20, ha='right')
@@ -455,7 +442,6 @@ for b, v in zip(bars, vals):
     pct = v / total_scielo * 100
     ax.text(b.get_x() + b.get_width() / 2, v + 1, f'{v}\n({pct:.1f}%)',
             ha='center', fontweight='bold', fontsize=14)
-ax.set_title('Concentração temporal das publicações – SciELO', fontsize=14, pad=20)
 ax.set_ylabel('Número de Artigos')
 ax.grid(True, alpha=0.3, axis='y', linestyle='--')
 salvar('scielo_06_concentracao_temporal.png')
