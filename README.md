@@ -30,7 +30,9 @@ analise_bibliometrica_ia_ciencias_humanas/
 ├── utils.py                        ← Estilo, paleta e regex IA compartilhados
 ├── analise_scielo.py               ← Análise dos artigos SciELO
 ├── analise_capes.py                ← Análise do catálogo CAPES
+├── analise_comparativa.py          ← Figura e tabelas comparativas SciELO × CAPES
 ├── gerar_graficos_figuras.py       ← Geração complementar de figuras
+├── tabelas_comparativas.md         ← Tabelas em Markdown geradas pelo script comparativo
 │
 ├── dados_scielo/                   ← Arquivos de entrada/saída SciELO
 │   ├── export_scielo.ris               (não versionado — ver Reprodutibilidade)
@@ -191,6 +193,21 @@ Versões fixadas em `requirements.txt`: `pandas`, `numpy`, `matplotlib`, `seabor
    - Gráficos PNG em `figuras/`
    - `dados_scielo/relatorio_completo.txt` (lista detalhada por categoria temática)
    - `dados_scielo/auditoria_foco_ia.csv` (classificação por artigo)
+
+### Análise comparativa SciELO × CAPES
+
+Depois de rodar os dois scripts acima, gere a figura e as tabelas comparativas:
+
+```bash
+python analise_comparativa.py
+```
+
+Saídas:
+- `figuras/comparativo_scielo_capes.png` e `.svg` — uma única figura com 4 painéis: evolução temporal sobreposta, concentração nos últimos anos, top 10 áreas (CAPES) e top 10 periódicos (SciELO).
+- `tabelas_comparativas.md` — tabelas Markdown: sumário comparativo, publicações por ano (ambas as bases lado a lado), top 10 áreas CAPES, top 10 periódicos SciELO.
+- `tabela_sumario.csv` e `tabela_publicacoes_por_ano.csv` — versões CSV.
+
+O script aplica também a consolidação de "Ciência Política" (duas grafias com espaçamento diferente nos dados brutos).
 
 ---
 

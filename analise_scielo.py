@@ -371,8 +371,6 @@ def criar_grafico_foco_ia(stats, output_path):
                 fontweight='bold', fontsize=13, color='black')
     
     ax.set_ylabel('Número de Artigos', fontsize=14, fontweight='bold')
-    ax.set_title('Classificação por foco em Inteligência Artificial', 
-                 fontsize=14, fontweight='bold', pad=20)
     ax.grid(axis='y', alpha=0.3, linestyle='--')
     ax.set_axisbelow(True)
     ax.set_ylim(0, max(valores) * 1.15)
@@ -426,8 +424,6 @@ def criar_grafico_publicacoes_ano(artigos, output_path):
     
     ax.set_xlabel('Ano', fontsize=13, fontweight='bold')
     ax.set_ylabel('Número de Artigos', fontsize=13, fontweight='bold')
-    ax.set_title('Distribuição Temporal das Publicações - SciELO (Barras Simples)', 
-                 fontsize=14, fontweight='bold', pad=20)
     ax.grid(axis='y', alpha=0.3, linestyle='--')
     ax.set_axisbelow(True)
     ax.set_ylim(0, max(counts) * 1.15)
@@ -460,8 +456,6 @@ def criar_grafico_publicacoes_ano(artigos, output_path):
     
     ax.set_xlabel('Ano', fontsize=13, fontweight='bold')
     ax.set_ylabel('Número de Artigos', fontsize=13, fontweight='bold')
-    ax.set_title('Distribuição Temporal das Publicações - SciELO (Barras com Destaque)', 
-                 fontsize=14, fontweight='bold', pad=20)
     ax.grid(axis='y', alpha=0.3, linestyle='--')
     ax.set_axisbelow(True)
     ax.set_ylim(0, max(counts) * 1.15)
@@ -487,8 +481,6 @@ def criar_grafico_publicacoes_ano(artigos, output_path):
     
     ax.set_xlabel('Ano', fontsize=13, fontweight='bold')
     ax.set_ylabel('Número de Artigos', fontsize=13, fontweight='bold')
-    ax.set_title('Distribuição Temporal das Publicações - SciELO (Linha Simples)', 
-                 fontsize=14, fontweight='bold', pad=20)
     ax.grid(True, alpha=0.3, linestyle='--')
     ax.set_axisbelow(True)
     ax.set_ylim(0, max(counts) * 1.15)
@@ -516,8 +508,6 @@ def criar_grafico_publicacoes_ano(artigos, output_path):
     
     ax.set_xlabel('Ano', fontsize=13, fontweight='bold')
     ax.set_ylabel('Número de Artigos', fontsize=13, fontweight='bold')
-    ax.set_title('Distribuição Temporal das Publicações - SciELO (Linha com Área)', 
-                 fontsize=14, fontweight='bold', pad=20)
     ax.grid(True, alpha=0.3, linestyle='--')
     ax.set_axisbelow(True)
     ax.set_ylim(0, max(counts) * 1.15)
@@ -564,8 +554,6 @@ def criar_grafico_top_journals(artigos, output_path, top_n=10):
     ax.set_yticklabels(names)
     ax.invert_yaxis()
     ax.set_xlabel('Número de Artigos', fontsize=13, fontweight='bold')
-    ax.set_title('Periódicos mais frequentes', 
-                 fontsize=14, fontweight='bold', pad=20)
     ax.grid(axis='x', alpha=0.3, linestyle='--')
     ax.set_xlim(0, max(values) * 1.15)
     
@@ -606,8 +594,6 @@ def criar_grafico_outros_journals(artigos, output_path, top_n=10, min_count=2):
     ax.set_yticklabels(names, fontsize=10)
     ax.invert_yaxis()
     ax.set_xlabel('Número de Artigos', fontsize=13, fontweight='bold')
-    ax.set_title('Periódicos menos frequentes', 
-                 fontsize=14, fontweight='bold', pad=20)
     ax.grid(axis='x', alpha=0.3, linestyle='--')
     ax.set_xlim(0, max(values) * 1.2)
     
@@ -640,7 +626,6 @@ def criar_grafico_idiomas(artigos, output_path):
     for text, size in zip(texts, sizes):
         text.set_text(f'{text.get_text()}\n({size})')
     
-    ax.set_title('Distribuição por idioma', fontsize=14, fontweight='bold', pad=20)
     
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
@@ -670,7 +655,6 @@ def criar_grafico_citavel(dados_csv, output_path):
     for text, size in zip(texts, sizes):
         text.set_text(f'{text.get_text()}\n({size} docs)')
     
-    ax.set_title('Documentos citáveis', fontsize=14, fontweight='bold', pad=20)
     
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
@@ -701,7 +685,6 @@ def criar_grafico_indice_citacoes(dados_csv, output_path):
     ax.set_yticklabels(indices)
     ax.invert_yaxis()
     ax.set_xlabel('Número de Publicações', fontsize=13, fontweight='bold')
-    ax.set_title('Índice de citações WoS', fontsize=14, fontweight='bold', pad=20)
     ax.grid(axis='x', alpha=0.3, linestyle='--')
     ax.set_xlim(0, max(values) * 1.2)
     
@@ -739,8 +722,6 @@ def criar_grafico_areas_tematicas(dados_csv, output_path, top_n=10):
     ax.set_yticklabels(names)
     ax.invert_yaxis()
     ax.set_xlabel('Número de Menções', fontsize=13, fontweight='bold')
-    ax.set_title('Áreas temáticas WoS mais frequentes', 
-                 fontsize=14, fontweight='bold', pad=20)
     ax.grid(axis='x', alpha=0.3, linestyle='--')
     ax.set_xlim(0, max(values) * 1.15)
     
@@ -780,8 +761,6 @@ def criar_grafico_outras_areas(dados_csv, output_path, top_n=10, min_count=3):
     ax.set_yticklabels(names, fontsize=10)
     ax.invert_yaxis()
     ax.set_xlabel('Número de Menções', fontsize=13, fontweight='bold')
-    ax.set_title('Áreas temáticas menos frequentes', 
-                 fontsize=14, fontweight='bold', pad=20)
     ax.grid(axis='x', alpha=0.3, linestyle='--')
     ax.set_xlim(0, max(values) * 1.2)
     
@@ -826,8 +805,6 @@ def criar_grafico_categorias_tematicas(categorias, total_ia, output_path):
     ax.set_yticks(range(len(labels)))
     ax.set_yticklabels(labels)
     ax.set_xlabel('Número de Artigos', fontsize=13, fontweight='bold')
-    ax.set_title('Categorias temática com foco em Inteligência Artificial', 
-                 fontsize=14, fontweight='bold', pad=20)
     ax.invert_yaxis()
     ax.grid(axis='x', alpha=0.3, linestyle='--')
     ax.set_xlim(0, max(values) * 1.15)

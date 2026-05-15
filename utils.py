@@ -24,20 +24,39 @@ FIGURAS_DIR = os.path.join(BASE_DIR, 'figuras')
 
 
 def aplicar_estilo_padrao():
-    """Estilo único compartilhado entre todos os gráficos."""
+    """Estilo único compartilhado entre todos os gráficos.
+
+    Segue o "padrão Python" enxuto: defaults do matplotlib + grade discreta,
+    sem bordas grossas, sem títulos em negrito enfático, sem cores saturadas
+    fora da paleta tab10. Pensado para reprodução em texto acadêmico.
+    """
     plt.style.use('default')
     sns.set_style("whitegrid")
-    plt.rcParams['figure.figsize'] = (14, 8)
+    # Paleta default do matplotlib (tab10) — sóbria e reconhecível.
+    plt.rcParams['axes.prop_cycle'] = plt.cycler(color=plt.cm.tab10.colors)
+    plt.rcParams['figure.figsize'] = (10, 6)
     plt.rcParams['figure.facecolor'] = 'white'
     plt.rcParams['axes.facecolor'] = 'white'
     plt.rcParams['savefig.facecolor'] = 'white'
     plt.rcParams['savefig.edgecolor'] = 'none'
     plt.rcParams['figure.dpi'] = 100
     plt.rcParams['savefig.dpi'] = 300
+    # Tipografia: tamanhos consistentes, sem bold gratuito.
     plt.rcParams['font.size'] = 10
-    plt.rcParams['axes.titlesize'] = 13
-    plt.rcParams['axes.labelsize'] = 11
-    plt.rcParams['axes.titleweight'] = 'bold'
+    plt.rcParams['axes.titlesize'] = 11
+    plt.rcParams['axes.labelsize'] = 10
+    plt.rcParams['axes.titleweight'] = 'normal'
+    plt.rcParams['axes.labelweight'] = 'normal'
+    plt.rcParams['legend.fontsize'] = 9
+    plt.rcParams['xtick.labelsize'] = 9
+    plt.rcParams['ytick.labelsize'] = 9
+    # Spines: só esquerda e baixo, padrão de publicação.
+    plt.rcParams['axes.spines.top'] = False
+    plt.rcParams['axes.spines.right'] = False
+    plt.rcParams['axes.grid'] = True
+    plt.rcParams['grid.alpha'] = 0.3
+    plt.rcParams['grid.linestyle'] = '--'
+    plt.rcParams['grid.linewidth'] = 0.5
 
 
 # Paleta usada por ambos os scripts
