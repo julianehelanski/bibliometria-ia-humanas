@@ -22,28 +22,31 @@ Os dados foram coletados em **6 de novembro de 2025**.
 ```
 analise_bibliometrica_ia_ciencias_humanas/
 │
-├── README.md                              ← Este arquivo
+├── README.md                       ← Este arquivo
+├── LICENSE                         ← Licença MIT
+├── CITATION.cff                    ← Metadados de citação (lido pelo GitHub)
+├── requirements.txt                ← Dependências Python
 │
-├── scripts/
-│   ├── analise_scielo_ia.py               ← Análise dos artigos SciELO
-│   └── analise_capes_ia.py                ← Análise do catálogo CAPES
+├── utils.py                        ← Estilo, paleta e regex IA compartilhados
+├── analise_scielo.py               ← Análise dos artigos SciELO
+├── analise_capes.py                ← Análise do catálogo CAPES
+├── gerar_graficos_figuras.py       ← Geração complementar de figuras
 │
-├── dados/
-│   ├── scielo/
-│   │   ├── export_scielo.ris              ← Exportação RIS do SciELO (não incluída por tamanho)
-│   │   ├── scielo_publi_ano.csv           ← Publicações por ano
-│   │   ├── scielo_periódicos.csv          ← Distribuição por periódico
-│   │   ├── scielo_tipo__literatura.csv    ← Tipo de documento
-│   │   └── scielo_citavel_naocitavel.csv  ← Citável vs. não citável
-│   │
-│   └── capes/
-│       ├── catalogo_teses_analise.xlsx           ← Dataset completo CAPES (não incluído por tamanho)
-│       └── resultados_detalhados_teses_ia.xlsx   ← Resultados consolidados
+├── dados_scielo/                   ← Arquivos de entrada/saída SciELO
+│   ├── export_scielo.ris               (não versionado — ver Reprodutibilidade)
+│   ├── scielo_*.csv                    (não versionado)
+│   ├── resultados_detalhados_scielo.xlsx
+│   ├── relatorio_completo.txt          (gerado pelo script)
+│   └── auditoria_foco_ia.csv           (gerado pelo script)
 │
-└── graficos/                              ← Gráficos gerados pelos scripts
+├── dados_capes/                    ← Arquivos de entrada/saída CAPES
+│   ├── catalogo_teses_analise.xlsx     (não versionado — ver Reprodutibilidade)
+│   └── resultados_detalhados_capes.xlsx
+│
+└── figuras/                        ← Gráficos PNG gerados pelos scripts
 ```
 
-> **Nota:** Os arquivos de dados brutos (`export_scielo.ris` e `catalogo_teses_analise.xlsx`) não estão incluídos neste repositório por conta do tamanho. As instruções para reprodução da coleta estão na seção [Reprodutibilidade](#reprodutibilidade).
+> **Nota:** Os arquivos de dados brutos (`export_scielo.ris` e `catalogo_teses_analise.xlsx`) não estão incluídos por conta do tamanho e das políticas de uso de cada plataforma. Instruções para reprodução da coleta estão em [Reprodutibilidade](#reprodutibilidade).
 
 ---
 
@@ -90,8 +93,11 @@ analise_bibliometrica_ia_ciencias_humanas/
 | Outros temas | 36 (36%) |
 | Número de áreas | 29 |
 | Número de instituições | 48 |
-| Crescimento (2013→2023) | 3.000% |
+| Crescimento bruto (2013→2023) | 3.000% |
+| CAGR (taxa anual composta) | ~41% a.a. |
 | Concentração nos últimos 3 anos | 81% |
+
+> **Por que reportar CAGR junto com crescimento bruto?** Um salto de 1 para 30 publicações representa 3.000% — número impressionante mas hiperinflado pelo denominador pequeno. A taxa anual composta (CAGR) descreve o mesmo crescimento de forma menos enganosa para comparação com outras séries.
 
 **Distribuição por área de conhecimento (CAPES):**
 
@@ -118,12 +124,25 @@ A escolha do filtro foi determinada pela arquitetura taxonômica das bases consu
 
 ---
 
+## Nota metodológica sobre a classificação de foco em IA
+
+Os scripts classificam cada trabalho em três categorias — **IA Foco Central**, **IA Foco Relacionado**, **Outros Temas** — usando expressões regulares com fronteiras de palavra (`\b`) para reduzir falsos positivos. A função compartilhada está em `utils.classificar_foco_ia`.
+
+- **Foco Central:** o texto menciona explicitamente IA, inteligência artificial, machine learning, deep learning, redes neurais, ChatGPT, GPT, LLM ou algoritmos.
+- **Foco Relacionado:** menciona apenas termos vizinhos — transhumanismo, robótica, automação, mineração de dados, big data, visão computacional, NLP.
+- **Outros Temas:** não menciona nenhum desses termos.
+
+Para fins de auditoria, ambos os scripts geram uma planilha/CSV com a classificação atribuída a cada registro (`Auditoria Foco IA` em `dados_capes/resultados_detalhados_capes.xlsx`, e `dados_scielo/auditoria_foco_ia.csv` para o SciELO). Isso permite revisão humana caso a caso.
+
+---
+
 ## Limitações
 
 - A análise cobre apenas materiais indexados nas fontes escolhidas, excluindo livros, capítulos de livros e anais de congressos — restrição significativa num campo onde parte da produção relevante circula nessas formas.
-- A classificação por foco em IA no CAPES foi realizada com base nos títulos dos trabalhos, dado que resumos não são indexados pelo catálogo.
+- A classificação por foco em IA no CAPES foi realizada primariamente com base nos títulos; quando a coluna `resumo` está presente, ela também é considerada.
 - Os dados do SciELO são dinâmicos: consultas futuras podem apresentar resultados diferentes.
 - A ênfase em quantidade em detrimento de qualidade é limitação inerente ao método bibliométrico.
+- O crescimento bruto entre 2013 e 2023 (3.000%) é matematicamente sensível à base muito pequena do ano inicial. A coexistência com o CAGR mitiga essa distorção.
 
 ---
 
@@ -132,44 +151,46 @@ A escolha do filtro foi determinada pela arquitetura taxonômica das bases consu
 ### Requisitos
 
 ```bash
-pip install pandas numpy matplotlib seaborn openpyxl
+pip install -r requirements.txt
 ```
 
-### Script SciELO
-
-```bash
-# 1. Ajuste os caminhos no início do script:
-BASE_DIR = r'caminho/para/seus/dados'
-OUTPUT_DIR = r'caminho/para/resultados'
-
-# 2. Execute:
-python analise_scielo_ia.py
-```
-
-**Arquivos de entrada necessários:**
-- `export_scielo.ris` — exportação RIS do SciELO
-- `scielo_publi_ano.csv`
-- `scielo_periódicos.csv`
-- `scielo_tipo__literatura.csv`
-- `scielo_citavel_naocitavel.csv`
-
-**Saídas geradas:**
-- Gráficos PNG na pasta `resultados_analise/`
-- `relatorio_completo.txt` com lista detalhada de artigos por categoria temática
+Versões fixadas em `requirements.txt`: `pandas`, `numpy`, `matplotlib`, `seaborn`, `openpyxl`.
 
 ### Script CAPES
 
-```bash
-# 1. Certifique-se de que o arquivo de dados está na mesma pasta:
-#    catalogo_teses_analise.xlsx  (aba: "Dados Completos")
+1. Coloque o arquivo de dados em `dados_capes/`:
+   - `catalogo_teses_analise.xlsx` (aba `Dados Completos`), **ou**
+   - um dos nomes alternativos suportados: `catalogo_teses_analise__2_.xlsx`, `catalogo_teses_limpo__2_.csv`, `catalogodeteses__4_.csv`.
 
-# 2. Execute:
-python analise_capes_ia.py
-```
+2. Execute:
+   ```bash
+   python analise_capes.py
+   ```
 
-**Saídas geradas:**
-- Gráficos PNG na pasta `graficos/`
-- `resultados_detalhados_teses_ia.xlsx` com todas as análises em abas separadas
+3. Saídas:
+   - Gráficos PNG em `figuras/`
+   - Planilha consolidada em `dados_capes/resultados_detalhados_capes.xlsx` (inclui aba `Auditoria Foco IA`, `Top Termos`, `Top Bigrams`)
+
+### Script SciELO
+
+1. Coloque os arquivos em `dados_scielo/`:
+   - `export_scielo.ris`
+   - `scielo_publi_ano.csv`
+   - `scielo_periódicos.csv`
+   - `scielo_tipo__literatura.csv`
+   - `scielo_citavel_naocitavel.csv`
+   - `scielo_areas_tematicas.csv`
+   - `scielo_indice_citacoes.csv`
+
+2. Execute:
+   ```bash
+   python analise_scielo.py
+   ```
+
+3. Saídas:
+   - Gráficos PNG em `figuras/`
+   - `dados_scielo/relatorio_completo.txt` (lista detalhada por categoria temática)
+   - `dados_scielo/auditoria_foco_ia.csv` (classificação por artigo)
 
 ---
 
@@ -187,7 +208,7 @@ python analise_capes_ia.py
 
 1. Acesse o [Catálogo de Teses e Dissertações da CAPES](https://catalogodeteses.capes.gov.br)
 2. Busque por `inteligência artificial` com filtro de grande área **Ciências Humanas**
-3. Use uma ferramenta de extração automatizada (ex: extensão de raspagem de dados para navegador) para exportar os resultados em CSV
+3. Use uma ferramenta de extração automatizada (ex.: extensão de raspagem de dados para navegador) para exportar os resultados em CSV
 4. Importe o CSV, limpe e organize no Excel; salve como `.xlsx` com aba `Dados Completos`
 
 ---
@@ -207,6 +228,8 @@ HELANSKI, Juliane. Análise Bibliométrica: Inteligência Artificial nas Ciênci
 Repositório de dados e scripts. GitHub, 2025.
 Disponível em: https://github.com/julianehelanski/analise_bibliometrica_ia_ciencias_humanas
 ```
+
+O arquivo [`CITATION.cff`](CITATION.cff) também é fornecido para citação automatizada pelo GitHub.
 
 A tese completa que contextualiza esta análise:
 

@@ -1,55 +1,58 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Nov 10 18:28:13 2025
+Análise bibliométrica: artigos SciELO com foco em inteligência artificial.
 
-@author: julia
+Lê arquivo RIS exportado do SciELO e CSVs auxiliares de `dados_scielo/`,
+classifica artigos por foco em IA, gera gráficos em `figuras/` e relatório
+em texto em `dados_scielo/`.
+
+Uso:
+    python analise_scielo.py
+
+Requisitos: ver requirements.txt
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Nov 10 18:05:16 2025
-
-@author: julia
-"""
-
-# -*- coding: utf-8 -*-
-"""
-ANÁLISE BIBLIOMÉTRICA: ARTIGOS SCIELO COM FOCO EM INTELIGÊNCIA ARTIFICIAL
-Versão otimizada com correções e código limpo
-Autor: Análise Automatizada
-Data: Novembro 2025
-"""
-
-import re
-import os
 import csv
-from collections import defaultdict, Counter
+import os
+import re
+import sys
+from collections import Counter, defaultdict
+
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 
-# Configurações gerais
-sns.set_style("whitegrid")
-plt.rcParams['font.size'] = 10
+from utils import (
+    BASE_DIR,
+    DADOS_SCIELO_DIR,
+    FIGURAS_DIR,
+    RE_IA_FORTE,
+    aplicar_estilo_padrao,
+    garantir_diretorio,
+    buscar_arquivo,
+)
+
+aplicar_estilo_padrao()
 plt.rcParams['figure.max_open_warning'] = 50
 
 # ============================================================================
 # CONFIGURAÇÃO DOS ARQUIVOS
 # ============================================================================
 
-BASE_DIR = r'C:\Users\julia\Downloads'
-OUTPUT_DIR = r'C:\Users\julia\Downloads\resultados_analise'
+# Caminhos relativos ao repositório. Permite rodar em qualquer máquina.
+OUTPUT_DIR = garantir_diretorio(FIGURAS_DIR)
 
-# Arquivos de entrada
-ARQUIVO_RIS = os.path.join(BASE_DIR, 'export_scielo.ris')
-CSV_AREAS = os.path.join(BASE_DIR, 'scielo_areas_tematicas.csv')
-CSV_CITAVEL = os.path.join(BASE_DIR, 'scielo_citavel_naocitavel.csv')
-CSV_CITACOES = os.path.join(BASE_DIR, 'scielo_indice_citacoes.csv')
-CSV_PERIODICOS = os.path.join(BASE_DIR, 'scielo_periódicos.csv')
-CSV_ANO = os.path.join(BASE_DIR, 'scielo_publi_ano.csv')
-CSV_LITERATURA = os.path.join(BASE_DIR, 'scielo_tipo__literatura.csv')
+def _resolver(nome):
+    """Procura arquivo em dados_scielo/ e cai para BASE_DIR como fallback."""
+    encontrado = buscar_arquivo([nome], DADOS_SCIELO_DIR, BASE_DIR)
+    return encontrado if encontrado else os.path.join(DADOS_SCIELO_DIR, nome)
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+ARQUIVO_RIS = _resolver('export_scielo.ris')
+CSV_AREAS = _resolver('scielo_areas_tematicas.csv')
+CSV_CITAVEL = _resolver('scielo_citavel_naocitavel.csv')
+CSV_CITACOES = _resolver('scielo_indice_citacoes.csv')
+CSV_PERIODICOS = _resolver('scielo_periódicos.csv')
+CSV_ANO = _resolver('scielo_publi_ano.csv')
+CSV_LITERATURA = _resolver('scielo_tipo__literatura.csv')
 
 # ============================================================================
 # FUNÇÕES DE LEITURA DE DADOS
@@ -185,40 +188,28 @@ def extrair_dados_artigo(record):
     }
 
 def verificar_foco_ia(artigo):
-    """Determina se o artigo tem IA como foco principal"""
-    
-    ia_keywords_principais = [
-        'inteligência artificial', 'artificial intelligence', 'inteligencia artificial',
-        'machine learning', 'aprendizado de máquina', 'deep learning',
-        'chatgpt', 'gpt'
-    ]
-    
-    ia_keywords_secundarias = [
-        'neural network', 'rede neural', 'algoritmo', 'algorithm', 
-        'automação', 'automation', 'ia ', ' ai ', 'dados', 'data'
-    ]
-    
-    # Preparar textos
-    title_lower = artigo['title'].lower()
-    abstract_lower = artigo['abstract'].lower()
-    keywords_lower = ' '.join(artigo['keywords']).lower()
-    
-    # Verificar menções
-    all_keywords = ia_keywords_principais + ia_keywords_secundarias
-    mentions_ai = any(kw in title_lower or kw in abstract_lower or kw in keywords_lower 
-                     for kw in all_keywords)
-    
-    # Verificar foco principal
+    """Determina se o artigo tem IA como foco principal.
+
+    Usa o regex compartilhado RE_IA_FORTE com word boundaries. Isso corrige o
+    bug antigo em que 'ia ' e ' ai ' capturavam pedaços de palavras vizinhas
+    e/ou falhavam quando 'IA' vinha colado a pontuação ('...da IA.').
+    """
+    title = artigo['title']
+    abstract = artigo['abstract']
+    keywords_str = ' '.join(artigo['keywords'])
+
+    mentions_ai = bool(RE_IA_FORTE.search(' '.join([title, abstract, keywords_str])))
+
+    # Foco principal: IA aparece no título OU entre as primeiras palavras-chave.
     about_ai = False
     if mentions_ai:
-        if any(kw in title_lower for kw in ia_keywords_principais):
+        if RE_IA_FORTE.search(title):
             about_ai = True
-        elif any(kw.lower() in keywords_lower.split()[:10] for kw in ia_keywords_principais):
+        elif RE_IA_FORTE.search(' '.join(artigo['keywords'][:10])):
             about_ai = True
-    
+
     artigo['mentions_ai'] = mentions_ai
     artigo['about_ai'] = about_ai
-    
     return artigo
 
 def categorizar_artigo(artigo):
@@ -403,7 +394,6 @@ Sem menção: {stats["sem_ia"]} ({stats["sem_ia"]/stats["total"]*100:.1f}%)'''
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"  ✓ Salvo: {output_path}")
-    plt.show()
 
 def criar_grafico_publicacoes_ano(artigos, output_path):
     """Gráfico: Publicações por ano - 4 versões padronizadas"""
@@ -449,7 +439,6 @@ def criar_grafico_publicacoes_ano(artigos, output_path):
     output_v1 = os.path.join(base_dir, '02a_temporal_barras_simples.png')
     plt.savefig(output_v1, dpi=300, bbox_inches='tight')
     print(f"  ✓ Versão 1 (Barras Simples): {output_v1}")
-    plt.show()
     
     # ===== VERSÃO 2: BARRAS - COM DESTAQUE =====
     fig, ax = plt.subplots(figsize=(16, 8))
@@ -484,7 +473,6 @@ def criar_grafico_publicacoes_ano(artigos, output_path):
     output_v2 = os.path.join(base_dir, '02b_temporal_barras_destaque.png')
     plt.savefig(output_v2, dpi=300, bbox_inches='tight')
     print(f"  ✓ Versão 2 (Barras Destaque): {output_v2}")
-    plt.show()
     
     # ===== VERSÃO 3: LINHA - SIMPLES =====
     fig, ax = plt.subplots(figsize=(16, 8))
@@ -512,7 +500,6 @@ def criar_grafico_publicacoes_ano(artigos, output_path):
     output_v3 = os.path.join(base_dir, '02c_temporal_linha_simples.png')
     plt.savefig(output_v3, dpi=300, bbox_inches='tight')
     print(f"  ✓ Versão 3 (Linha Simples): {output_v3}")
-    plt.show()
     
     # ===== VERSÃO 4: LINHA - COM ÁREA PREENCHIDA =====
     fig, ax = plt.subplots(figsize=(16, 8))
@@ -543,7 +530,6 @@ def criar_grafico_publicacoes_ano(artigos, output_path):
     output_v4 = os.path.join(base_dir, '02d_temporal_linha_area.png')
     plt.savefig(output_v4, dpi=300, bbox_inches='tight')
     print(f"  ✓ Versão 4 (Linha com Área): {output_v4}")
-    plt.show()
     
     print(f"  ✓ 4 versões geradas com sucesso!")
 
@@ -586,7 +572,6 @@ def criar_grafico_top_journals(artigos, output_path, top_n=10):
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"  ✓ Salvo: {output_path}")
-    plt.show()
 
 def criar_grafico_outros_journals(artigos, output_path, top_n=10, min_count=2):
     """Gráfico: Periódicos fora do top N"""
@@ -629,7 +614,6 @@ def criar_grafico_outros_journals(artigos, output_path, top_n=10, min_count=2):
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"  ✓ Salvo: {output_path}")
-    plt.show()
 
 def criar_grafico_idiomas(artigos, output_path):
     """Gráfico: Distribuição por idioma"""
@@ -661,7 +645,6 @@ def criar_grafico_idiomas(artigos, output_path):
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"  ✓ Salvo: {output_path}")
-    plt.show()
 
 def criar_grafico_citavel(dados_csv, output_path):
     """Gráfico: Documentos citáveis vs não citáveis"""
@@ -692,7 +675,6 @@ def criar_grafico_citavel(dados_csv, output_path):
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"  ✓ Salvo: {output_path}")
-    plt.show()
 
 def criar_grafico_indice_citacoes(dados_csv, output_path):
     """Gráfico: Índice de citações WoS"""
@@ -726,7 +708,6 @@ def criar_grafico_indice_citacoes(dados_csv, output_path):
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"  ✓ Salvo: {output_path}")
-    plt.show()
 
 def criar_grafico_areas_tematicas(dados_csv, output_path, top_n=10):
     """Gráfico: Top N áreas temáticas WoS"""
@@ -766,7 +747,6 @@ def criar_grafico_areas_tematicas(dados_csv, output_path, top_n=10):
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"  ✓ Salvo: {output_path}")
-    plt.show()
 
 def criar_grafico_outras_areas(dados_csv, output_path, top_n=10, min_count=3):
     """Gráfico: Áreas temáticas fora do top N"""
@@ -818,7 +798,6 @@ def criar_grafico_outras_areas(dados_csv, output_path, top_n=10, min_count=3):
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"  ✓ Salvo: {output_path}")
-    plt.show()
 
 def criar_grafico_categorias_tematicas(categorias, total_ia, output_path):
     """Gráfico: Categorias temáticas dos artigos com foco em IA"""
@@ -856,7 +835,6 @@ def criar_grafico_categorias_tematicas(categorias, total_ia, output_path):
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"  ✓ Salvo: {output_path}")
-    plt.show()
 
 # ============================================================================
 # RELATÓRIO DETALHADO
@@ -964,9 +942,9 @@ def main():
         # Processar arquivo RIS
         records = ler_arquivo_ris(ARQUIVO_RIS)
         if not records:
-            print("\n✗ Não foi possível continuar sem o arquivo RIS.")
-            input("Pressione ENTER para sair...")
-            return
+            print(f"\n[ERRO] Arquivo RIS não encontrado em {ARQUIVO_RIS}.")
+            print("       Coloque export_scielo.ris em dados_scielo/ e tente novamente.")
+            sys.exit(1)
         
         artigos = processar_artigos(records)
         stats = gerar_estatisticas(artigos)
@@ -989,38 +967,35 @@ def main():
         criar_grafico_categorias_tematicas(categorias, stats['about_ai'], 
                                            os.path.join(OUTPUT_DIR, '09_categorias_ia.png'))
         
-        # Gerar relatório
-        gerar_relatorio_detalhado(categorias, artigos, stats, dados_csv, 
-                                  os.path.join(OUTPUT_DIR, 'relatorio_completo.txt'))
-        
+        # Relatório textual salvo junto aos dados, não nas figuras.
+        gerar_relatorio_detalhado(categorias, artigos, stats, dados_csv,
+                                  os.path.join(DADOS_SCIELO_DIR, 'relatorio_completo.txt'))
+
+        # Auditoria: CSV com classificação por artigo, para revisão humana.
+        try:
+            import csv as _csv
+            audit_path = os.path.join(DADOS_SCIELO_DIR, 'auditoria_foco_ia.csv')
+            with open(audit_path, 'w', encoding='utf-8', newline='') as f:
+                w = _csv.writer(f)
+                w.writerow(['ano', 'periódico', 'menciona_ia', 'foco_ia', 'título'])
+                for a in artigos:
+                    w.writerow([a['year'], a['journal'], a['mentions_ai'],
+                                a['about_ai'], a['title']])
+            print(f"✓ Auditoria salva: {audit_path}")
+        except Exception as exc:
+            print(f"[AVISO] Não foi possível salvar auditoria: {exc}")
+
         print("\n" + "="*80)
-        print("✓✓✓ ANÁLISE CONCLUÍDA COM SUCESSO ✓✓✓")
+        print("ANÁLISE CONCLUÍDA")
         print("="*80)
-        print(f"\nArquivos salvos em: {OUTPUT_DIR}")
-        print("\nGRÁFICOS GERADOS (11 arquivos):")
-        print("  01_foco_ia.png")
-        print("  02_publicacoes_ano.png")
-        print("  03a_top10_journals.png")
-        print("  03b_outros_journals.png")
-        print("  04_idiomas.png")
-        print("  06_citavel.png")
-        print("  07_indice_citacoes.png")
-        print("  08a_top10_areas.png ← CORRIGIDO (Education consolidado)")
-        print("  08b_outras_areas.png")
-        print("  09_categorias_ia.png")
-        print("\n  relatorio_completo.txt")
-        print("="*80 + "\n")
-        
-        # Abrir pasta de resultados
-        input("Pressione ENTER para abrir a pasta de resultados...")
-        import subprocess
-        subprocess.Popen(f'explorer "{OUTPUT_DIR}"')
-        
+        print(f"\nGráficos: {OUTPUT_DIR}")
+        print(f"Relatório e auditoria: {DADOS_SCIELO_DIR}")
+
     except Exception as e:
-        print(f"\n✗ ERRO: {e}")
+        print(f"\n[ERRO] {e}")
         import traceback
         traceback.print_exc()
-        input("\nPressione ENTER para sair...")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

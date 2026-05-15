@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+title: "Análise Bibliométrica: Inteligência Artificial nas Ciências Humanas Brasileiras"
+message: "Se você usar estes scripts ou dados, por favor cite-os."
+type: dataset
+authors:
+  - family-names: Helanski
+    given-names: Juliane
+date-released: 2025-11-06
+repository-code: "https://github.com/julianehelanski/analise_bibliometrica_ia_ciencias_humanas-"
+license: MIT
+keywords:
+  - bibliometria
+  - inteligência artificial
+  - ciências humanas
+  - antropologia
+  - SciELO
+  - CAPES
