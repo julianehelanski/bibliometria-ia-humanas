@@ -108,16 +108,39 @@ RE_SUBCAMPO_DL = re.compile(
     flags=re.IGNORECASE,
 )
 
-RE_SUBCAMPO_LLM = re.compile(
+# Termos inequívocos de LLM/IA generativa.
+RE_SUBCAMPO_LLM_STRICT = re.compile(
     r'\b('
     r'llms?|large\s+language\s+models?|'
     r'modelos?\s+de\s+linguagem|'
-    r'transformer[s]?|'
     r'chatgpt|gpt-\d|'
     r'ia\s+generativa|generative\s+ai'
     r')\b',
     flags=re.IGNORECASE,
 )
+
+# 'transformer' tem dois sentidos em inglês: a arquitetura de rede neural
+# (LLMs) E o substantivo literal "transformador/transformante" — comum em
+# Engenharia Elétrica (equipamento físico) e em textos não-técnicos
+# (educação, antropologia, turismo: "social transformer", "potential
+# transformer of the context"). Por isso, isolado, dá falso positivo de
+# grande magnitude. Só conta como LLM se coocorrer com contexto técnico
+# (NLP, attention, BERT, neural, etc.) no mesmo texto.
+RE_TRANSFORMER_AMBIGUO = re.compile(r'\btransformer[s]?\b', flags=re.IGNORECASE)
+RE_CONTEXTO_NEURAL = re.compile(
+    r'\b('
+    r'neural|atten[çc][ãa]o|attention|bert|encoder|decoder|'
+    r'self-?attention|pre-?train|fine-?tun|embedding|'
+    r'deep\s+learning|aprendizado\s+profundo|'
+    r'natural\s+language|processamento\s+de\s+linguagem|nlp|'
+    r'language\s+model|modelo\s+de\s+linguagem|huggingface'
+    r')\b',
+    flags=re.IGNORECASE,
+)
+
+
+# Compatibilidade: a constante antiga ainda é usada por alguns lugares.
+RE_SUBCAMPO_LLM = RE_SUBCAMPO_LLM_STRICT
 
 RE_SUBCAMPO_CORRELATOS = re.compile(
     r'\b('
@@ -155,35 +178,42 @@ def classificar_subcampos(texto):
     Um trabalho pode estar em zero, um ou vários subcampos. A presença
     do conjunto vazio indica que o trabalho não toca o campo coberto
     pelo regex e fica em 'Outros Temas'.
+
+    Regras de co-ocorrência para reduzir falsos positivos:
+      - 'transformer' isolado (sem termos técnicos de NN/NLP no mesmo texto)
+        NÃO conta para o subcampo LLM. Esta regra evita capturar
+        transformadores elétricos (Engenharia) e usos metafóricos do
+        substantivo em inglês ("social transformer", "transformer of the
+        context").
     """
     if not texto or isinstance(texto, float):
         return set()
     s = str(texto)
-    return {label for label, padrao in SUBCAMPOS if padrao.search(s)}
+    encontrados = {label for label, padrao in SUBCAMPOS if padrao.search(s)}
 
+    # Adendo: se "transformer" aparece e há contexto técnico de NN/NLP,
+    # conta como LLM (recupera os ~193 trabalhos com contexto técnico
+    # que ficariam de fora pelo regex estrito de LLM).
+    if RE_TRANSFORMER_AMBIGUO.search(s) and RE_CONTEXTO_NEURAL.search(s):
+        encontrados.add("Modelos de linguagem & IA generativa")
 
-# Núcleo (mantido para retrocompatibilidade): união dos 4 subcampos centrais.
-# Estes termos definem o vocabulário canônico das tecnologias de IA/ML/DL/LLMs.
-RE_IA_NUCLEO = re.compile(
-    r'\b('
-    r'intelig[êe]ncia\s+artificial|artificial\s+intelligence|'
-    r'machine\s+learning|aprendizado\s+de\s+m[áa]quina|'
-    r'deep\s+learning|aprendizado\s+profundo|'
-    r'redes?\s+neurais|neural\s+networks?|'
-    r'modelos?\s+de\s+linguagem|'
-    r'large\s+language\s+models?|llms?|'
-    r'transformer[s]?|'
-    r'chatgpt|gpt-\d|'
-    r'ia\s+generativa|generative\s+ai'
-    r')\b',
-    flags=re.IGNORECASE,
-)
+    return encontrados
+
 
 # 'IA' como sigla. Só conta como central se coocorrer com termo do núcleo
 # ou correlatos no mesmo texto (regra de co-ocorrência).
 RE_IA_SIGLA = re.compile(r'\b(ia|i\.a\.)\b', flags=re.IGNORECASE)
 
 # Alias retrocompatível: scripts antigos usam RE_IA_FORTE / RE_IA_RELACIONADA.
+# RE_IA_NUCLEO agora é derivado: união dos 4 regexes centrais (sem 'transformer'
+# isolado, que está na regra de co-ocorrência dentro de classificar_subcampos).
+RE_IA_NUCLEO = re.compile(
+    r'(' + RE_SUBCAMPO_IA_STRICT.pattern + r')|('
+    + RE_SUBCAMPO_ML.pattern + r')|('
+    + RE_SUBCAMPO_DL.pattern + r')|('
+    + RE_SUBCAMPO_LLM_STRICT.pattern + r')',
+    flags=re.IGNORECASE,
+)
 RE_IA_FORTE = RE_IA_NUCLEO
 RE_IA_RELACIONADA = RE_SUBCAMPO_CORRELATOS
 
@@ -191,30 +221,29 @@ RE_IA_RELACIONADA = RE_SUBCAMPO_CORRELATOS
 def classificar_foco_ia(texto):
     """Classifica um texto em três categorias quanto ao foco no campo.
 
+    Implementação atual delega a classificar_subcampos para garantir
+    consistência: se algum subcampo central (1-4) está presente, é
+    'Foco Central'; se só correlatos está presente, é 'Correlato'
+    (ou Central, se a sigla 'IA' coocorrer com correlatos); se nenhum
+    subcampo está presente, é 'Outros Temas'.
+
     Importante: o rótulo guarda-chuva NÃO afirma que IA, ML, DL, LLMs e
     correlatos são a mesma coisa. Ele apenas agrupa, para fins de
     contagem total, trabalhos que mencionam qualquer uma dessas
-    tecnologias. A subcategorização real fica em classificar_subcampos.
-
-    Retorna uma das strings:
-      - 'Tecnologias IA/ML/DL - Foco Central'
-        (mencionou IA, ML, DL ou LLMs — i.e., algum subcampo central)
-      - 'Tecnologias IA/ML/DL - Correlato'
-        (mencionou só tecnologias correlatas, ou só a sigla 'IA' sem
-        co-ocorrência)
-      - 'Outros Temas'
+    tecnologias.
     """
     if not texto or isinstance(texto, float):
         return 'Outros Temas'
-    s = str(texto)
-    if RE_IA_NUCLEO.search(s):
+    subc = classificar_subcampos(texto)
+    if not subc:
+        return 'Outros Temas'
+    centrais_presentes = subc & set(SUBCAMPOS_CENTRAIS)
+    if centrais_presentes:
         return 'Tecnologias IA/ML/DL - Foco Central'
-    if RE_SUBCAMPO_CORRELATOS.search(s):
-        # Sigla 'IA' + correlato = central (ex.: "IA e robótica").
-        if RE_IA_SIGLA.search(s):
-            return 'Tecnologias IA/ML/DL - Foco Central'
-        return 'Tecnologias IA/ML/DL - Correlato'
-    return 'Outros Temas'
+    # só correlatos: pode virar Central se houver sigla 'IA' coocorrendo
+    if RE_IA_SIGLA.search(str(texto)):
+        return 'Tecnologias IA/ML/DL - Foco Central'
+    return 'Tecnologias IA/ML/DL - Correlato'
 
 
 # Rótulo guarda-chuva descritivo, sem afirmar identidade entre os campos.

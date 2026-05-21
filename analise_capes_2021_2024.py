@@ -117,10 +117,23 @@ def construir_texto_classificacao(df: pd.DataFrame) -> pd.Series:
 
 
 def classificar(df: pd.DataFrame) -> pd.DataFrame:
-    """Adiciona coluna FOCO_IA usando o classificador do utils."""
+    """Adiciona coluna FOCO_IA + colunas booleanas por subcampo + SUBCAMPOS."""
+    from utils import classificar_subcampos
     texto = construir_texto_classificacao(df)
     df = df.copy()
     df["FOCO_IA"] = texto.map(classificar_foco_ia)
+    # Subcampos: aplica uma vez, deriva 6 colunas
+    subcs = texto.map(classificar_subcampos)
+    mapa_col = {
+        "IA em sentido estrito": "SUBCAMPO_IA_STRICTO",
+        "Aprendizado de máquina (ML)": "SUBCAMPO_ML",
+        "Aprendizado profundo & redes neurais": "SUBCAMPO_DL",
+        "Modelos de linguagem & IA generativa": "SUBCAMPO_LLM",
+        "Tecnologias correlatas (robótica, NLP, big data…)": "SUBCAMPO_CORRELATOS",
+    }
+    for nome, col in mapa_col.items():
+        df[col] = subcs.map(lambda s, n=nome: n in s)
+    df["SUBCAMPOS"] = subcs.map(lambda s: "; ".join(sorted(s)) if s else "")
     return df
 
 
