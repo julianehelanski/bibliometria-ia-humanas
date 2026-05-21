@@ -126,25 +126,43 @@ RE_IA_FORTE = RE_IA_NUCLEO
 def classificar_foco_ia(texto):
     """Classifica um texto em três categorias quanto ao foco em IA.
 
-    A categoria 'IA - Foco Central' é atribuída se há termo do núcleo OU se
-    a sigla 'IA' aparece em co-ocorrência com termo do núcleo/relacionado no
-    mesmo texto. A regra de co-ocorrência reduz drasticamente falsos positivos
-    em grandes áreas onde 'IA' tem outros significados.
+    O rótulo "IA (sentido amplo)" reconhece que o campo guarda-chuva inclui
+    inteligência artificial em sentido estrito, aprendizado de máquina
+    (ML/DL), redes neurais, modelos de linguagem (LLMs), IA generativa e
+    correlatos — todos cobertos pelo regex RE_IA_NUCLEO. A formulação evita
+    a leitura ingênua de "IA" como sinônimo apenas de "inteligência
+    artificial em sentido literal".
 
-    Retorna uma das strings: 'IA - Foco Central', 'IA - Foco Relacionado',
-    'Outros Temas'.
+    A categoria 'IA (sentido amplo) - Foco Central' é atribuída se há termo
+    do núcleo OU se a sigla 'IA' aparece em co-ocorrência com termo do
+    núcleo/relacionado no mesmo texto. A regra de co-ocorrência reduz
+    drasticamente falsos positivos em grandes áreas onde 'IA' tem outros
+    significados.
+
+    Retorna uma das strings:
+      - 'IA (sentido amplo) - Foco Central'
+      - 'IA (sentido amplo) - Foco Relacionado'
+      - 'Outros Temas'
     """
     if not texto or isinstance(texto, float):
         return 'Outros Temas'
     s = str(texto)
     if RE_IA_NUCLEO.search(s):
-        return 'IA - Foco Central'
+        return 'IA (sentido amplo) - Foco Central'
     if RE_IA_RELACIONADA.search(s):
         # Sigla 'IA' + termo relacionado = foco central (ex.: "IA e robótica").
         if RE_IA_SIGLA.search(s):
-            return 'IA - Foco Central'
-        return 'IA - Foco Relacionado'
+            return 'IA (sentido amplo) - Foco Central'
+        return 'IA (sentido amplo) - Foco Relacionado'
     return 'Outros Temas'
+
+
+# Rótulo guarda-chuva usado em títulos, eixos e textos. Evita que o leitor
+# leia "IA" como sinônimo de "inteligência artificial em sentido literal" e
+# perca o fato de que machine learning, redes neurais, LLMs, IA generativa
+# etc. também estão dentro do recorte.
+LABEL_GUARDA_CHUVA = "Inteligência Artificial em sentido amplo"
+LABEL_GUARDA_CHUVA_CURTO = "IA (sentido amplo)"
 
 
 # Stopwords em português, expandida. Cobre artigos, preposições, conjunções,
