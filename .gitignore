@@ -6,3 +6,8 @@ venv/
 .ipynb_checkpoints/
 .DS_Store
 resultados_analise/
+
+# Subset IA completo (com resumos): regenerável pelo script, grande demais
+# para versionar. A versão slim de auditoria (capes_2021_2024_ia_auditoria.xlsx)
+# fica no repo.
+dados_capes/capes_2021_2024_ia.csv

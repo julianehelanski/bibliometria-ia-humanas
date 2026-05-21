@@ -164,3 +164,19 @@ if __name__ == "__main__":
     saida = os.path.join(DADOS_CAPES_DIR, "capes_2021_2024_ia.csv")
     ia.to_csv(saida, index=False)
     print(f"\nSubset IA salvo em {saida} ({len(ia):,} registros)")
+
+    # Versão slim para o repo: drop dos campos de texto longo (resumo/abstract),
+    # mantendo o suficiente para auditoria humana da classificação.
+    slim_cols = [
+        "ID_PRODUCAO_INTELECTUAL", "AN_BASE", "DT_TITULACAO",
+        "NM_GRANDE_AREA_CONHECIMENTO", "NM_AREA_CONHECIMENTO",
+        "NM_SUBAREA_CONHECIMENTO", "NM_AREA_AVALIACAO",
+        "NM_GRAU_ACADEMICO", "NM_ENTIDADE_ENSINO", "SG_ENTIDADE_ENSINO",
+        "NM_REGIAO", "SG_UF_IES", "NM_ORIENTADOR", "NM_PROGRAMA",
+        "NM_PRODUCAO", "DS_PALAVRA_CHAVE", "DS_KEYWORD",
+        "NR_PAGINAS", "NM_IDIOMA", "FOCO_IA",
+    ]
+    slim = ia[[c for c in slim_cols if c in ia.columns]].copy()
+    saida_slim = os.path.join(DADOS_CAPES_DIR, "capes_2021_2024_ia_auditoria.xlsx")
+    slim.to_excel(saida_slim, index=False, engine="openpyxl")
+    print(f"Versão slim (auditoria) salva em {saida_slim}")
