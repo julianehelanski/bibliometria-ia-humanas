@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
-"""Gera as três figuras novas que situam a IA nas humanidades dentro do
-mapa mais amplo da produção pós-graduada brasileira sobre IA (2021-2024).
+"""Gera o conjunto de figuras da análise CAPES 2021-2024.
 
-Pré-requisito: rodar antes `python analise_capes_2021_2024.py` para gerar
-`dados_capes/capes_2021_2024_ia.csv`.
+Pré-requisito: rodar `python analise_capes_2021_2024.py` antes.
 
-Figuras geradas:
-  figuras/capes_11_grande_area_share.png    distribuição IA por grande área
-  figuras/capes_12_temporal_grande_area.png evolução 2021-2024 por grande área
-  figuras/capes_13_heatmap_area_keyword.png heatmap área × keyword
+Saídas em figuras/:
+  capes_11_grande_area_share.png        IA por grande área (absoluto + taxa interna)
+  capes_12_temporal_grande_area.png     evolução 2021-2024 por grande área
+  capes_13_heatmap_area_keyword.png     heatmap grande área × keyword
+  capes_14_temporal_total.png           total IA por ano (Central + Relacionado)
+  capes_15_nivel_academico.png          mestrado / doutorado / profissional
+  capes_16_top_areas_conhecimento.png   top 20 áreas de conhecimento
+  capes_17_top_instituicoes.png         top 20 instituições
+  capes_18_regiao_uf.png                IA por região e UF
+  capes_19_paginas.png                  distribuição de páginas
+  capes_20_top_termos.png               top termos no corpus IA
 
 Uso:
     python figuras_capes_2021_2024.py
@@ -19,6 +24,7 @@ from __future__ import annotations
 import os
 import re
 import sys
+from collections import Counter
 
 import numpy as np
 import pandas as pd
@@ -29,6 +35,7 @@ from utils import (
     CORES_INTERMEDIARIAS,
     DADOS_CAPES_DIR,
     FIGURAS_DIR,
+    STOPWORDS_PT,
     aplicar_estilo_padrao,
     garantir_diretorio,
 )
@@ -37,8 +44,13 @@ aplicar_estilo_padrao()
 garantir_diretorio(FIGURAS_DIR)
 
 CSV_IA = os.path.join(DADOS_CAPES_DIR, "capes_2021_2024_ia.csv")
+CSV_AUDIT = os.path.join(DADOS_CAPES_DIR, "capes_2021_2024_ia_auditoria.xlsx")
 
-# Termos individuais para o heatmap (presença/ausência por registro)
+COR_HUMANAS = CORES_INTERMEDIARIAS[0]      # destaque vermelho-muted
+COR_NEUTRA = CORES_INTERMEDIARIAS[9]       # cinza-azulado
+COR_DEST = CORES_INTERMEDIARIAS[3]         # azul
+COR_OUTROS = CORES_INTERMEDIARIAS[11]      # cinza muito claro
+
 KEYWORDS_HEATMAP = [
     ("inteligência artificial", r"\b(intelig[êe]ncia\s+artificial|artificial\s+intelligence)\b"),
     ("machine/deep learning", r"\b(machine\s+learning|deep\s+learning|aprendizado\s+de\s+m[áa]quina|aprendizado\s+profundo)\b"),
@@ -54,10 +66,36 @@ KEYWORDS_HEATMAP = [
 
 
 def carregar_ia() -> pd.DataFrame:
+    if os.path.isfile(CSV_IA):
+        return pd.read_csv(CSV_IA, low_memory=False)
+    if os.path.isfile(CSV_AUDIT):
+        sys.stderr.write(
+            f"[aviso] usando {CSV_AUDIT} (sem resumo). Termos no heatmap ficarão mais escassos.\n"
+        )
+        return pd.read_excel(CSV_AUDIT, engine="openpyxl")
+    sys.exit(f"ERRO: rode antes analise_capes_2021_2024.py — falta {CSV_IA}")
+
+
+def carregar_totais_grande_area() -> pd.Series | None:
+    """Lê os totais por grande área no universo completo, se disponível.
+
+    Se o usuário rodou o classificador localmente, podemos contar isso da
+    base completa. Se só temos o slim, retornamos None e a figura 11
+    omite a taxa interna.
+    """
     if not os.path.isfile(CSV_IA):
-        sys.exit(f"ERRO: rode antes analise_capes_2021_2024.py — falta {CSV_IA}")
-    df = pd.read_csv(CSV_IA, low_memory=False)
-    return df
+        return None
+    # O CSV de IA não tem os "outros temas". Precisamos contar pela base
+    # completa em /tmp ou em CAPES_DATA_DIR — esse é o universo de 350k.
+    capes_dir = os.environ.get("CAPES_DATA_DIR", DADOS_CAPES_DIR)
+    import glob
+    xlsx = sorted(glob.glob(os.path.join(capes_dir, "br-capes-btd-*.xlsx")))
+    if not xlsx or any(os.path.getsize(x) < 1024 for x in xlsx):
+        return None
+    # Lê só a coluna de grande área para ser rápido
+    partes = [pd.read_excel(p, usecols=["NM_GRANDE_AREA_CONHECIMENTO"], engine="openpyxl") for p in xlsx]
+    full = pd.concat(partes, ignore_index=True)
+    return full["NM_GRANDE_AREA_CONHECIMENTO"].fillna("(não informado)").value_counts()
 
 
 def texto_classificacao(df: pd.DataFrame) -> pd.Series:
@@ -68,38 +106,50 @@ def texto_classificacao(df: pd.DataFrame) -> pd.Series:
     return s
 
 
+def _cor_por_humanas(label: str) -> str:
+    return COR_HUMANAS if "Humanas" in str(label) else COR_NEUTRA
+
+
 # ---------------------------------------------------------------------------
-# Figura 11: distribuição IA por grande área (barras horizontais)
+# Figura 11: IA por grande área — absoluto + taxa interna (dois painéis)
 # ---------------------------------------------------------------------------
-def fig11_distribuicao_grande_area(df: pd.DataFrame) -> None:
-    counts = (
-        df["NM_GRANDE_AREA_CONHECIMENTO"]
-        .fillna("(não informado)")
-        .value_counts()
-        .sort_values()
-    )
+def fig11_grande_area(df: pd.DataFrame, totais_universo: pd.Series | None) -> None:
+    counts = df["NM_GRANDE_AREA_CONHECIMENTO"].fillna("(s/info)").value_counts().sort_values()
+    cores = [_cor_por_humanas(a) for a in counts.index]
     total = counts.sum()
 
-    cores = []
-    for area in counts.index:
-        if "Humanas" in str(area):
-            cores.append(CORES_INTERMEDIARIAS[0])   # destaque vermelho
-        else:
-            cores.append(CORES_INTERMEDIARIAS[9])   # cinza para o resto
+    if totais_universo is not None:
+        # Dois painéis: contagem IA + taxa interna (IA / total da área)
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 6.5), gridspec_kw={"wspace": 0.45})
+    else:
+        fig, ax1 = plt.subplots(figsize=(10, 6))
+        ax2 = None
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-    bars = ax.barh(counts.index, counts.values, color=cores, edgecolor="white", linewidth=0.5)
+    bars = ax1.barh(counts.index, counts.values, color=cores, edgecolor="white", linewidth=0.5)
     for bar, val in zip(bars, counts.values):
-        pct = val / total * 100
-        ax.text(
-            bar.get_width() + total * 0.005,
-            bar.get_y() + bar.get_height() / 2,
-            f"{val:,} ({pct:.1f}%)",
-            va="center", fontsize=8,
-        )
-    ax.set_xlabel(f"Trabalhos sobre IA (N = {total:,})")
-    ax.set_ylabel("")
-    ax.set_xlim(0, counts.max() * 1.18)
+        ax1.text(bar.get_width() + total * 0.005,
+                 bar.get_y() + bar.get_height() / 2,
+                 f"{val:,} ({val/total*100:.1f}%)",
+                 va="center", fontsize=8)
+    ax1.set_xlabel(f"Trabalhos sobre IA (N = {total:,})")
+    ax1.set_xlim(0, counts.max() * 1.22)
+
+    if ax2 is not None:
+        taxa = pd.Series({
+            area: counts.get(area, 0) / totais_universo.get(area, np.nan) * 100
+            for area in counts.index
+        }).dropna().sort_values()
+        cores2 = [_cor_por_humanas(a) for a in taxa.index]
+        bars2 = ax2.barh(taxa.index, taxa.values, color=cores2, edgecolor="white", linewidth=0.5)
+        for bar, val in zip(bars2, taxa.values):
+            ax2.text(bar.get_width() + taxa.max() * 0.01,
+                     bar.get_y() + bar.get_height() / 2,
+                     f"{val:.1f}%",
+                     va="center", fontsize=8)
+        ax2.set_xlabel("Taxa interna: % da grande área que é sobre IA")
+        ax2.set_xlim(0, taxa.max() * 1.18)
+        ax2.set_yticklabels([])  # eixo Y duplicado, omite
+
     plt.tight_layout()
     out = os.path.join(FIGURAS_DIR, "capes_11_grande_area_share.png")
     plt.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
@@ -108,44 +158,38 @@ def fig11_distribuicao_grande_area(df: pd.DataFrame) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Figura 12: evolução temporal por grande área (linhas)
+# Figura 12: evolução temporal por grande área
 # ---------------------------------------------------------------------------
 def fig12_temporal_grande_area(df: pd.DataFrame) -> None:
     df = df.copy()
     df["AN_BASE"] = pd.to_numeric(df["AN_BASE"], errors="coerce")
     df = df.dropna(subset=["AN_BASE"])
     df["AN_BASE"] = df["AN_BASE"].astype(int)
-    df["NM_GRANDE_AREA_CONHECIMENTO"] = df["NM_GRANDE_AREA_CONHECIMENTO"].fillna("(não informado)")
+    df["NM_GRANDE_AREA_CONHECIMENTO"] = df["NM_GRANDE_AREA_CONHECIMENTO"].fillna("(s/info)")
 
-    pivot = (
-        df.groupby(["AN_BASE", "NM_GRANDE_AREA_CONHECIMENTO"])
-        .size()
-        .unstack(fill_value=0)
-        .sort_index()
-    )
-
-    # Ordena por volume total, descendente (linha mais grossa = top)
+    pivot = (df.groupby(["AN_BASE", "NM_GRANDE_AREA_CONHECIMENTO"]).size()
+             .unstack(fill_value=0).sort_index())
     pivot = pivot[pivot.sum().sort_values(ascending=False).index]
 
     fig, ax = plt.subplots(figsize=(11, 6.5))
     for i, area in enumerate(pivot.columns):
         is_humanas = "Humanas" in str(area)
-        cor = CORES_INTERMEDIARIAS[0] if is_humanas else CORES_INTERMEDIARIAS[i % 12]
-        lw = 2.5 if is_humanas else 1.5
-        alpha = 1.0 if is_humanas else 0.75
-        ax.plot(
-            pivot.index, pivot[area],
-            marker="o", linewidth=lw, alpha=alpha,
-            color=cor, label=str(area),
-        )
+        cor = COR_HUMANAS if is_humanas else CORES_INTERMEDIARIAS[(i + 2) % 12]
+        lw = 3.0 if is_humanas else 1.4
+        ax.plot(pivot.index, pivot[area], marker="o", linewidth=lw,
+                color=cor, label=str(area),
+                alpha=1.0 if is_humanas else 0.7)
+        # Rótulo no fim de cada linha
+        x_end = pivot.index[-1]
+        y_end = pivot[area].iloc[-1]
+        ax.text(x_end + 0.05, y_end, f"  {area} ({y_end:,})",
+                fontsize=8, va="center",
+                color=cor, fontweight="bold" if is_humanas else "normal")
 
     ax.set_xlabel("Ano base de defesa")
     ax.set_ylabel("Trabalhos sobre IA")
     ax.set_xticks(sorted(pivot.index))
-    ax.legend(
-        loc="center left", bbox_to_anchor=(1.01, 0.5),
-        frameon=False, fontsize=8,
-    )
+    ax.set_xlim(min(pivot.index) - 0.2, max(pivot.index) + 2.2)
     plt.tight_layout()
     out = os.path.join(FIGURAS_DIR, "capes_12_temporal_grande_area.png")
     plt.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
@@ -154,52 +198,260 @@ def fig12_temporal_grande_area(df: pd.DataFrame) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Figura 13: heatmap grande área × keyword (presença normalizada por linha)
+# Figura 13: heatmap grande área × keyword
 # ---------------------------------------------------------------------------
 def fig13_heatmap_area_keyword(df: pd.DataFrame) -> None:
     texto = texto_classificacao(df)
-    presenca = pd.DataFrame(
-        {label: texto.str.contains(pat, flags=re.IGNORECASE, regex=True, na=False)
-         for label, pat in KEYWORDS_HEATMAP}
-    )
-    presenca["GRANDE_AREA"] = df["NM_GRANDE_AREA_CONHECIMENTO"].fillna("(não informado)").values
+    presenca = pd.DataFrame({
+        label: texto.str.contains(pat, flags=re.IGNORECASE, regex=True, na=False)
+        for label, pat in KEYWORDS_HEATMAP
+    })
+    presenca["GRANDE_AREA"] = df["NM_GRANDE_AREA_CONHECIMENTO"].fillna("(s/info)").values
 
     bruto = presenca.groupby("GRANDE_AREA").sum(numeric_only=True)
-    # Mantém só grandes áreas com pelo menos 20 registros IA para reduzir ruído
-    totais = df["NM_GRANDE_AREA_CONHECIMENTO"].fillna("(não informado)").value_counts()
+    totais = df["NM_GRANDE_AREA_CONHECIMENTO"].fillna("(s/info)").value_counts()
     keep = totais[totais >= 20].index
     bruto = bruto.loc[bruto.index.intersection(keep)]
-    # Ordena linhas por volume total decrescente
-    ordem_linhas = totais.loc[bruto.index].sort_values(ascending=False).index
-    bruto = bruto.loc[ordem_linhas]
+    bruto = bruto.loc[totais.loc[bruto.index].sort_values(ascending=False).index]
 
-    # Normaliza por linha: o que cada termo representa dentro daquela área
-    norm = bruto.div(bruto.sum(axis=1).replace(0, np.nan), axis=0).fillna(0) * 100
+    # Normaliza por COLUNA (termo): mostra concentração geográfica do termo nas áreas
+    norm_col = bruto.div(bruto.sum(axis=0).replace(0, np.nan), axis=1).fillna(0) * 100
 
     fig, ax = plt.subplots(figsize=(11, 6.5))
-    cmap = mcolors.LinearSegmentedColormap.from_list(
-        "muted_red", ["#FFFFFF", CORES_INTERMEDIARIAS[0]]
-    )
-    im = ax.imshow(norm.values, aspect="auto", cmap=cmap, vmin=0, vmax=norm.values.max())
-    ax.set_xticks(range(len(norm.columns)))
-    ax.set_xticklabels(norm.columns, rotation=40, ha="right", fontsize=8)
-    ax.set_yticks(range(len(norm.index)))
-    ax.set_yticklabels(norm.index, fontsize=9)
-    for i in range(norm.shape[0]):
-        for j in range(norm.shape[1]):
-            v = norm.values[i, j]
-            if v > 0:
-                ax.text(
-                    j, i, f"{v:.0f}",
-                    ha="center", va="center",
-                    color="white" if v > norm.values.max() * 0.55 else "#333",
-                    fontsize=7,
-                )
+    cmap = mcolors.LinearSegmentedColormap.from_list("muted_red", ["#FFFFFF", COR_HUMANAS])
+    im = ax.imshow(norm_col.values, aspect="auto", cmap=cmap, vmin=0, vmax=norm_col.values.max())
+    ax.set_xticks(range(len(norm_col.columns)))
+    ax.set_xticklabels(norm_col.columns, rotation=40, ha="right", fontsize=8)
+    ax.set_yticks(range(len(norm_col.index)))
+    ax.set_yticklabels(norm_col.index, fontsize=9)
+    for i in range(norm_col.shape[0]):
+        for j in range(norm_col.shape[1]):
+            v = norm_col.values[i, j]
+            raw = int(bruto.values[i, j])
+            if raw > 0:
+                txt = f"{v:.0f}%\n({raw:,})"
+                ax.text(j, i, txt, ha="center", va="center",
+                        color="white" if v > norm_col.values.max() * 0.55 else "#333",
+                        fontsize=6.5)
     cbar = plt.colorbar(im, ax=ax, fraction=0.025, pad=0.02)
-    cbar.set_label("% de menções da grande área (por linha)", fontsize=8)
+    cbar.set_label("% do termo concentrado na grande área", fontsize=8)
     cbar.ax.tick_params(labelsize=7)
     plt.tight_layout()
     out = os.path.join(FIGURAS_DIR, "capes_13_heatmap_area_keyword.png")
+    plt.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"  → {out}")
+
+
+# ---------------------------------------------------------------------------
+# Figura 14: evolução temporal total (Central vs Relacionado)
+# ---------------------------------------------------------------------------
+def fig14_temporal_total(df: pd.DataFrame) -> None:
+    df = df.copy()
+    df["AN_BASE"] = pd.to_numeric(df["AN_BASE"], errors="coerce").astype("Int64")
+    pivot = (df.groupby(["AN_BASE", "FOCO_IA"]).size()
+             .unstack(fill_value=0).sort_index())
+
+    fig, ax = plt.subplots(figsize=(10, 5.5))
+    anos = pivot.index.astype(int).tolist()
+    bottom = np.zeros(len(anos))
+    cores = {"IA - Foco Central": COR_DEST, "IA - Foco Relacionado": CORES_INTERMEDIARIAS[1]}
+    for foco in ["IA - Foco Central", "IA - Foco Relacionado"]:
+        if foco not in pivot.columns:
+            continue
+        vals = pivot[foco].values
+        ax.bar(anos, vals, bottom=bottom, color=cores[foco], label=foco, edgecolor="white")
+        for x, v, b in zip(anos, vals, bottom):
+            if v > 50:
+                ax.text(x, b + v / 2, f"{int(v):,}", ha="center", va="center",
+                        color="white", fontsize=9)
+        bottom = bottom + vals
+    # Total no topo
+    for x, total in zip(anos, bottom):
+        ax.text(x, total + max(bottom) * 0.02, f"{int(total):,}",
+                ha="center", va="bottom", fontsize=10, fontweight="bold")
+    ax.set_xlabel("Ano base de defesa")
+    ax.set_ylabel("Trabalhos sobre IA")
+    ax.set_xticks(anos)
+    ax.legend(loc="upper left", frameon=False)
+    plt.tight_layout()
+    out = os.path.join(FIGURAS_DIR, "capes_14_temporal_total.png")
+    plt.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"  → {out}")
+
+
+# ---------------------------------------------------------------------------
+# Figura 15: nível acadêmico (Mestrado / Doutorado / Profissional)
+# ---------------------------------------------------------------------------
+def fig15_nivel_academico(df: pd.DataFrame) -> None:
+    serie = df["NM_GRAU_ACADEMICO"].fillna("(s/info)").value_counts()
+    total = serie.sum()
+
+    fig, ax = plt.subplots(figsize=(9, 5))
+    cores = [COR_DEST, CORES_INTERMEDIARIAS[1], CORES_INTERMEDIARIAS[2], COR_NEUTRA][: len(serie)]
+    bars = ax.bar(serie.index, serie.values, color=cores, edgecolor="white")
+    for bar, val in zip(bars, serie.values):
+        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + total * 0.005,
+                f"{val:,}\n({val/total*100:.1f}%)",
+                ha="center", va="bottom", fontsize=9)
+    ax.set_ylabel("Trabalhos sobre IA")
+    ax.set_ylim(0, serie.max() * 1.18)
+    plt.tight_layout()
+    out = os.path.join(FIGURAS_DIR, "capes_15_nivel_academico.png")
+    plt.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"  → {out}")
+
+
+# ---------------------------------------------------------------------------
+# Figura 16: top 20 áreas de conhecimento
+# ---------------------------------------------------------------------------
+def fig16_top_areas_conhecimento(df: pd.DataFrame) -> None:
+    serie = (df["NM_AREA_CONHECIMENTO"].fillna("(s/info)").value_counts().head(20)
+             .sort_values())
+    cores = []
+    # Para esta figura precisamos saber a grande área de cada área
+    mapa_ga = (df.dropna(subset=["NM_AREA_CONHECIMENTO"])
+               .groupby("NM_AREA_CONHECIMENTO")["NM_GRANDE_AREA_CONHECIMENTO"]
+               .agg(lambda s: s.mode().iat[0] if not s.mode().empty else "(s/info)"))
+    for area in serie.index:
+        ga = mapa_ga.get(area, "")
+        cores.append(_cor_por_humanas(ga))
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+    bars = ax.barh(serie.index, serie.values, color=cores, edgecolor="white", linewidth=0.5)
+    for bar, val in zip(bars, serie.values):
+        ax.text(bar.get_width() + serie.max() * 0.01,
+                bar.get_y() + bar.get_height() / 2,
+                f"{val:,}", va="center", fontsize=8)
+    ax.set_xlabel("Trabalhos sobre IA (top 20 áreas de conhecimento)")
+    ax.set_xlim(0, serie.max() * 1.12)
+    # Legenda explicando cor
+    from matplotlib.patches import Patch
+    legend_handles = [
+        Patch(color=COR_HUMANAS, label="Ciências Humanas"),
+        Patch(color=COR_NEUTRA, label="Outras grandes áreas"),
+    ]
+    ax.legend(handles=legend_handles, loc="lower right", frameon=False, fontsize=8)
+    plt.tight_layout()
+    out = os.path.join(FIGURAS_DIR, "capes_16_top_areas_conhecimento.png")
+    plt.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"  → {out}")
+
+
+# ---------------------------------------------------------------------------
+# Figura 17: top 20 instituições
+# ---------------------------------------------------------------------------
+def fig17_top_instituicoes(df: pd.DataFrame) -> None:
+    serie = (df["SG_ENTIDADE_ENSINO"].fillna("(s/info)").value_counts().head(20)
+             .sort_values())
+    fig, ax = plt.subplots(figsize=(10, 8))
+    bars = ax.barh(serie.index, serie.values, color=COR_DEST, edgecolor="white", linewidth=0.5)
+    for bar, val in zip(bars, serie.values):
+        ax.text(bar.get_width() + serie.max() * 0.01,
+                bar.get_y() + bar.get_height() / 2,
+                f"{val:,}", va="center", fontsize=8)
+    ax.set_xlabel("Trabalhos sobre IA (top 20 IES)")
+    ax.set_xlim(0, serie.max() * 1.12)
+    plt.tight_layout()
+    out = os.path.join(FIGURAS_DIR, "capes_17_top_instituicoes.png")
+    plt.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"  → {out}")
+
+
+# ---------------------------------------------------------------------------
+# Figura 18: IA por região e UF
+# ---------------------------------------------------------------------------
+def fig18_regiao_uf(df: pd.DataFrame) -> None:
+    regiao = df["NM_REGIAO"].fillna("(s/info)").value_counts()
+    uf = df["SG_UF_IES"].fillna("?").value_counts().head(15)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.5), gridspec_kw={"width_ratios": [1, 1.4]})
+    cores_r = [CORES_INTERMEDIARIAS[i] for i in [3, 1, 2, 4, 7]][: len(regiao)]
+    bars = ax1.bar(regiao.index, regiao.values, color=cores_r, edgecolor="white")
+    for bar, val in zip(bars, regiao.values):
+        ax1.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + regiao.max() * 0.01,
+                 f"{val:,}", ha="center", va="bottom", fontsize=9)
+    ax1.set_title("Por região", fontsize=10)
+    ax1.set_ylabel("Trabalhos sobre IA")
+    ax1.set_ylim(0, regiao.max() * 1.15)
+
+    bars = ax2.bar(uf.index, uf.values, color=COR_DEST, edgecolor="white")
+    for bar, val in zip(bars, uf.values):
+        ax2.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + uf.max() * 0.01,
+                 f"{val:,}", ha="center", va="bottom", fontsize=8)
+    ax2.set_title("Top 15 UFs", fontsize=10)
+    ax2.set_ylim(0, uf.max() * 1.15)
+    plt.tight_layout()
+    out = os.path.join(FIGURAS_DIR, "capes_18_regiao_uf.png")
+    plt.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"  → {out}")
+
+
+# ---------------------------------------------------------------------------
+# Figura 19: distribuição de páginas
+# ---------------------------------------------------------------------------
+def fig19_paginas(df: pd.DataFrame) -> None:
+    p = pd.to_numeric(df["NR_PAGINAS"], errors="coerce")
+    p = p[(p > 20) & (p < 800)]  # remove outliers de digitação
+    fig, ax = plt.subplots(figsize=(10, 5.5))
+    ax.hist(p, bins=40, color=COR_DEST, edgecolor="white", alpha=0.9)
+    mediana = p.median()
+    ax.axvline(mediana, color=CORES_INTERMEDIARIAS[0], linestyle="--", linewidth=2,
+               label=f"mediana = {mediana:.0f} páginas")
+    ax.set_xlabel("Número de páginas")
+    ax.set_ylabel("Trabalhos sobre IA")
+    ax.legend(frameon=False)
+    plt.tight_layout()
+    out = os.path.join(FIGURAS_DIR, "capes_19_paginas.png")
+    plt.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"  → {out}")
+
+
+# ---------------------------------------------------------------------------
+# Figura 20: top termos no corpus IA (n-gramas relevantes)
+# ---------------------------------------------------------------------------
+def fig20_top_termos(df: pd.DataFrame) -> None:
+    """Conta termos dos títulos, removendo stopwords e termos do regex IA
+    (que dominariam o ranking sem agregar informação)."""
+    texto = df["NM_PRODUCAO"].fillna("").astype(str).str.lower()
+    # Limpa pontuação básica
+    texto = texto.str.replace(r"[^\wáéíóúâêôãõçà\s-]", " ", regex=True)
+    # Remove termos do próprio regex IA (não traz informação nova)
+    termos_ia = {
+        "inteligência", "artificial", "machine", "deep", "learning", "aprendizado",
+        "máquina", "maquina", "profundo", "redes", "rede", "neurais", "neural",
+        "ia", "llm", "llms", "chatgpt", "gpt", "transformer", "transformers",
+        "generativa", "modelos", "modelo", "linguagem",
+    }
+    stop = STOPWORDS_PT | termos_ia | {"the", "of", "and", "in", "for", "to", "a", "an", "on", "with"}
+    counter: Counter[str] = Counter()
+    for t in texto:
+        for tok in t.split():
+            tok = tok.strip("-")
+            if len(tok) >= 4 and tok not in stop:
+                counter[tok] += 1
+    top = counter.most_common(25)
+    if not top:
+        print("  (sem termos para fig20)")
+        return
+    labels, vals = zip(*reversed(top))
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+    bars = ax.barh(labels, vals, color=COR_DEST, edgecolor="white", linewidth=0.5)
+    for bar, val in zip(bars, vals):
+        ax.text(bar.get_width() + max(vals) * 0.01,
+                bar.get_y() + bar.get_height() / 2,
+                f"{val:,}", va="center", fontsize=8)
+    ax.set_xlabel("Ocorrências em títulos (top 25, exclui termos canônicos de IA)")
+    ax.set_xlim(0, max(vals) * 1.12)
+    plt.tight_layout()
+    out = os.path.join(FIGURAS_DIR, "capes_20_top_termos.png")
     plt.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     print(f"  → {out}")
@@ -210,9 +462,22 @@ if __name__ == "__main__":
     df = carregar_ia()
     print(f"  {len(df):,} trabalhos sobre IA carregados")
 
+    print("Carregando totais por grande área (universo completo) ...")
+    totais_universo = carregar_totais_grande_area()
+    if totais_universo is not None:
+        print(f"  totais lidos para {len(totais_universo)} grandes áreas")
+    else:
+        print("  (universo total indisponível — figura 11 sem taxa interna)")
+
     print("\nGerando figuras:")
-    fig11_distribuicao_grande_area(df)
+    fig11_grande_area(df, totais_universo)
     fig12_temporal_grande_area(df)
     fig13_heatmap_area_keyword(df)
-
+    fig14_temporal_total(df)
+    fig15_nivel_academico(df)
+    fig16_top_areas_conhecimento(df)
+    fig17_top_instituicoes(df)
+    fig18_regiao_uf(df)
+    fig19_paginas(df)
+    fig20_top_termos(df)
     print("\nPronto.")
