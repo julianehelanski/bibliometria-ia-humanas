@@ -35,6 +35,8 @@ from utils import (
     CORES_INTERMEDIARIAS,
     DADOS_CAPES_DIR,
     FIGURAS_DIR,
+    LABEL_GUARDA_CHUVA,
+    LABEL_GUARDA_CHUVA_CURTO,
     STOPWORDS_PT,
     aplicar_estilo_padrao,
     garantir_diretorio,
@@ -76,26 +78,33 @@ def carregar_ia() -> pd.DataFrame:
     sys.exit(f"ERRO: rode antes analise_capes_2021_2024.py — falta {CSV_IA}")
 
 
-def carregar_totais_grande_area() -> pd.Series | None:
-    """Lê os totais por grande área no universo completo, se disponível.
+CACHE_TOTAIS = os.path.join(DADOS_CAPES_DIR, "capes_2021_2024_universo_por_grande_area.csv")
 
-    Se o usuário rodou o classificador localmente, podemos contar isso da
-    base completa. Se só temos o slim, retornamos None e a figura 11
-    omite a taxa interna.
+
+def carregar_totais_grande_area() -> pd.Series | None:
+    """Lê os totais por grande área no universo completo, com cache.
+
+    Primeira vez: lê os 4 XLSX (~10 min) e salva CSV em `CACHE_TOTAIS`.
+    Próximas: lê o CSV direto (instantâneo).
     """
-    if not os.path.isfile(CSV_IA):
-        return None
-    # O CSV de IA não tem os "outros temas". Precisamos contar pela base
-    # completa em /tmp ou em CAPES_DATA_DIR — esse é o universo de 350k.
+    # Cache hit
+    if os.path.isfile(CACHE_TOTAIS):
+        df = pd.read_csv(CACHE_TOTAIS)
+        return pd.Series(df["total"].values, index=df["grande_area"].values)
+    # Cache miss: precisa dos XLSX
     capes_dir = os.environ.get("CAPES_DATA_DIR", DADOS_CAPES_DIR)
     import glob
     xlsx = sorted(glob.glob(os.path.join(capes_dir, "br-capes-btd-*.xlsx")))
     if not xlsx or any(os.path.getsize(x) < 1024 for x in xlsx):
         return None
-    # Lê só a coluna de grande área para ser rápido
+    print(f"  [cache miss] lendo {len(xlsx)} XLSX para calcular universo por grande área (uma vez só)...")
     partes = [pd.read_excel(p, usecols=["NM_GRANDE_AREA_CONHECIMENTO"], engine="openpyxl") for p in xlsx]
     full = pd.concat(partes, ignore_index=True)
-    return full["NM_GRANDE_AREA_CONHECIMENTO"].fillna("(não informado)").value_counts()
+    serie = full["NM_GRANDE_AREA_CONHECIMENTO"].fillna("(não informado)").value_counts()
+    # Salva cache
+    serie.reset_index().rename(columns={"index": "grande_area", "NM_GRANDE_AREA_CONHECIMENTO": "grande_area", "count": "total"}).to_csv(CACHE_TOTAIS, index=False)
+    print(f"  [cache write] {CACHE_TOTAIS}")
+    return serie
 
 
 def texto_classificacao(df: pd.DataFrame) -> pd.Series:
@@ -131,7 +140,7 @@ def fig11_grande_area(df: pd.DataFrame, totais_universo: pd.Series | None) -> No
                  bar.get_y() + bar.get_height() / 2,
                  f"{val:,} ({val/total*100:.1f}%)",
                  va="center", fontsize=8)
-    ax1.set_xlabel(f"Trabalhos sobre IA (N = {total:,})")
+    ax1.set_xlabel(f"Trabalhos sobre IA (sentido amplo) (N = {total:,})")
     ax1.set_xlim(0, counts.max() * 1.22)
 
     if ax2 is not None:
@@ -187,7 +196,7 @@ def fig12_temporal_grande_area(df: pd.DataFrame) -> None:
                 color=cor, fontweight="bold" if is_humanas else "normal")
 
     ax.set_xlabel("Ano base de defesa")
-    ax.set_ylabel("Trabalhos sobre IA")
+    ax.set_ylabel("Trabalhos sobre IA (sentido amplo)")
     ax.set_xticks(sorted(pivot.index))
     ax.set_xlim(min(pivot.index) - 0.2, max(pivot.index) + 2.2)
     plt.tight_layout()
@@ -255,8 +264,8 @@ def fig14_temporal_total(df: pd.DataFrame) -> None:
     fig, ax = plt.subplots(figsize=(10, 5.5))
     anos = pivot.index.astype(int).tolist()
     bottom = np.zeros(len(anos))
-    cores = {"IA - Foco Central": COR_DEST, "IA - Foco Relacionado": CORES_INTERMEDIARIAS[1]}
-    for foco in ["IA - Foco Central", "IA - Foco Relacionado"]:
+    cores = {"IA (sentido amplo) - Foco Central": COR_DEST, "IA (sentido amplo) - Foco Relacionado": CORES_INTERMEDIARIAS[1]}
+    for foco in ["IA (sentido amplo) - Foco Central", "IA (sentido amplo) - Foco Relacionado"]:
         if foco not in pivot.columns:
             continue
         vals = pivot[foco].values
@@ -271,7 +280,7 @@ def fig14_temporal_total(df: pd.DataFrame) -> None:
         ax.text(x, total + max(bottom) * 0.02, f"{int(total):,}",
                 ha="center", va="bottom", fontsize=10, fontweight="bold")
     ax.set_xlabel("Ano base de defesa")
-    ax.set_ylabel("Trabalhos sobre IA")
+    ax.set_ylabel("Trabalhos sobre IA (sentido amplo)")
     ax.set_xticks(anos)
     ax.legend(loc="upper left", frameon=False)
     plt.tight_layout()
@@ -295,7 +304,7 @@ def fig15_nivel_academico(df: pd.DataFrame) -> None:
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + total * 0.005,
                 f"{val:,}\n({val/total*100:.1f}%)",
                 ha="center", va="bottom", fontsize=9)
-    ax.set_ylabel("Trabalhos sobre IA")
+    ax.set_ylabel("Trabalhos sobre IA (sentido amplo)")
     ax.set_ylim(0, serie.max() * 1.18)
     plt.tight_layout()
     out = os.path.join(FIGURAS_DIR, "capes_15_nivel_academico.png")
@@ -325,7 +334,7 @@ def fig16_top_areas_conhecimento(df: pd.DataFrame) -> None:
         ax.text(bar.get_width() + serie.max() * 0.01,
                 bar.get_y() + bar.get_height() / 2,
                 f"{val:,}", va="center", fontsize=8)
-    ax.set_xlabel("Trabalhos sobre IA (top 20 áreas de conhecimento)")
+    ax.set_xlabel("Trabalhos sobre IA (sentido amplo) (top 20 áreas de conhecimento)")
     ax.set_xlim(0, serie.max() * 1.12)
     # Legenda explicando cor
     from matplotlib.patches import Patch
@@ -353,7 +362,7 @@ def fig17_top_instituicoes(df: pd.DataFrame) -> None:
         ax.text(bar.get_width() + serie.max() * 0.01,
                 bar.get_y() + bar.get_height() / 2,
                 f"{val:,}", va="center", fontsize=8)
-    ax.set_xlabel("Trabalhos sobre IA (top 20 IES)")
+    ax.set_xlabel("Trabalhos sobre IA (sentido amplo) (top 20 IES)")
     ax.set_xlim(0, serie.max() * 1.12)
     plt.tight_layout()
     out = os.path.join(FIGURAS_DIR, "capes_17_top_instituicoes.png")
@@ -376,7 +385,7 @@ def fig18_regiao_uf(df: pd.DataFrame) -> None:
         ax1.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + regiao.max() * 0.01,
                  f"{val:,}", ha="center", va="bottom", fontsize=9)
     ax1.set_title("Por região", fontsize=10)
-    ax1.set_ylabel("Trabalhos sobre IA")
+    ax1.set_ylabel("Trabalhos sobre IA (sentido amplo)")
     ax1.set_ylim(0, regiao.max() * 1.15)
 
     bars = ax2.bar(uf.index, uf.values, color=COR_DEST, edgecolor="white")
@@ -404,7 +413,7 @@ def fig19_paginas(df: pd.DataFrame) -> None:
     ax.axvline(mediana, color=CORES_INTERMEDIARIAS[0], linestyle="--", linewidth=2,
                label=f"mediana = {mediana:.0f} páginas")
     ax.set_xlabel("Número de páginas")
-    ax.set_ylabel("Trabalhos sobre IA")
+    ax.set_ylabel("Trabalhos sobre IA (sentido amplo)")
     ax.legend(frameon=False)
     plt.tight_layout()
     out = os.path.join(FIGURAS_DIR, "capes_19_paginas.png")
@@ -460,7 +469,7 @@ def fig20_top_termos(df: pd.DataFrame) -> None:
 if __name__ == "__main__":
     print("Carregando subset IA ...")
     df = carregar_ia()
-    print(f"  {len(df):,} trabalhos sobre IA carregados")
+    print(f"  {len(df):,} trabalhos sobre IA (sentido amplo) carregados")
 
     print("Carregando totais por grande área (universo completo) ...")
     totais_universo = carregar_totais_grande_area()

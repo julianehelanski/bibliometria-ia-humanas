@@ -16,7 +16,9 @@ A análise combina dois repositórios:
 A coleta foi realizada em dois momentos:
 
 - **6 de novembro de 2025** — coleta inicial via SciELO e Catálogo de Teses e Dissertações da CAPES (interface web), com filtro de grande área "Ciências Humanas". Esta coleta resultou na análise SciELO (152 artigos) e na análise CAPES restrita às Humanas (100 trabalhos, 2013–2023).
-- **20 de maio de 2026** — expansão da análise CAPES para o dump oficial completo no portal de Dados Abertos da CAPES (`BR-CAPES-BTD-2021A2024-2025-12-01`, versão 3.0), cobrindo **todas as grandes áreas** do conhecimento e o quadriênio 2021–2024 (350.071 registros no universo, 13.336 trabalhos sobre IA identificados pelo classificador refinado). A virada metodológica permite situar a marginalidade das humanidades dentro do mapa mais amplo da produção brasileira sobre IA.
+- **20 de maio de 2026** — expansão da análise CAPES para o dump oficial completo no portal de Dados Abertos da CAPES (`BR-CAPES-BTD-2021A2024-2025-12-01`, versão 3.0), cobrindo **todas as grandes áreas** do conhecimento e o quadriênio 2021–2024 (350.071 registros no universo, 13.336 trabalhos sobre **Inteligência Artificial em sentido amplo** identificados pelo classificador refinado). A virada metodológica permite situar a marginalidade das humanidades dentro do mapa mais amplo da produção brasileira sobre o campo.
+
+> **Nota sobre o rótulo "IA em sentido amplo":** ao longo de todo o repositório, "IA" é usada como abreviação do campo guarda-chuva que inclui inteligência artificial em sentido estrito, aprendizado de máquina (ML/DL), redes neurais, modelos de linguagem (LLMs/transformers), IA generativa, processamento de linguagem natural e correlatos. O regex em `utils.RE_IA_NUCLEO` define exatamente quais termos são considerados. A escolha de explicitar "sentido amplo" no rótulo evita a leitura ingênua de "IA" como sinônimo de apenas "inteligência artificial em sentido literal" — leitura que faria a contagem parecer artificialmente menor do que é.
 
 ---
 
@@ -96,24 +98,24 @@ analise_bibliometrica_ia_ciencias_humanas/
 
 ---
 
-### CAPES (2021–2024, todas as áreas) — 13.336 trabalhos sobre IA
+### CAPES (2021–2024, todas as áreas) — 13.336 trabalhos sobre IA em sentido amplo
 
-Análise baseada no dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` do portal de Dados Abertos da CAPES. O universo total do dump (350.071 trabalhos de conclusão de pós-graduação stricto sensu) é classificado pelo regex refinado de IA, sem restrição prévia de área.
+Análise baseada no dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` do portal de Dados Abertos da CAPES. O universo total do dump (350.071 trabalhos de conclusão de pós-graduação stricto sensu) é classificado pelo regex refinado de IA em sentido amplo, sem restrição prévia de área.
 
 | Indicador | Valor |
 |-----------|-------|
 | Universo total (2021–2024) | 350.071 |
-| **IA — Foco Central** | **10.412** |
-| **IA — Foco Relacionado** | **2.924** |
-| **Total IA (Central + Relacionado)** | **13.336 (3,81% do universo)** |
+| **IA em sentido amplo — Foco Central** | **10.412** |
+| **IA em sentido amplo — Foco Relacionado** | **2.924** |
+| **Total (Central + Relacionado)** | **13.336 (3,81% do universo)** |
 | Mestrado | 7.066 (53%) |
 | Doutorado | 4.601 (35%) |
 | Mestrado Profissional | 1.629 (12%) |
 | Crescimento 2021→2024 (CAGR) | ~14% a.a. (2.716 → 4.020 trabalhos/ano) |
 
-**Distribuição IA por grande área (corpus IA = 13.336):**
+**Distribuição por grande área (corpus IA em sentido amplo = 13.336):**
 
-| Grande área | IA | % do corpus IA | Total geral | Taxa interna IA |
+| Grande área | Trabalhos | % do corpus | Total da grande área | Taxa interna |
 |-------------|---:|---:|---:|---:|
 | Engenharias | 3.818 | 28,6% | 29.880 | **12,8%** |
 | Ciências Exatas e da Terra | 3.645 | 27,3% | 25.431 | **14,3%** |
@@ -125,11 +127,11 @@ Análise baseada no dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` do portal d
 | Ciências Biológicas | 240 | 1,8% | 19.461 | 1,2% |
 | Linguística, Letras e Artes | 146 | 1,1% | 21.860 | 0,7% |
 
-**Marginalidade em duas leituras:** Ciências Humanas é a maior grande área no universo total (17% das defesas), mas só 3,3% do corpus IA, e apenas 0,7% das defesas em Humanas tratam de IA — contra 12,8% em Engenharias e 14,3% em Exatas (diferença de uma ordem de grandeza).
+**Marginalidade em duas leituras:** Ciências Humanas é a maior grande área no universo total (17% das defesas), mas só 3,3% do corpus IA em sentido amplo, e apenas 0,7% das defesas em Humanas tratam do campo — contra 12,8% em Engenharias e 14,3% em Exatas (diferença de uma ordem de grandeza).
 
 ---
 
-### CAPES — Zoom em Ciências Humanas (2021–2024) — 441 trabalhos sobre IA
+### CAPES — Zoom em Ciências Humanas (2021–2024) — 441 trabalhos sobre IA em sentido amplo
 
 | Área de conhecimento | Trabalhos | % de IA-Humanas |
 |----------------------|---:|---:|
@@ -202,9 +204,9 @@ A escolha do filtro foi determinada pela arquitetura taxonômica das bases consu
 
 ---
 
-## Nota metodológica sobre a classificação de foco em IA
+## Nota metodológica sobre a classificação de foco em IA em sentido amplo
 
-Os scripts classificam cada trabalho em três categorias — **IA Foco Central**, **IA Foco Relacionado**, **Outros Temas** — usando expressões regulares com fronteiras de palavra (`\b`) para reduzir falsos positivos. A função compartilhada está em `utils.classificar_foco_ia`.
+Os scripts classificam cada trabalho em três categorias — **IA (sentido amplo) - Foco Central**, **IA (sentido amplo) - Foco Relacionado**, **Outros Temas** — usando expressões regulares com fronteiras de palavra (`\b`) para reduzir falsos positivos. A função compartilhada está em `utils.classificar_foco_ia`. O rótulo "sentido amplo" é deliberado: o campo guarda-chuva inclui inteligência artificial em sentido estrito, aprendizado de máquina, redes neurais, modelos de linguagem, IA generativa e correlatos.
 
 ### Versão refinada (análise 2021–2024, todas as áreas)
 
@@ -372,4 +374,4 @@ Este repositório está disponível sob a licença [MIT](LICENSE). Os dados cole
 
 ---
 
-*Última atualização: 21 de maio de 2026 — expansão para o dump CAPES 2021–2024 (todas as grandes áreas, 13.336 trabalhos sobre IA identificados, dos quais 441 em Ciências Humanas e 5 em Antropologia).*
+*Última atualização: 21 de maio de 2026 — expansão para o dump CAPES 2021–2024 (todas as grandes áreas, 13.336 trabalhos sobre IA em sentido amplo identificados, dos quais 441 em Ciências Humanas e 5 em Antropologia). Atualização do rótulo guarda-chuva para "Inteligência Artificial em sentido amplo" em figuras, README, código e planilha de auditoria.*

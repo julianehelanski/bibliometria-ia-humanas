@@ -81,7 +81,7 @@ def figh01_areas_humanas(df: pd.DataFrame) -> None:
         ax.text(bar.get_width() + serie.max() * 0.01,
                 bar.get_y() + bar.get_height() / 2,
                 f"{val} ({val/total*100:.1f}%)", va="center", fontsize=8)
-    ax.set_xlabel(f"Trabalhos sobre IA em Ciências Humanas (N = {total})")
+    ax.set_xlabel(f"Trabalhos sobre IA (sentido amplo) em Ciências Humanas (N = {total})")
     ax.set_xlim(0, serie.max() * 1.22)
     # Legenda
     from matplotlib.patches import Patch
@@ -126,7 +126,7 @@ def figh02_temporal_humanas(df: pd.DataFrame) -> None:
         ax.text(x, total + bottom.max() * 0.02, f"{int(total)}",
                 ha="center", va="bottom", fontsize=10, fontweight="bold")
     ax.set_xlabel("Ano base de defesa")
-    ax.set_ylabel("Trabalhos sobre IA em Ciências Humanas")
+    ax.set_ylabel("Trabalhos sobre IA (sentido amplo) em Ciências Humanas")
     ax.set_xticks(anos)
     ax.legend(loc="upper left", frameon=False)
     plt.tight_layout()
@@ -233,7 +233,7 @@ def relatorio_resumo(df: pd.DataFrame) -> None:
     # Antropologia em destaque
     antro = df[df["NM_AREA_CONHECIMENTO"].str.contains("ANTROPOLOGIA", case=False, na=False)]
     print()
-    print(f"Antropologia: {len(antro)} trabalhos sobre IA")
+    print(f"Antropologia: {len(antro)} trabalhos sobre IA (sentido amplo)")
     if len(antro):
         print("  Por sub-área:")
         print(antro["NM_SUBAREA_CONHECIMENTO"].fillna("(s/info)").value_counts().to_string())
