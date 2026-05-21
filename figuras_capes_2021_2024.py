@@ -140,7 +140,7 @@ def fig11_grande_area(df: pd.DataFrame, totais_universo: pd.Series | None) -> No
                  bar.get_y() + bar.get_height() / 2,
                  f"{val:,} ({val/total*100:.1f}%)",
                  va="center", fontsize=8)
-    ax1.set_xlabel(f"Trabalhos sobre IA (sentido amplo) (N = {total:,})")
+    ax1.set_xlabel(f"Trabalhos no campo Tecnologias IA/ML/DL (N = {total:,})")
     ax1.set_xlim(0, counts.max() * 1.22)
 
     if ax2 is not None:
@@ -196,7 +196,7 @@ def fig12_temporal_grande_area(df: pd.DataFrame) -> None:
                 color=cor, fontweight="bold" if is_humanas else "normal")
 
     ax.set_xlabel("Ano base de defesa")
-    ax.set_ylabel("Trabalhos sobre IA (sentido amplo)")
+    ax.set_ylabel("Trabalhos no campo Tecnologias IA/ML/DL")
     ax.set_xticks(sorted(pivot.index))
     ax.set_xlim(min(pivot.index) - 0.2, max(pivot.index) + 2.2)
     plt.tight_layout()
@@ -264,8 +264,8 @@ def fig14_temporal_total(df: pd.DataFrame) -> None:
     fig, ax = plt.subplots(figsize=(10, 5.5))
     anos = pivot.index.astype(int).tolist()
     bottom = np.zeros(len(anos))
-    cores = {"IA (sentido amplo) - Foco Central": COR_DEST, "IA (sentido amplo) - Foco Relacionado": CORES_INTERMEDIARIAS[1]}
-    for foco in ["IA (sentido amplo) - Foco Central", "IA (sentido amplo) - Foco Relacionado"]:
+    cores = {"Tecnologias IA/ML/DL - Foco Central": COR_DEST, "Tecnologias IA/ML/DL - Correlato": CORES_INTERMEDIARIAS[1]}
+    for foco in ["Tecnologias IA/ML/DL - Foco Central", "Tecnologias IA/ML/DL - Correlato"]:
         if foco not in pivot.columns:
             continue
         vals = pivot[foco].values
@@ -280,7 +280,7 @@ def fig14_temporal_total(df: pd.DataFrame) -> None:
         ax.text(x, total + max(bottom) * 0.02, f"{int(total):,}",
                 ha="center", va="bottom", fontsize=10, fontweight="bold")
     ax.set_xlabel("Ano base de defesa")
-    ax.set_ylabel("Trabalhos sobre IA (sentido amplo)")
+    ax.set_ylabel("Trabalhos no campo Tecnologias IA/ML/DL")
     ax.set_xticks(anos)
     ax.legend(loc="upper left", frameon=False)
     plt.tight_layout()
@@ -304,7 +304,7 @@ def fig15_nivel_academico(df: pd.DataFrame) -> None:
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + total * 0.005,
                 f"{val:,}\n({val/total*100:.1f}%)",
                 ha="center", va="bottom", fontsize=9)
-    ax.set_ylabel("Trabalhos sobre IA (sentido amplo)")
+    ax.set_ylabel("Trabalhos no campo Tecnologias IA/ML/DL")
     ax.set_ylim(0, serie.max() * 1.18)
     plt.tight_layout()
     out = os.path.join(FIGURAS_DIR, "capes_15_nivel_academico.png")
@@ -334,7 +334,7 @@ def fig16_top_areas_conhecimento(df: pd.DataFrame) -> None:
         ax.text(bar.get_width() + serie.max() * 0.01,
                 bar.get_y() + bar.get_height() / 2,
                 f"{val:,}", va="center", fontsize=8)
-    ax.set_xlabel("Trabalhos sobre IA (sentido amplo) (top 20 áreas de conhecimento)")
+    ax.set_xlabel("Trabalhos no campo Tecnologias IA/ML/DL (top 20 áreas de conhecimento)")
     ax.set_xlim(0, serie.max() * 1.12)
     # Legenda explicando cor
     from matplotlib.patches import Patch
@@ -362,7 +362,7 @@ def fig17_top_instituicoes(df: pd.DataFrame) -> None:
         ax.text(bar.get_width() + serie.max() * 0.01,
                 bar.get_y() + bar.get_height() / 2,
                 f"{val:,}", va="center", fontsize=8)
-    ax.set_xlabel("Trabalhos sobre IA (sentido amplo) (top 20 IES)")
+    ax.set_xlabel("Trabalhos no campo Tecnologias IA/ML/DL (top 20 IES)")
     ax.set_xlim(0, serie.max() * 1.12)
     plt.tight_layout()
     out = os.path.join(FIGURAS_DIR, "capes_17_top_instituicoes.png")
@@ -385,7 +385,7 @@ def fig18_regiao_uf(df: pd.DataFrame) -> None:
         ax1.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + regiao.max() * 0.01,
                  f"{val:,}", ha="center", va="bottom", fontsize=9)
     ax1.set_title("Por região", fontsize=10)
-    ax1.set_ylabel("Trabalhos sobre IA (sentido amplo)")
+    ax1.set_ylabel("Trabalhos no campo Tecnologias IA/ML/DL")
     ax1.set_ylim(0, regiao.max() * 1.15)
 
     bars = ax2.bar(uf.index, uf.values, color=COR_DEST, edgecolor="white")
@@ -413,7 +413,7 @@ def fig19_paginas(df: pd.DataFrame) -> None:
     ax.axvline(mediana, color=CORES_INTERMEDIARIAS[0], linestyle="--", linewidth=2,
                label=f"mediana = {mediana:.0f} páginas")
     ax.set_xlabel("Número de páginas")
-    ax.set_ylabel("Trabalhos sobre IA (sentido amplo)")
+    ax.set_ylabel("Trabalhos no campo Tecnologias IA/ML/DL")
     ax.legend(frameon=False)
     plt.tight_layout()
     out = os.path.join(FIGURAS_DIR, "capes_19_paginas.png")
@@ -466,10 +466,142 @@ def fig20_top_termos(df: pd.DataFrame) -> None:
     print(f"  → {out}")
 
 
+# ---------------------------------------------------------------------------
+# Figuras 21-23: subcampos (IA stricto, ML, DL, LLMs, correlatos)
+# ---------------------------------------------------------------------------
+SUBCAMPO_COLS = [
+    ("SUBCAMPO_IA_STRICTO", "IA em sentido estrito"),
+    ("SUBCAMPO_ML", "Aprendizado de máquina (ML)"),
+    ("SUBCAMPO_DL", "Aprendizado profundo & redes neurais"),
+    ("SUBCAMPO_LLM", "Modelos de linguagem & IA generativa"),
+    ("SUBCAMPO_CORRELATOS", "Tecnologias correlatas"),
+]
+SUBCAMPO_CORES = [
+    CORES_INTERMEDIARIAS[3],   # azul: IA stricto
+    CORES_INTERMEDIARIAS[2],   # verde: ML
+    CORES_INTERMEDIARIAS[4],   # roxo: DL/redes
+    CORES_INTERMEDIARIAS[6],   # rosa: LLMs
+    CORES_INTERMEDIARIAS[9],   # cinza-azulado: correlatos
+]
+
+
+def _bool_col(df: pd.DataFrame, col: str) -> pd.Series:
+    """Converte coluna booleana (que pode vir como str do CSV) para bool."""
+    if col not in df.columns:
+        return pd.Series(False, index=df.index)
+    s = df[col]
+    if s.dtype == bool:
+        return s
+    return s.astype(str).str.lower().isin(["true", "1", "1.0", "yes"])
+
+
+# Figura 21: distribuição dos 13.336 trabalhos por subcampo
+def fig21_subcampos_distribuicao(df: pd.DataFrame) -> None:
+    counts = []
+    for col, label in SUBCAMPO_COLS:
+        counts.append(_bool_col(df, col).sum())
+    total = len(df)
+    # Ordena visualmente (maior para menor, mas mantém cor por subcampo)
+    pares = sorted(zip([l for _, l in SUBCAMPO_COLS], counts, SUBCAMPO_CORES),
+                   key=lambda x: x[1])
+    labels = [p[0] for p in pares]
+    vals = [p[1] for p in pares]
+    cores = [p[2] for p in pares]
+
+    fig, ax = plt.subplots(figsize=(10, 5.5))
+    bars = ax.barh(labels, vals, color=cores, edgecolor="white", linewidth=0.5)
+    for bar, val in zip(bars, vals):
+        ax.text(bar.get_width() + max(vals) * 0.01,
+                bar.get_y() + bar.get_height() / 2,
+                f"{val:,} ({val/total*100:.1f}%)",
+                va="center", fontsize=9)
+    ax.set_xlabel(f"Trabalhos que mencionam o subcampo (N total do corpus = {total:,})")
+    ax.set_xlim(0, max(vals) * 1.18)
+    # Nota: percentuais somam mais que 100% porque um trabalho pode estar
+    # em múltiplos subcampos
+    ax.text(0.99, -0.18,
+            "Trabalhos podem estar em múltiplos subcampos; percentuais somam mais que 100%.",
+            transform=ax.transAxes, ha="right", fontsize=8, style="italic", color="#555")
+    plt.tight_layout()
+    out = os.path.join(FIGURAS_DIR, "capes_21_subcampos_distribuicao.png")
+    plt.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"  → {out}")
+
+
+# Figura 22: heatmap subcampo × grande área (normalizado por coluna = subcampo)
+def fig22_heatmap_subcampo_grande_area(df: pd.DataFrame) -> None:
+    df = df.copy()
+    df["NM_GRANDE_AREA_CONHECIMENTO"] = df["NM_GRANDE_AREA_CONHECIMENTO"].fillna("(s/info)")
+    rows = []
+    for col, label in SUBCAMPO_COLS:
+        sub = df[_bool_col(df, col)]
+        counts = sub["NM_GRANDE_AREA_CONHECIMENTO"].value_counts()
+        rows.append(counts.rename(label))
+    bruto = pd.DataFrame(rows).fillna(0).astype(int)
+    # Ordena colunas (grandes áreas) por volume total no corpus IA
+    ordem_cols = df["NM_GRANDE_AREA_CONHECIMENTO"].value_counts().index
+    bruto = bruto.reindex(columns=ordem_cols)
+    # Normaliza por linha (subcampo): mostra concentração geográfica do subcampo
+    norm = bruto.div(bruto.sum(axis=1).replace(0, np.nan), axis=0).fillna(0) * 100
+
+    fig, ax = plt.subplots(figsize=(13, 5.5))
+    cmap = mcolors.LinearSegmentedColormap.from_list("muted_blue", ["#FFFFFF", CORES_INTERMEDIARIAS[3]])
+    im = ax.imshow(norm.values, aspect="auto", cmap=cmap, vmin=0, vmax=norm.values.max())
+    ax.set_xticks(range(len(norm.columns)))
+    ax.set_xticklabels(norm.columns, rotation=30, ha="right", fontsize=8)
+    ax.set_yticks(range(len(norm.index)))
+    ax.set_yticklabels(norm.index, fontsize=9)
+    for i in range(norm.shape[0]):
+        for j in range(norm.shape[1]):
+            v = norm.values[i, j]
+            raw = int(bruto.values[i, j])
+            if raw > 0:
+                ax.text(j, i, f"{v:.0f}%\n({raw:,})",
+                        ha="center", va="center",
+                        color="white" if v > norm.values.max() * 0.5 else "#333",
+                        fontsize=7)
+    cbar = plt.colorbar(im, ax=ax, fraction=0.025, pad=0.02)
+    cbar.set_label("% do subcampo concentrado na grande área", fontsize=8)
+    cbar.ax.tick_params(labelsize=7)
+    plt.tight_layout()
+    out = os.path.join(FIGURAS_DIR, "capes_22_heatmap_subcampo_grande_area.png")
+    plt.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"  → {out}")
+
+
+# Figura 23: evolução temporal por subcampo (5 linhas 2021-2024)
+def fig23_temporal_subcampos(df: pd.DataFrame) -> None:
+    df = df.copy()
+    df["AN_BASE"] = pd.to_numeric(df["AN_BASE"], errors="coerce").astype("Int64")
+    anos = sorted(df["AN_BASE"].dropna().unique().tolist())
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    for (col, label), cor in zip(SUBCAMPO_COLS, SUBCAMPO_CORES):
+        serie = df[_bool_col(df, col)].groupby("AN_BASE").size().reindex(anos, fill_value=0)
+        ax.plot(serie.index, serie.values, marker="o", linewidth=2.3, color=cor, label=label)
+        # Anota valor final
+        x_end = serie.index[-1]
+        y_end = serie.iloc[-1]
+        ax.text(x_end + 0.06, y_end, f" {y_end:,}", fontsize=8, va="center", color=cor)
+
+    ax.set_xlabel("Ano base de defesa")
+    ax.set_ylabel("Trabalhos que mencionam o subcampo")
+    ax.set_xticks(anos)
+    ax.set_xlim(min(anos) - 0.2, max(anos) + 1.0)
+    ax.legend(loc="upper left", frameon=False, fontsize=9)
+    plt.tight_layout()
+    out = os.path.join(FIGURAS_DIR, "capes_23_temporal_subcampos.png")
+    plt.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"  → {out}")
+
+
 if __name__ == "__main__":
     print("Carregando subset IA ...")
     df = carregar_ia()
-    print(f"  {len(df):,} trabalhos sobre IA (sentido amplo) carregados")
+    print(f"  {len(df):,} trabalhos no campo Tecnologias IA/ML/DL carregados")
 
     print("Carregando totais por grande área (universo completo) ...")
     totais_universo = carregar_totais_grande_area()
@@ -489,4 +621,7 @@ if __name__ == "__main__":
     fig18_regiao_uf(df)
     fig19_paginas(df)
     fig20_top_termos(df)
+    fig21_subcampos_distribuicao(df)
+    fig22_heatmap_subcampo_grande_area(df)
+    fig23_temporal_subcampos(df)
     print("\nPronto.")
