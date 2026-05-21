@@ -16,8 +16,9 @@ A análise combina dois repositórios:
 A coleta foi realizada em dois momentos:
 
 - **6 de novembro de 2025** — coleta inicial via SciELO e Catálogo de Teses e Dissertações da CAPES (interface web), com filtro de grande área "Ciências Humanas". Esta coleta resultou na análise SciELO (152 artigos) e na análise CAPES restrita às Humanas (100 trabalhos, 2013–2023).
-- **20 de maio de 2026** — expansão da análise CAPES para o dump oficial completo no portal de Dados Abertos da CAPES (`BR-CAPES-BTD-2021A2024-2025-12-01`, versão 3.0), cobrindo **todas as grandes áreas** do conhecimento e o quadriênio 2021–2024 (350.071 registros no universo, 13.336 trabalhos no campo das **Tecnologias de IA, ML e aprendizado profundo** identificados pelo classificador refinado).
+- **20 de maio de 2026** — expansão da análise CAPES para o dump oficial completo no portal de Dados Abertos da CAPES (`BR-CAPES-BTD-2021A2024-2025-12-01`, versão 3.0), cobrindo **todas as grandes áreas** do conhecimento e o quadriênio 2021–2024 (350.071 registros no universo, ~13 mil trabalhos no campo das **Tecnologias de IA, ML e aprendizado profundo** identificados pelo classificador refinado).
 - **21 de maio de 2026** — subcategorização do campo em **5 subcampos** que reconhecem genealogias distintas (IA stricto sensu, aprendizado de máquina, aprendizado profundo & redes neurais, modelos de linguagem & IA generativa, tecnologias correlatas). Um mesmo trabalho pode estar em vários subcampos; o agrupamento sob um único rótulo guarda-chuva é descritivo, não afirmação de identidade entre as tradições.
+- **21 de maio de 2026** (auditoria) — diagnóstico de um falso positivo na Antropologia (a defesa "Reivindicando o maternar", da UFPR, classificada erroneamente em LLMs por causa do termo "transformer" no sentido literal em inglês) revelou que **564 dos 876 trabalhos** do subcampo LLM caíram lá apenas por essa palavra. Adicionada regra de co-ocorrência: `transformer` só conta como LLM quando aparece com contexto técnico (NLP, attention, BERT, neural, etc.) no mesmo texto. **Corpus final: 12.995 trabalhos** (queda de 341 falsos positivos); subcampo LLM cai de 876 para **506**.
 
 > **Nota sobre o rótulo guarda-chuva:** "Tecnologias de IA, ML e aprendizado profundo" é descritivo. Não afirma que inteligência artificial em sentido estrito, machine learning, deep learning, modelos de linguagem e tecnologias correlatas são a mesma coisa — cada um tem genealogia, comunidade epistêmica e tradição teórica próprias. A função do rótulo é apenas marcar o conjunto de trabalhos que tocam essa constelação. A análise de subcampos (`utils.classificar_subcampos`) preserva as distinções nas figuras de granularidade fina.
 
@@ -100,75 +101,71 @@ analise_bibliometrica_ia_ciencias_humanas/
 
 ---
 
-### CAPES (2021–2024, todas as áreas) — 13.336 trabalhos no campo das Tecnologias IA/ML/DL
+### CAPES (2021–2024, todas as áreas) — 12.995 trabalhos no campo das Tecnologias IA/ML/DL
 
-Análise baseada no dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` do portal de Dados Abertos da CAPES. O universo total do dump (350.071 trabalhos de conclusão de pós-graduação stricto sensu) é classificado pelo regex de subcampos sem restrição prévia de área.
+Análise baseada no dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` do portal de Dados Abertos da CAPES. O universo total do dump (350.071 trabalhos de conclusão de pós-graduação stricto sensu) é classificado pelo regex de subcampos sem restrição prévia de área, com regra de co-ocorrência para `transformer` (que tem dois sentidos em inglês) e para a sigla "IA".
 
 | Indicador | Valor |
 |-----------|-------|
 | Universo total (2021–2024) | 350.071 |
-| **Foco Central (IA, ML, DL ou LLMs)** | **10.412** |
-| **Correlatos (robótica, NLP, big data, ...)** | **2.924** |
-| **Total no campo** | **13.336 (3,81% do universo)** |
-| Mestrado | 7.066 (53%) |
-| Doutorado | 4.601 (35%) |
-| Mestrado Profissional | 1.629 (12%) |
-| Crescimento 2021→2024 (CAGR) | ~14% a.a. (2.716 → 4.020 trabalhos/ano) |
+| **Foco Central (IA, ML, DL ou LLMs)** | **10.058** |
+| **Correlatos (robótica, NLP, big data, ...)** | **2.937** |
+| **Total no campo** | **12.995 (3,71% do universo)** |
 
-**Distribuição por subcampo (de 13.336 trabalhos no campo; soma > 100% pois trabalhos podem estar em vários):**
+**Distribuição por subcampo (de 12.995 trabalhos no campo; soma > 100% pois trabalhos podem estar em vários):**
 
 | Subcampo | Trabalhos | % do corpus |
 |----------|---:|---:|
-| Aprendizado de máquina (ML) | 5.284 | 39,6% |
-| Tecnologias correlatas (robótica, NLP, big data…) | 4.972 | 37,3% |
-| Aprendizado profundo & redes neurais | 4.326 | 32,4% |
-| IA em sentido estrito | 3.821 | 28,7% |
-| Modelos de linguagem & IA generativa | 876 | 6,6% |
+| Aprendizado de máquina (ML) | 5.284 | 40,7% |
+| Tecnologias correlatas (robótica, NLP, big data…) | 4.972 | 38,3% |
+| Aprendizado profundo & redes neurais | 4.326 | 33,3% |
+| IA em sentido estrito | 3.821 | 29,4% |
+| Modelos de linguagem & IA generativa | 506 | 3,9% |
 
-> **Achado relevante:** "Aprendizado de máquina" supera "IA em sentido estrito" no corpus (5.284 vs 3.821). Tratá-los como sinônimos sob "IA" mascararia essa hierarquia. Modelos de linguagem & IA generativa ainda é nicho (876) mas cresceu rapidamente em 2024.
+> **Achado relevante:** "Aprendizado de máquina" supera "IA em sentido estrito" no corpus (5.284 vs 3.821). Tratá-los como sinônimos sob "IA" mascararia essa hierarquia. Modelos de linguagem & IA generativa, após a limpeza dos falsos positivos de `transformer`, é o menor dos cinco subcampos (506) — mas é o que mais cresce em 2024, indicando uma onda emergente.
 
-**Distribuição por grande área (corpus = 13.336):**
+**Distribuição por grande área (corpus = 12.995):**
 
 | Grande área | Trabalhos | % do corpus | Total da grande área | Taxa interna |
 |-------------|---:|---:|---:|---:|
-| Engenharias | 3.818 | 28,6% | 29.880 | **12,8%** |
-| Ciências Exatas e da Terra | 3.645 | 27,3% | 25.431 | **14,3%** |
-| Ciências Sociais Aplicadas | 1.865 | 14,0% | 53.492 | 3,5% |
-| Multidisciplinar | 1.660 | 12,4% | 57.231 | 2,9% |
-| Ciências Agrárias | 774 | 5,8% | 27.619 | 2,8% |
-| Ciências da Saúde | 747 | 5,6% | 55.121 | 1,4% |
-| **Ciências Humanas** | **441** | **3,3%** | **59.976** | **0,7%** |
-| Ciências Biológicas | 240 | 1,8% | 19.461 | 1,2% |
-| Linguística, Letras e Artes | 146 | 1,1% | 21.860 | 0,7% |
+| Ciências Exatas e da Terra | 3.633 | 28,0% | 25.431 | **14,3%** |
+| Engenharias | 3.590 | 27,6% | 29.880 | **12,0%** |
+| Ciências Sociais Aplicadas | 1.848 | 14,2% | 53.492 | 3,5% |
+| Multidisciplinar | 1.632 | 12,6% | 57.231 | 2,9% |
+| Ciências Agrárias | 773 | 5,9% | 27.619 | 2,8% |
+| Ciências da Saúde | 741 | 5,7% | 55.121 | 1,3% |
+| **Ciências Humanas** | **400** | **3,1%** | **59.976** | **0,7%** |
+| Ciências Biológicas | 238 | 1,8% | 19.461 | 1,2% |
+| Linguística, Letras e Artes | 140 | 1,1% | 21.860 | 0,6% |
 
-**Marginalidade em duas leituras:** Ciências Humanas é a maior grande área no universo total (17% das defesas), mas só 3,3% do corpus IA em sentido amplo, e apenas 0,7% das defesas em Humanas tratam do campo — contra 12,8% em Engenharias e 14,3% em Exatas (diferença de uma ordem de grandeza).
+**Marginalidade em duas leituras:** Ciências Humanas é a maior grande área no universo total (17% das defesas), mas só 3,1% do corpus IA/ML/DL, e apenas 0,7% das defesas em Humanas tratam do campo — contra 12,0% em Engenharias e 14,3% em Exatas (diferença de uma ordem de grandeza).
 
 ---
 
-### CAPES — Zoom em Ciências Humanas (2021–2024) — 441 trabalhos no campo
+### CAPES — Zoom em Ciências Humanas (2021–2024) — 400 trabalhos no campo
 
-**Assinatura discursiva das Humanas:** dos 441 trabalhos, a maioria conversa com o campo via tecnologias correlatas (45,6%) ou via IA como conceito (35,8%), e quase não via técnicas específicas (DL/redes 7,3%, ML 17,7%). Este padrão é praticamente inverso ao de Engenharias/Exatas, que escrevem sobre técnicas e raramente sobre "IA" como conceito.
+**Assinatura discursiva das Humanas:** dos 400 trabalhos, a maioria conversa com o campo via tecnologias correlatas (50,2%) ou via IA como conceito (39,5%), e quase não via técnicas específicas (DL/redes 8,0%, ML 19,5%, LLMs 5,0%). Este padrão é praticamente inverso ao de Engenharias/Exatas, que escrevem sobre técnicas e raramente sobre "IA" como conceito.
 
 | Subcampo | Trabalhos em Humanas | % de IA-Humanas |
 |---|---:|---:|
-| Tecnologias correlatas | 201 | 45,6% |
-| IA em sentido estrito | 158 | 35,8% |
-| Aprendizado de máquina (ML) | 78 | 17,7% |
-| Modelos de linguagem & IA generativa | 61 | 13,8% |
-| Aprendizado profundo & redes neurais | 32 | 7,3% |
+| Tecnologias correlatas | 201 | 50,2% |
+| IA em sentido estrito | 158 | 39,5% |
+| Aprendizado de máquina (ML) | 78 | 19,5% |
+| Aprendizado profundo & redes neurais | 32 | 8,0% |
+| Modelos de linguagem & IA generativa | 20 | 5,0% |
 
 
 | Área de conhecimento | Trabalhos | % de IA-Humanas |
 |----------------------|---:|---:|
-| Educação | 174 | 39,5% |
-| Geografia | 71 | 16,1% |
-| Psicologia | 59 | 13,4% |
-| Filosofia | 43 | 9,8% |
-| Ciência Política | 40 | 9,1% |
-| Sociologia | 26 | 5,9% |
-| História | 16 | 3,6% |
-| **Antropologia** | **5** | **1,1%** |
-| Teologia | 5 | 1,1% |
+| Educação | 154 | 38,5% |
+| Geografia | 64 | 16,0% |
+| Psicologia | 56 | 14,0% |
+| Ciência Política | 40 | 10,0% |
+| Filosofia | 39 | 9,8% |
+| Sociologia | 25 | 6,2% |
+| História | 12 | 3,0% |
+| **Antropologia** | **4** | **1,0%** |
+| Teologia | 4 | 1,0% |
 | Arqueologia | 2 | 0,5% |
 
 **Top 10 IES em IA-Humanas:** UnB (30), USP (27), UFRJ (18), UFRN (13), UFMG (12), UFC (12), UFRGS (11), UNICAMP (10), UFRRJ (9), UFPE (8).
@@ -177,8 +174,8 @@ Análise baseada no dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` do portal d
 
 **Marginalidade em camadas (confirmação empírica do argumento da tese):**
 - IA é marginal em Humanas (0,7% da produção da grande área)
-- A Antropologia é marginal dentro do corpus IA-Humanas (1,1% das 441 defesas em IA-Humanas)
-- Cinco trabalhos sobre IA em Antropologia em quatro anos — densidade muito baixa frente a Educação (174) ou Geografia (71).
+- A Antropologia é marginal dentro do corpus IA-Humanas (1,0% das 400 defesas em IA-Humanas)
+- Quatro trabalhos sobre IA em Antropologia em quatro anos (após auditoria de falsos positivos) — densidade muito baixa frente a Educação (154) ou Geografia (64).
 
 ---
 
@@ -414,4 +411,4 @@ Este repositório está disponível sob a licença [MIT](LICENSE). Os dados cole
 
 ---
 
-*Última atualização: 21 de maio de 2026 — subcategorização do campo em 5 subcampos (IA stricto, ML, DL/redes, LLMs/generativa, correlatos) e abandono do rótulo guarda-chuva único. O agrupamento sob "Tecnologias de IA, ML e aprendizado profundo" passa a ser descritivo, não afirmação de identidade entre os subcampos. Adicionadas figuras capes_21-23 dedicadas à análise por subcampo.*
+*Última atualização: 21 de maio de 2026 — subcategorização do campo em 5 subcampos (IA stricto, ML, DL/redes, LLMs/generativa, correlatos) e auditoria de falsos positivos. Diagnóstico de uma defesa específica em Antropologia (a defesa "Reivindicando o maternar", da UFPR) revelou que o termo `transformer` no regex de LLMs casava 564 vezes com o substantivo literal em inglês ("social transformer", transformadores elétricos da engenharia), não com a arquitetura de rede neural. A correção via regra de co-ocorrência derrubou o corpus de 13.336 para **12.995 trabalhos** e o subcampo LLM de 876 para **506**. Adicionadas figuras capes_21-23 dedicadas à análise por subcampo.*
