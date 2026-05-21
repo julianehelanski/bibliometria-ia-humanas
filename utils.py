@@ -76,54 +76,73 @@ CORES_INTERMEDIARIAS = [
 ]
 
 
-# Regex de IA: \b garante limites de palavra, evitando capturar "ia" dentro de
-# "via", "tecnologia", "história" etc. Sem \b, a string "ia " falharia em
-# títulos onde "IA" aparece com pontuação ("...da IA.", "...da IA,").
-RE_IA_FORTE = re.compile(
+# Núcleo de termos de IA com alta precisão. Sem 'IA' isolado (tratado por
+# co-ocorrência), sem 'algoritmo' (falso positivo enorme fora das humanas).
+# Estes termos definem o vocabulário canônico do campo: presença de qualquer
+# um deles num título/resumo basta para classificar como foco em IA.
+RE_IA_NUCLEO = re.compile(
     r'\b('
-    r'ia|'
-    r'i\.a\.|'
     r'inteligência\s+artificial|inteligencia\s+artificial|'
     r'artificial\s+intelligence|'
     r'machine\s+learning|aprendizado\s+de\s+máquina|aprendizado\s+de\s+maquina|'
     r'deep\s+learning|aprendizado\s+profundo|'
     r'redes?\s+neurais|neural\s+networks?|'
-    r'chatgpt|gpt|llm|llms|'
-    r'algoritmo[s]?|algorithm[s]?'
+    r'modelos?\s+de\s+linguagem|'
+    r'large\s+language\s+models?|llms?|'
+    r'transformer[s]?|'
+    r'chatgpt|gpt-\d|'
+    r'ia\s+generativa|generative\s+ai'
     r')\b',
-    flags=re.IGNORECASE
+    flags=re.IGNORECASE,
 )
 
-# "Foco relacionado" agora é mais estrito: removidos 'dados', 'internet',
-# 'online', 'virtual', 'computacional' que produziam falsos positivos enormes
-# (qualquer tese sobre redes sociais ou pesquisa quantitativa caía aqui).
+# 'IA' como sigla. Só conta como IA central se também houver um termo do
+# núcleo ou da lista relacionada no mesmo texto — caso contrário, gera muitos
+# falsos positivos (Iniciação Científica, Imposto Adicional, Inteligência de
+# Mercado, nomes próprios, etc).
+RE_IA_SIGLA = re.compile(r'\b(ia|i\.a\.)\b', flags=re.IGNORECASE)
+
+# "Foco relacionado": termos vizinhos do campo que sozinhos não bastam para
+# afirmar que a tese é "sobre IA", mas que indicam adjacência conceitual.
+# Mantido conservador, sem 'dados', 'internet', 'online', 'virtual',
+# 'computacional' (falsos positivos enormes em humanas).
 RE_IA_RELACIONADA = re.compile(
     r'\b('
     r'transhumanismo|pós-humanismo|pos-humanismo|'
     r'robótica|robotica|robôs|robos|'
     r'automação|automacao|automation|'
-    r'aprendizado\s+de\s+máquina|'
     r'mineração\s+de\s+dados|mineracao\s+de\s+dados|data\s+mining|'
     r'big\s+data|'
     r'visão\s+computacional|visao\s+computacional|computer\s+vision|'
     r'processamento\s+de\s+linguagem\s+natural|natural\s+language\s+processing|nlp'
     r')\b',
-    flags=re.IGNORECASE
+    flags=re.IGNORECASE,
 )
+
+# Alias retrocompatível: scripts antigos usam RE_IA_FORTE.
+RE_IA_FORTE = RE_IA_NUCLEO
 
 
 def classificar_foco_ia(texto):
-    """Classifica um texto (título + resumo/keywords) em três categorias.
+    """Classifica um texto em três categorias quanto ao foco em IA.
 
-    Usa regex com word boundaries para reduzir falsos positivos. Retorna uma
-    das strings: 'IA - Foco Central', 'IA - Foco Relacionado', 'Outros Temas'.
+    A categoria 'IA - Foco Central' é atribuída se há termo do núcleo OU se
+    a sigla 'IA' aparece em co-ocorrência com termo do núcleo/relacionado no
+    mesmo texto. A regra de co-ocorrência reduz drasticamente falsos positivos
+    em grandes áreas onde 'IA' tem outros significados.
+
+    Retorna uma das strings: 'IA - Foco Central', 'IA - Foco Relacionado',
+    'Outros Temas'.
     """
-    if not texto or (isinstance(texto, float)):
+    if not texto or isinstance(texto, float):
         return 'Outros Temas'
     s = str(texto)
-    if RE_IA_FORTE.search(s):
+    if RE_IA_NUCLEO.search(s):
         return 'IA - Foco Central'
     if RE_IA_RELACIONADA.search(s):
+        # Sigla 'IA' + termo relacionado = foco central (ex.: "IA e robótica").
+        if RE_IA_SIGLA.search(s):
+            return 'IA - Foco Central'
         return 'IA - Foco Relacionado'
     return 'Outros Temas'
 
