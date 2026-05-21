@@ -76,15 +76,98 @@ CORES_INTERMEDIARIAS = [
 ]
 
 
-# Núcleo de termos de IA com alta precisão. Sem 'IA' isolado (tratado por
-# co-ocorrência), sem 'algoritmo' (falso positivo enorme fora das humanas).
-# Estes termos definem o vocabulário canônico do campo: presença de qualquer
-# um deles num título/resumo basta para classificar como foco em IA.
+# =============================================================================
+# Subcampos: reconhece que IA, ML, deep learning, LLMs e tecnologias correlatas
+# têm genealogias e comunidades epistêmicas distintas. Cada subcampo é definido
+# por seu próprio regex; um trabalho pode pertencer a mais de um subcampo
+# simultaneamente. A coleção destes subcampos forma o que chamamos de
+# "Tecnologias de IA, ML e aprendizado profundo" — rótulo descritivo, não
+# afirmação de identidade entre os campos.
+# =============================================================================
+
+RE_SUBCAMPO_IA_STRICT = re.compile(
+    r'\b('
+    r'intelig[êe]ncia\s+artificial|artificial\s+intelligence'
+    r')\b',
+    flags=re.IGNORECASE,
+)
+
+RE_SUBCAMPO_ML = re.compile(
+    r'\b('
+    r'machine\s+learning|'
+    r'aprendizado\s+de\s+m[áa]quina'
+    r')\b',
+    flags=re.IGNORECASE,
+)
+
+RE_SUBCAMPO_DL = re.compile(
+    r'\b('
+    r'deep\s+learning|aprendizado\s+profundo|'
+    r'redes?\s+neurais|neural\s+networks?'
+    r')\b',
+    flags=re.IGNORECASE,
+)
+
+RE_SUBCAMPO_LLM = re.compile(
+    r'\b('
+    r'llms?|large\s+language\s+models?|'
+    r'modelos?\s+de\s+linguagem|'
+    r'transformer[s]?|'
+    r'chatgpt|gpt-\d|'
+    r'ia\s+generativa|generative\s+ai'
+    r')\b',
+    flags=re.IGNORECASE,
+)
+
+RE_SUBCAMPO_CORRELATOS = re.compile(
+    r'\b('
+    r'transhumanismo|p[óo]s-humanismo|'
+    r'rob[óo]tica|rob[ôo]s|'
+    r'automa[çc][ãa]o|automation|'
+    r'minera[çc][ãa]o\s+de\s+dados|data\s+mining|'
+    r'big\s+data|'
+    r'vis[ãa]o\s+computacional|computer\s+vision|'
+    r'processamento\s+de\s+linguagem\s+natural|natural\s+language\s+processing|nlp'
+    r')\b',
+    flags=re.IGNORECASE,
+)
+
+# Ordem é didática: do mais "alto nível" (IA conceito) até o mais "técnico"
+# (correlatos). Os primeiros 4 são canonicamente IA/ML/DL/LLMs; o 5º agrupa
+# tecnologias adjacentes que circulam no entorno mas não são equivalentes.
+SUBCAMPOS = [
+    ("IA em sentido estrito", RE_SUBCAMPO_IA_STRICT),
+    ("Aprendizado de máquina (ML)", RE_SUBCAMPO_ML),
+    ("Aprendizado profundo & redes neurais", RE_SUBCAMPO_DL),
+    ("Modelos de linguagem & IA generativa", RE_SUBCAMPO_LLM),
+    ("Tecnologias correlatas (robótica, NLP, big data…)", RE_SUBCAMPO_CORRELATOS),
+]
+
+# Subcampos "centrais" (1-4) vs "correlato" (5). Útil para preservar a
+# distinção Central / Correlato sem aglutinar IA com ML/DL/LLMs.
+SUBCAMPOS_CENTRAIS = [s for s, _ in SUBCAMPOS[:4]]
+SUBCAMPO_CORRELATOS = SUBCAMPOS[4][0]
+
+
+def classificar_subcampos(texto):
+    """Retorna o conjunto de subcampos que aparecem no texto.
+
+    Um trabalho pode estar em zero, um ou vários subcampos. A presença
+    do conjunto vazio indica que o trabalho não toca o campo coberto
+    pelo regex e fica em 'Outros Temas'.
+    """
+    if not texto or isinstance(texto, float):
+        return set()
+    s = str(texto)
+    return {label for label, padrao in SUBCAMPOS if padrao.search(s)}
+
+
+# Núcleo (mantido para retrocompatibilidade): união dos 4 subcampos centrais.
+# Estes termos definem o vocabulário canônico das tecnologias de IA/ML/DL/LLMs.
 RE_IA_NUCLEO = re.compile(
     r'\b('
-    r'inteligência\s+artificial|inteligencia\s+artificial|'
-    r'artificial\s+intelligence|'
-    r'machine\s+learning|aprendizado\s+de\s+máquina|aprendizado\s+de\s+maquina|'
+    r'intelig[êe]ncia\s+artificial|artificial\s+intelligence|'
+    r'machine\s+learning|aprendizado\s+de\s+m[áa]quina|'
     r'deep\s+learning|aprendizado\s+profundo|'
     r'redes?\s+neurais|neural\s+networks?|'
     r'modelos?\s+de\s+linguagem|'
@@ -96,73 +179,47 @@ RE_IA_NUCLEO = re.compile(
     flags=re.IGNORECASE,
 )
 
-# 'IA' como sigla. Só conta como IA central se também houver um termo do
-# núcleo ou da lista relacionada no mesmo texto — caso contrário, gera muitos
-# falsos positivos (Iniciação Científica, Imposto Adicional, Inteligência de
-# Mercado, nomes próprios, etc).
+# 'IA' como sigla. Só conta como central se coocorrer com termo do núcleo
+# ou correlatos no mesmo texto (regra de co-ocorrência).
 RE_IA_SIGLA = re.compile(r'\b(ia|i\.a\.)\b', flags=re.IGNORECASE)
 
-# "Foco relacionado": termos vizinhos do campo que sozinhos não bastam para
-# afirmar que a tese é "sobre IA", mas que indicam adjacência conceitual.
-# Mantido conservador, sem 'dados', 'internet', 'online', 'virtual',
-# 'computacional' (falsos positivos enormes em humanas).
-RE_IA_RELACIONADA = re.compile(
-    r'\b('
-    r'transhumanismo|pós-humanismo|pos-humanismo|'
-    r'robótica|robotica|robôs|robos|'
-    r'automação|automacao|automation|'
-    r'mineração\s+de\s+dados|mineracao\s+de\s+dados|data\s+mining|'
-    r'big\s+data|'
-    r'visão\s+computacional|visao\s+computacional|computer\s+vision|'
-    r'processamento\s+de\s+linguagem\s+natural|natural\s+language\s+processing|nlp'
-    r')\b',
-    flags=re.IGNORECASE,
-)
-
-# Alias retrocompatível: scripts antigos usam RE_IA_FORTE.
+# Alias retrocompatível: scripts antigos usam RE_IA_FORTE / RE_IA_RELACIONADA.
 RE_IA_FORTE = RE_IA_NUCLEO
+RE_IA_RELACIONADA = RE_SUBCAMPO_CORRELATOS
 
 
 def classificar_foco_ia(texto):
-    """Classifica um texto em três categorias quanto ao foco em IA.
+    """Classifica um texto em três categorias quanto ao foco no campo.
 
-    O rótulo "IA (sentido amplo)" reconhece que o campo guarda-chuva inclui
-    inteligência artificial em sentido estrito, aprendizado de máquina
-    (ML/DL), redes neurais, modelos de linguagem (LLMs), IA generativa e
-    correlatos — todos cobertos pelo regex RE_IA_NUCLEO. A formulação evita
-    a leitura ingênua de "IA" como sinônimo apenas de "inteligência
-    artificial em sentido literal".
-
-    A categoria 'IA (sentido amplo) - Foco Central' é atribuída se há termo
-    do núcleo OU se a sigla 'IA' aparece em co-ocorrência com termo do
-    núcleo/relacionado no mesmo texto. A regra de co-ocorrência reduz
-    drasticamente falsos positivos em grandes áreas onde 'IA' tem outros
-    significados.
+    Importante: o rótulo guarda-chuva NÃO afirma que IA, ML, DL, LLMs e
+    correlatos são a mesma coisa. Ele apenas agrupa, para fins de
+    contagem total, trabalhos que mencionam qualquer uma dessas
+    tecnologias. A subcategorização real fica em classificar_subcampos.
 
     Retorna uma das strings:
-      - 'IA (sentido amplo) - Foco Central'
-      - 'IA (sentido amplo) - Foco Relacionado'
+      - 'Tecnologias IA/ML/DL - Foco Central'
+        (mencionou IA, ML, DL ou LLMs — i.e., algum subcampo central)
+      - 'Tecnologias IA/ML/DL - Correlato'
+        (mencionou só tecnologias correlatas, ou só a sigla 'IA' sem
+        co-ocorrência)
       - 'Outros Temas'
     """
     if not texto or isinstance(texto, float):
         return 'Outros Temas'
     s = str(texto)
     if RE_IA_NUCLEO.search(s):
-        return 'IA (sentido amplo) - Foco Central'
-    if RE_IA_RELACIONADA.search(s):
-        # Sigla 'IA' + termo relacionado = foco central (ex.: "IA e robótica").
+        return 'Tecnologias IA/ML/DL - Foco Central'
+    if RE_SUBCAMPO_CORRELATOS.search(s):
+        # Sigla 'IA' + correlato = central (ex.: "IA e robótica").
         if RE_IA_SIGLA.search(s):
-            return 'IA (sentido amplo) - Foco Central'
-        return 'IA (sentido amplo) - Foco Relacionado'
+            return 'Tecnologias IA/ML/DL - Foco Central'
+        return 'Tecnologias IA/ML/DL - Correlato'
     return 'Outros Temas'
 
 
-# Rótulo guarda-chuva usado em títulos, eixos e textos. Evita que o leitor
-# leia "IA" como sinônimo de "inteligência artificial em sentido literal" e
-# perca o fato de que machine learning, redes neurais, LLMs, IA generativa
-# etc. também estão dentro do recorte.
-LABEL_GUARDA_CHUVA = "Inteligência Artificial em sentido amplo"
-LABEL_GUARDA_CHUVA_CURTO = "IA (sentido amplo)"
+# Rótulo guarda-chuva descritivo, sem afirmar identidade entre os campos.
+LABEL_GUARDA_CHUVA = "Tecnologias de IA, ML e aprendizado profundo"
+LABEL_GUARDA_CHUVA_CURTO = "Tecnologias IA/ML/DL"
 
 
 # Stopwords em português, expandida. Cobre artigos, preposições, conjunções,

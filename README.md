@@ -16,9 +16,10 @@ A análise combina dois repositórios:
 A coleta foi realizada em dois momentos:
 
 - **6 de novembro de 2025** — coleta inicial via SciELO e Catálogo de Teses e Dissertações da CAPES (interface web), com filtro de grande área "Ciências Humanas". Esta coleta resultou na análise SciELO (152 artigos) e na análise CAPES restrita às Humanas (100 trabalhos, 2013–2023).
-- **20 de maio de 2026** — expansão da análise CAPES para o dump oficial completo no portal de Dados Abertos da CAPES (`BR-CAPES-BTD-2021A2024-2025-12-01`, versão 3.0), cobrindo **todas as grandes áreas** do conhecimento e o quadriênio 2021–2024 (350.071 registros no universo, 13.336 trabalhos sobre **Inteligência Artificial em sentido amplo** identificados pelo classificador refinado). A virada metodológica permite situar a marginalidade das humanidades dentro do mapa mais amplo da produção brasileira sobre o campo.
+- **20 de maio de 2026** — expansão da análise CAPES para o dump oficial completo no portal de Dados Abertos da CAPES (`BR-CAPES-BTD-2021A2024-2025-12-01`, versão 3.0), cobrindo **todas as grandes áreas** do conhecimento e o quadriênio 2021–2024 (350.071 registros no universo, 13.336 trabalhos no campo das **Tecnologias de IA, ML e aprendizado profundo** identificados pelo classificador refinado).
+- **21 de maio de 2026** — subcategorização do campo em **5 subcampos** que reconhecem genealogias distintas (IA stricto sensu, aprendizado de máquina, aprendizado profundo & redes neurais, modelos de linguagem & IA generativa, tecnologias correlatas). Um mesmo trabalho pode estar em vários subcampos; o agrupamento sob um único rótulo guarda-chuva é descritivo, não afirmação de identidade entre as tradições.
 
-> **Nota sobre o rótulo "IA em sentido amplo":** ao longo de todo o repositório, "IA" é usada como abreviação do campo guarda-chuva que inclui inteligência artificial em sentido estrito, aprendizado de máquina (ML/DL), redes neurais, modelos de linguagem (LLMs/transformers), IA generativa, processamento de linguagem natural e correlatos. O regex em `utils.RE_IA_NUCLEO` define exatamente quais termos são considerados. A escolha de explicitar "sentido amplo" no rótulo evita a leitura ingênua de "IA" como sinônimo de apenas "inteligência artificial em sentido literal" — leitura que faria a contagem parecer artificialmente menor do que é.
+> **Nota sobre o rótulo guarda-chuva:** "Tecnologias de IA, ML e aprendizado profundo" é descritivo. Não afirma que inteligência artificial em sentido estrito, machine learning, deep learning, modelos de linguagem e tecnologias correlatas são a mesma coisa — cada um tem genealogia, comunidade epistêmica e tradição teórica próprias. A função do rótulo é apenas marcar o conjunto de trabalhos que tocam essa constelação. A análise de subcampos (`utils.classificar_subcampos`) preserva as distinções nas figuras de granularidade fina.
 
 ---
 
@@ -59,6 +60,7 @@ analise_bibliometrica_ia_ciencias_humanas/
 └── figuras/                        ← Gráficos PNG gerados pelos scripts
     ├── capes_01a..10*.png              (análise antiga, 2013–2023)
     ├── capes_11..20*.png               (análise expandida, 2021–2024)
+    ├── capes_21..23*.png               (análise por subcampo: IA, ML, DL, LLMs, correlatos)
     ├── capes_h01..h05*.png             (zoom em Ciências Humanas)
     ├── scielo_*.png                    (análise SciELO)
     └── comparativo_scielo_capes.*      (comparativo)
@@ -98,22 +100,34 @@ analise_bibliometrica_ia_ciencias_humanas/
 
 ---
 
-### CAPES (2021–2024, todas as áreas) — 13.336 trabalhos sobre IA em sentido amplo
+### CAPES (2021–2024, todas as áreas) — 13.336 trabalhos no campo das Tecnologias IA/ML/DL
 
-Análise baseada no dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` do portal de Dados Abertos da CAPES. O universo total do dump (350.071 trabalhos de conclusão de pós-graduação stricto sensu) é classificado pelo regex refinado de IA em sentido amplo, sem restrição prévia de área.
+Análise baseada no dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` do portal de Dados Abertos da CAPES. O universo total do dump (350.071 trabalhos de conclusão de pós-graduação stricto sensu) é classificado pelo regex de subcampos sem restrição prévia de área.
 
 | Indicador | Valor |
 |-----------|-------|
 | Universo total (2021–2024) | 350.071 |
-| **IA em sentido amplo — Foco Central** | **10.412** |
-| **IA em sentido amplo — Foco Relacionado** | **2.924** |
-| **Total (Central + Relacionado)** | **13.336 (3,81% do universo)** |
+| **Foco Central (IA, ML, DL ou LLMs)** | **10.412** |
+| **Correlatos (robótica, NLP, big data, ...)** | **2.924** |
+| **Total no campo** | **13.336 (3,81% do universo)** |
 | Mestrado | 7.066 (53%) |
 | Doutorado | 4.601 (35%) |
 | Mestrado Profissional | 1.629 (12%) |
 | Crescimento 2021→2024 (CAGR) | ~14% a.a. (2.716 → 4.020 trabalhos/ano) |
 
-**Distribuição por grande área (corpus IA em sentido amplo = 13.336):**
+**Distribuição por subcampo (de 13.336 trabalhos no campo; soma > 100% pois trabalhos podem estar em vários):**
+
+| Subcampo | Trabalhos | % do corpus |
+|----------|---:|---:|
+| Aprendizado de máquina (ML) | 5.284 | 39,6% |
+| Tecnologias correlatas (robótica, NLP, big data…) | 4.972 | 37,3% |
+| Aprendizado profundo & redes neurais | 4.326 | 32,4% |
+| IA em sentido estrito | 3.821 | 28,7% |
+| Modelos de linguagem & IA generativa | 876 | 6,6% |
+
+> **Achado relevante:** "Aprendizado de máquina" supera "IA em sentido estrito" no corpus (5.284 vs 3.821). Tratá-los como sinônimos sob "IA" mascararia essa hierarquia. Modelos de linguagem & IA generativa ainda é nicho (876) mas cresceu rapidamente em 2024.
+
+**Distribuição por grande área (corpus = 13.336):**
 
 | Grande área | Trabalhos | % do corpus | Total da grande área | Taxa interna |
 |-------------|---:|---:|---:|---:|
@@ -131,7 +145,18 @@ Análise baseada no dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` do portal d
 
 ---
 
-### CAPES — Zoom em Ciências Humanas (2021–2024) — 441 trabalhos sobre IA em sentido amplo
+### CAPES — Zoom em Ciências Humanas (2021–2024) — 441 trabalhos no campo
+
+**Assinatura discursiva das Humanas:** dos 441 trabalhos, a maioria conversa com o campo via tecnologias correlatas (45,6%) ou via IA como conceito (35,8%), e quase não via técnicas específicas (DL/redes 7,3%, ML 17,7%). Este padrão é praticamente inverso ao de Engenharias/Exatas, que escrevem sobre técnicas e raramente sobre "IA" como conceito.
+
+| Subcampo | Trabalhos em Humanas | % de IA-Humanas |
+|---|---:|---:|
+| Tecnologias correlatas | 201 | 45,6% |
+| IA em sentido estrito | 158 | 35,8% |
+| Aprendizado de máquina (ML) | 78 | 17,7% |
+| Modelos de linguagem & IA generativa | 61 | 13,8% |
+| Aprendizado profundo & redes neurais | 32 | 7,3% |
+
 
 | Área de conhecimento | Trabalhos | % de IA-Humanas |
 |----------------------|---:|---:|
@@ -204,9 +229,24 @@ A escolha do filtro foi determinada pela arquitetura taxonômica das bases consu
 
 ---
 
-## Nota metodológica sobre a classificação de foco em IA em sentido amplo
+## Nota metodológica: subcampos e por que não dizer "IA"
 
-Os scripts classificam cada trabalho em três categorias — **IA (sentido amplo) - Foco Central**, **IA (sentido amplo) - Foco Relacionado**, **Outros Temas** — usando expressões regulares com fronteiras de palavra (`\b`) para reduzir falsos positivos. A função compartilhada está em `utils.classificar_foco_ia`. O rótulo "sentido amplo" é deliberado: o campo guarda-chuva inclui inteligência artificial em sentido estrito, aprendizado de máquina, redes neurais, modelos de linguagem, IA generativa e correlatos.
+A partir de 21/05/2026, a análise rejeita o uso de "IA" como rótulo guarda-chuva único. Em vez disso, opera com **cinco subcampos** que reconhecem genealogias distintas:
+
+1. **IA em sentido estrito** — `inteligência artificial`, `artificial intelligence`. Genealogia: Dartmouth 1956, IA simbólica, sistemas especialistas.
+2. **Aprendizado de máquina (ML)** — `machine learning`, `aprendizado de máquina`. Ramo da IA que se autonomizou a partir dos anos 1990.
+3. **Aprendizado profundo & redes neurais** — `deep learning`, `aprendizado profundo`, `redes neurais`, `neural networks`. Tradição que vem da cibernética; ressurge nos 2010s.
+4. **Modelos de linguagem & IA generativa** — `LLM`, `transformer`, `ChatGPT`, `GPT-N`, `modelos de linguagem`, `IA generativa`. Onda contemporânea, pós-2017.
+5. **Tecnologias correlatas** — robótica, automação, NLP, visão computacional, big data, mineração de dados. Adjacências históricas do campo.
+
+Um mesmo trabalho pode pertencer a vários subcampos. A função `utils.classificar_subcampos(texto)` retorna o conjunto que casa; `utils.classificar_foco_ia(texto)` mantém a interface antiga, retornando "Tecnologias IA/ML/DL - Foco Central" (se algum subcampo 1-4 casa) ou "Tecnologias IA/ML/DL - Correlato" (se só o subcampo 5 casa).
+
+**Por que separar?** Tratar IA, ML, DL e LLMs como sinônimos mascara achados importantes. Por exemplo, "Aprendizado de máquina" (5.284 trabalhos) é o subcampo mais frequente no corpus brasileiro — supera "IA em sentido estrito" (3.821). Em Humanas, a hierarquia se inverte: 35,8% conversam com o campo via "IA" enquanto só 7,3% mencionam "deep learning". Esta diferença é analiticamente relevante e ficaria invisível sob um rótulo único.
+
+**Regras adicionais do classificador refinado:**
+
+- **Sigla `IA` isolada** não é suficiente para classificar como Foco Central. Ela precisa coocorrer no mesmo texto com termo de algum subcampo para evitar falsos positivos ("Iniciação Científica", "Imposto Adicional", nomes próprios).
+- **`Algoritmo` foi removido do regex.** Sem o filtro de área, esse termo capturava praticamente toda a Computação/Engenharia/Estatística. Quem usa apenas `algoritmo` sem outros termos entra em "Outros Temas".
 
 ### Versão refinada (análise 2021–2024, todas as áreas)
 
@@ -374,4 +414,4 @@ Este repositório está disponível sob a licença [MIT](LICENSE). Os dados cole
 
 ---
 
-*Última atualização: 21 de maio de 2026 — expansão para o dump CAPES 2021–2024 (todas as grandes áreas, 13.336 trabalhos sobre IA em sentido amplo identificados, dos quais 441 em Ciências Humanas e 5 em Antropologia). Atualização do rótulo guarda-chuva para "Inteligência Artificial em sentido amplo" em figuras, README, código e planilha de auditoria.*
+*Última atualização: 21 de maio de 2026 — subcategorização do campo em 5 subcampos (IA stricto, ML, DL/redes, LLMs/generativa, correlatos) e abandono do rótulo guarda-chuva único. O agrupamento sob "Tecnologias de IA, ML e aprendizado profundo" passa a ser descritivo, não afirmação de identidade entre os subcampos. Adicionadas figuras capes_21-23 dedicadas à análise por subcampo.*
