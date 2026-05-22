@@ -347,7 +347,7 @@ Convenções adotadas:
 
 ## Painel SciELO 2021–2024 (paralelo ao painel CAPES)
 
-Conjunto de figuras dedicado à análise SciELO via API ArticleMeta, com mesma estrutura analítica do painel CAPES. Universo: **98.165 artigos** da coleção Brasil (todas as 8 \textit{subject\_areas} do SciELO) publicados em 2021–2024. Corpus IA/ML/DL no recorte estrito 2021–2024: **631 artigos** (502 Foco Central + 129 Correlatos; taxa interna geral 0,70%).
+Conjunto de figuras dedicado à análise SciELO via API ArticleMeta, com mesma estrutura analítica do painel CAPES. Universo: **98.165 artigos** da coleção Brasil (todas as 8 \textit{subject\_areas} oficiais do SciELO) publicados em 2021--2024. Corpus IA/ML/DL no recorte estrito 2021--2024: **631 artigos** (502 Foco Central + 129 Correlatos; taxa interna geral 0,70\%). Nas tabelas, periódicos com múltiplas \textit{subject\_areas} aparecem agrupados na categoria sintética "Multidisciplinar" (não-oficial), resultando em 9 linhas: as 8 áreas SciELO + Multidisciplinar.
 
 ### Figura SciELO 11 — Distribuição por subject_area (volume + taxa interna)
 
