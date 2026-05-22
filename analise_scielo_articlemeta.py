@@ -114,11 +114,22 @@ def listar_periodicos(collection: str = "scl") -> list[dict]:
 
 
 def carregar_periodico(issn: str, collection: str = "scl") -> dict | None:
-    """Fetch metadata de um periódico (subject_areas etc.). Cache por ISSN."""
+    """Fetch metadata de um periódico (subject_areas etc.). Cache por ISSN.
+
+    Se o JSON em cache estiver corrompido (truncamento por queda de rede,
+    interrupção do processo etc.), apaga e refaz.
+    """
     cache_path = os.path.join(CACHE_DIR, "journals", f"{issn}.json")
     if os.path.isfile(cache_path):
-        with open(cache_path) as f:
-            return json.load(f)
+        try:
+            with open(cache_path) as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError) as e:
+            sys.stderr.write(f"[cache corrompido journal {issn}, refazendo] {e}\n")
+            try:
+                os.remove(cache_path)
+            except OSError:
+                pass
     try:
         data = _get("/journal/", {"collection": collection, "issn": issn})
         with open(cache_path, "w") as f:
@@ -129,9 +140,17 @@ def carregar_periodico(issn: str, collection: str = "scl") -> dict | None:
         return None
 
 
-def filtrar_periodicos_humanas(periodicos: list[dict]) -> list[dict]:
-    """Mantém só periódicos cujas subject_areas tocam Humanas/Sociais Aplicadas/Letras."""
-    print(f"Identificando periódicos em áreas-alvo (Humanas + Sociais Aplicadas + Letras)...")
+def filtrar_periodicos_humanas(periodicos: list[dict], todas_as_areas: bool = False) -> list[dict]:
+    """Mantém só periódicos cujas subject_areas tocam Humanas/Sociais Aplicadas/Letras.
+
+    Se todas_as_areas=True, NÃO filtra por área — devolve todos os periódicos
+    com suas subject_areas anotadas. Útil para análises panorâmicas do
+    universo SciELO Brasil.
+    """
+    if todas_as_areas:
+        print(f"Modo todas-as-áreas: coletando metadados de TODOS os periódicos...")
+    else:
+        print(f"Identificando periódicos em áreas-alvo (Humanas + Sociais Aplicadas + Letras)...")
     relevantes = []
     for p in periodicos:
         issn = p.get("code")
@@ -155,13 +174,16 @@ def filtrar_periodicos_humanas(periodicos: list[dict]) -> list[dict]:
                     else:
                         areas.append(str(item))
         areas = [a.strip() for a in areas if a.strip()]
-        if set(areas) & SUBJECT_AREAS_ALVO:
+        if todas_as_areas or (set(areas) & SUBJECT_AREAS_ALVO):
             relevantes.append({
                 "issn": issn,
                 "subject_areas": areas,
                 "raw": meta,
             })
-    print(f"  {len(relevantes)} periódicos em áreas-alvo")
+    if todas_as_areas:
+        print(f"  {len(relevantes)} periódicos no total (todas as áreas)")
+    else:
+        print(f"  {len(relevantes)} periódicos em áreas-alvo")
     return relevantes
 
 
@@ -186,11 +208,22 @@ def listar_pids_periodico(issn: str, date_from: str, date_until: str,
 
 
 def carregar_artigo(pid: str, collection: str = "scl") -> dict | None:
-    """Fetch full article metadata. Cache por PID."""
+    """Fetch full article metadata. Cache por PID.
+
+    Se o JSON em cache estiver corrompido (truncamento por queda de rede,
+    interrupção do processo etc.), apaga e refaz.
+    """
     cache_path = os.path.join(CACHE_DIR, "articles", f"{pid}.json")
     if os.path.isfile(cache_path):
-        with open(cache_path) as f:
-            return json.load(f)
+        try:
+            with open(cache_path) as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError) as e:
+            sys.stderr.write(f"[cache corrompido article {pid}, refazendo] {e}\n")
+            try:
+                os.remove(cache_path)
+            except OSError:
+                pass
     try:
         data = _get("/article/", {"code": pid, "collection": collection, "format": "xylose"})
         with open(cache_path, "w") as f:
@@ -271,6 +304,11 @@ def main():
                         help="Data final (default 2024-12-31)")
     parser.add_argument("--periodo-completo", action="store_true",
                         help="Sem janela de datas; coleta tudo na fonte")
+    parser.add_argument("--todas-as-areas", action="store_true",
+                        help=("Coleta o universo SciELO Brasil completo (todas as "
+                              "subject_areas), não só Humanas+Sociais Aplicadas+Letras. "
+                              "Atenção: muito mais lento (várias horas) e ocupa muito "
+                              "mais espaço em cache."))
     args = parser.parse_args()
     if args.periodo_completo:
         args.date_from = ""
@@ -281,12 +319,16 @@ def main():
         print(f"Janela: {args.date_from or 'início'} → {args.date_until or 'fim'}")
     else:
         print("Janela: histórico completo")
+    if args.todas_as_areas:
+        print("Modo: TODAS as subject_areas (universo completo do SciELO Brasil)")
+    else:
+        print("Modo: áreas-alvo (Human Sciences + Applied Social Sciences + Linguistics, Letters and Arts)")
 
     # 1) Periódicos da coleção
     periodicos = listar_periodicos()
 
-    # 2) Filtra para áreas-alvo (Humanas/Sociais Aplicadas/Letras)
-    relevantes = filtrar_periodicos_humanas(periodicos)
+    # 2) Filtra (ou não) por áreas
+    relevantes = filtrar_periodicos_humanas(periodicos, todas_as_areas=args.todas_as_areas)
 
     # 3) Itera artigos
     registros = []
@@ -321,21 +363,29 @@ def main():
         df[col] = subcs.map(lambda s, n=nome: n in s)
     df["SUBCAMPOS"] = subcs.map(lambda s: "; ".join(sorted(s)) if s else "")
 
-    # 5) Salva universo completo (filtrado por áreas-alvo) + subset IA
+    # 5) Salva universo + subset IA. Nome de saída depende do modo.
     df = df.drop(columns=["_texto_classif"])
-    out_universo = os.path.join(DADOS_SCIELO_DIR, "scielo_humanas_universo.csv")
+    if args.todas_as_areas:
+        out_universo = os.path.join(DADOS_SCIELO_DIR, "scielo_brasil_universo.csv")
+        out_ia = os.path.join(DADOS_SCIELO_DIR, "scielo_brasil_ia_subcampos.csv")
+        out_xlsx = os.path.join(DADOS_SCIELO_DIR, "scielo_brasil_ia_subcampos_auditoria.xlsx")
+        rotulo = "Brasil SciELO completo"
+    else:
+        out_universo = os.path.join(DADOS_SCIELO_DIR, "scielo_humanas_universo.csv")
+        out_ia = os.path.join(DADOS_SCIELO_DIR, "scielo_ia_subcampos.csv")
+        out_xlsx = os.path.join(DADOS_SCIELO_DIR, "scielo_ia_subcampos_auditoria.xlsx")
+        rotulo = "Humanas + Sociais Aplicadas + Letras"
+
     df.to_csv(out_universo, index=False)
-    print(f"Universo (Humanas + Sociais Aplicadas + Letras) salvo em {out_universo}")
+    print(f"Universo ({rotulo}) salvo em {out_universo}")
     print(f"Distribuição FOCO_IA:")
     print(df["FOCO_IA"].value_counts().to_string())
 
     ia = df[df["FOCO_IA"] != "Outros Temas"].copy()
-    out_ia = os.path.join(DADOS_SCIELO_DIR, "scielo_ia_subcampos.csv")
     ia.to_csv(out_ia, index=False)
     print(f"\nSubset IA salvo em {out_ia} ({len(ia)} artigos)")
 
     if len(ia):
-        out_xlsx = os.path.join(DADOS_SCIELO_DIR, "scielo_ia_subcampos_auditoria.xlsx")
         ia.to_excel(out_xlsx, index=False, engine="openpyxl")
         print(f"XLSX para auditoria: {out_xlsx}")
 

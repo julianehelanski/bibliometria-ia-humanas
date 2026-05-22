@@ -345,18 +345,209 @@ Convenções adotadas:
 
 ---
 
+## Painel SciELO 2021–2024 (paralelo ao painel CAPES)
+
+Conjunto de figuras dedicado à análise SciELO via API ArticleMeta, com mesma estrutura analítica do painel CAPES. Universo: 30.602 artigos das áreas-alvo (Human Sciences + Applied Social Sciences + Linguistics, Letters and Arts) publicados em 2021–2024. Corpus IA/ML/DL: 179 artigos.
+
+### Figura SciELO 11 — Distribuição por subject_area (volume + taxa interna)
+
+`figuras/scielo_11_subject_area_share.png`
+
+```latex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figuras/scielo_11_subject_area_share.png}
+  \caption{Distribuição dos 179 artigos sobre Tecnologias de IA, ML e aprendizado profundo publicados em periódicos da coleção brasileira do SciELO (2021--2024) pela \textit{subject\_area} primária do periódico. O painel esquerdo mostra o volume absoluto e o percentual no corpus; o painel direito mostra a taxa interna --- isto é, a fração dos artigos da subject\_area que tratam do campo. Human Sciences (destacada em vermelho) responde por cerca de 41\% do corpus, com taxa interna em torno de 0,8\%.}
+  \label{fig:scielo_11_subject_area}
+  \source{Elaboração própria a partir da API ArticleMeta da SciELO (\textit{articlemeta.scielo.org}, coleção \textit{scl}).}
+\end{figure}
+```
+
+**Comentário analítico.** Paralelo a Fig. 11 do painel CAPES. Confirma a marginalidade do tema dentro do recorte Humanas-Sociais-Letras também no espaço dos periódicos.
+
+---
+
+### Figura SciELO 12 — Evolução temporal por subject_area
+
+`figuras/scielo_12_temporal_subject_area.png`
+
+```latex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figuras/scielo_12_temporal_subject_area.png}
+  \caption{Evolução anual (2021--2024) das publicações sobre Tecnologias de IA, ML e aprendizado profundo no SciELO, segmentada pela \textit{subject\_area} primária do periódico. Human Sciences (em vermelho) cresce de forma consistente; as demais áreas-alvo também acompanham o movimento, com curvas inclinadas para cima sobretudo em 2024.}
+  \label{fig:scielo_12_temporal_subject_area}
+  \source{Elaboração própria a partir da API ArticleMeta da SciELO.}
+\end{figure}
+```
+
+---
+
+### Figura SciELO 13 — Heatmap subject_area × keyword
+
+`figuras/scielo_13_heatmap_sa_keyword.png`
+
+```latex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figuras/scielo_13_heatmap_sa_keyword.png}
+  \caption{Mapa de calor da co-ocorrência entre dez termos-chave do campo e as \textit{subject\_areas} dos periódicos SciELO no recorte 2021--2024. Cada célula apresenta o percentual da coluna (termo) concentrado naquela linha (área), com contagem absoluta entre parênteses. ``ChatGPT/GPT-N'' e ``IA generativa'' aparecem espalhados, com presença notável em Human Sciences e Applied Social Sciences; ``redes neurais'' e ``machine/deep learning'' concentram-se nos periódicos multidisciplinares e em Applied Social Sciences via Administração e Direito.}
+  \label{fig:scielo_13_heatmap_sa_keyword}
+  \source{Elaboração própria a partir da API ArticleMeta da SciELO.}
+\end{figure}
+```
+
+---
+
+### Figura SciELO 14 — Evolução total (Foco Central + Correlatos)
+
+`figuras/scielo_14_temporal_total.png`
+
+```latex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figuras/scielo_14_temporal_total.png}
+  \caption{Evolução anual (2021--2024) do corpus SciELO completo, discriminado em Foco Central (artigos que mencionam IA, ML, DL ou LLMs) e Correlatos (apenas tecnologias adjacentes). O total cresce de 27 artigos em 2021 para 76 em 2024 (+181\%, CAGR aproximado de 41\% a.a. --- ritmo bem mais agudo que o da CAPES no mesmo período).}
+  \label{fig:scielo_14_temporal_total}
+  \source{Elaboração própria a partir da API ArticleMeta da SciELO.}
+\end{figure}
+```
+
+---
+
+### Figura SciELO 15 — Idioma dos artigos
+
+`figuras/scielo_15_idioma.png`
+
+```latex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\linewidth]{figuras/scielo_15_idioma.png}
+  \caption{Distribuição dos 179 artigos do corpus SciELO sobre Tecnologias de IA, ML e aprendizado profundo (2021--2024) pelo idioma de publicação. O português predomina, seguido pelo inglês --- padrão coerente com a vocação predominantemente lusófona dos periódicos da coleção brasileira do SciELO, ainda que a presença do inglês indique abertura para circulação internacional.}
+  \label{fig:scielo_15_idioma}
+  \source{Elaboração própria a partir da API ArticleMeta da SciELO.}
+\end{figure}
+```
+
+**Comentário analítico.** Paralelo (com adaptação) à Fig. 15 do painel CAPES (que usa nível acadêmico). Aqui usamos idioma como variável de distribuição, dado que SciELO indexa artigos --- não há nível acadêmico associado.
+
+---
+
+### Figura SciELO 16 — Top 20 periódicos
+
+`figuras/scielo_16_top_periodicos.png`
+
+```latex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figuras/scielo_16_top_periodicos.png}
+  \caption{Vinte periódicos do SciELO com maior volume de artigos sobre Tecnologias de IA, ML e aprendizado profundo no período 2021--2024. Barras em vermelho indicam periódicos cuja \textit{subject\_area} primária é Human Sciences; em cinza, as demais áreas-alvo. Estudos Avançados, Trans/Form/Ação, Texto Livre, Filosofia Unisinos e Ciência \& Educação aparecem como núcleos humanísticos; Anais da Academia Brasileira de Ciências figura no topo por sua \textit{subject\_area} multidisciplinar.}
+  \label{fig:scielo_16_top_periodicos}
+  \source{Elaboração própria a partir da API ArticleMeta da SciELO.}
+\end{figure}
+```
+
+---
+
+### Figura SciELO 20 — Top termos em títulos
+
+`figuras/scielo_20_top_termos.png`
+
+```latex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\linewidth]{figuras/scielo_20_top_termos.png}
+  \caption{Vinte e cinco termos mais frequentes nos títulos dos 179 artigos do corpus SciELO sobre IA/ML/DL (2021--2024), após remoção de stopwords e dos termos canônicos do regex. O ranking revela o vocabulário de entorno do campo --- termos próximos a aplicação (ensino, educação, ética, direito, política) e a objetos teóricos (sociedade, sujeito, conhecimento) --- coerente com o perfil mais conceitual do SciELO em relação ao CAPES.}
+  \label{fig:scielo_20_top_termos}
+  \source{Elaboração própria a partir da API ArticleMeta da SciELO.}
+\end{figure}
+```
+
+---
+
+### Figura SciELO 21 — Distribuição por subcampo
+
+`figuras/scielo_21_subcampos_distribuicao.png`
+
+```latex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\linewidth]{figuras/scielo_21_subcampos_distribuicao.png}
+  \caption{Distribuição dos 179 artigos do corpus SciELO pelos cinco subcampos do classificador (presença pode ocorrer simultaneamente em múltiplos subcampos). IA em sentido estrito é o subcampo dominante (86 artigos, 48,0\%), seguido por Tecnologias correlatas (50, 27,9\%). Os subcampos técnicos --- ML, DL e LLMs --- aparecem em proporção menor, padrão oposto ao do CAPES.}
+  \label{fig:scielo_21_subcampos_distribuicao_scielo}
+  \source{Elaboração própria a partir da API ArticleMeta da SciELO.}
+\end{figure}
+```
+
+**Comentário analítico.** Paralelo à Fig. 21 do painel CAPES. A inversão da hierarquia (no SciELO, IA estrita lidera; no CAPES, ML lidera) é o achado mais saliente da comparação entre as bases: humanidades publicadas em periódicos conversam com o tema em chave conceitual, não técnica.
+
+---
+
+### Figura SciELO 22 — Heatmap subcampo × subject_area
+
+`figuras/scielo_22_heatmap_subcampo_sa.png`
+
+```latex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figuras/scielo_22_heatmap_subcampo_sa.png}
+  \caption{Mapa de calor da concentração dos cinco subcampos do classificador entre as \textit{subject\_areas} dos periódicos SciELO. Cada linha (subcampo) está normalizada para somar 100\%. Ao contrário do CAPES, no SciELO o subcampo Modelos de linguagem \& IA generativa aparece concentrado em Human Sciences e Applied Social Sciences, e quase ausente em periódicos exclusivamente técnicos --- coerente com a entrada do tema na pauta humanística pós-ChatGPT.}
+  \label{fig:scielo_22_heatmap_subcampo_sa}
+  \source{Elaboração própria a partir da API ArticleMeta da SciELO.}
+\end{figure}
+```
+
+---
+
+### Figura SciELO 23 — Evolução temporal por subcampo
+
+`figuras/scielo_23_temporal_subcampos.png`
+
+```latex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figuras/scielo_23_temporal_subcampos.png}
+  \caption{Evolução temporal (2021--2024) dos cinco subcampos no corpus SciELO. IA em sentido estrito predomina ao longo do período; Modelos de linguagem \& IA generativa, ausente em 2021, cresce notavelmente em 2024 --- captura empírica do impacto da popularização do ChatGPT (lançado novembro/2022) sobre a produção humanística brasileira.}
+  \label{fig:scielo_23_temporal_subcampos}
+  \source{Elaboração própria a partir da API ArticleMeta da SciELO.}
+\end{figure}
+```
+
+---
+
+## Comparativo SciELO × CAPES Humanas
+
+### Figura Comparativa — Síntese SciELO × CAPES (2021–2024)
+
+`figuras/comparativo_scielo_capes_2026.png`
+
+```latex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.98\linewidth]{figuras/comparativo_scielo_capes_2026.png}
+  \caption{Análise comparativa SciELO $\times$ CAPES (Ciências Humanas) sobre o quadriênio 2021--2024, com classificador uniforme de subcampos aplicado às duas bases. (A)~Evolução temporal sobreposta: SciELO cresce de 27 para 76 artigos sobre IA, ML e aprendizado profundo (+181\%); CAPES Humanas cresce de 69 para 142 defesas (+106\%). (B)~Distribuição por subcampo lado a lado: o SciELO é mais conceitual (48\% via ``IA em sentido estrito''), enquanto o CAPES é mais aplicado (50\% via tecnologias correlatas, sobretudo via Educação). (C)~Top dez periódicos do SciELO no campo, com destaque para Estudos Avançados, Trans/Form/Ação, Texto Livre e Filosofia Unisinos. (D)~Top dez áreas de conhecimento das defesas CAPES em IA/Humanas: Educação (154), Geografia (64), Psicologia (56), Ciência Política (40), Filosofia (39), e a Antropologia com apenas quatro defesas.}
+  \label{fig:comparativo_scielo_capes_2026}
+  \source{Elaboração própria. Bases: API ArticleMeta (\textit{articlemeta.scielo.org}, coleção \textit{scl}, 179 artigos das áreas-alvo Human Sciences, Applied Social Sciences, Linguistics, Letters and Arts) e Catálogo de Teses e Dissertações da CAPES (BR-CAPES-BTD-2021A2024-2025-12-01, 400 defesas da grande área Ciências Humanas).}
+\end{figure}
+```
+
+**Comentário analítico.** Figura-síntese que fecha o capítulo. Apresenta as duas bases lado a lado, com metodologia idêntica, sustentando os achados centrais: (i) crescimento expressivo do tema nas humanidades brasileiras; (ii) padrões discursivos distintos entre periódicos (mais conceituais) e teses/dissertações (mais aplicadas); (iii) marginalidade persistente da Antropologia na produção pós-graduada brasileira sobre IA.
+
+---
+
 ## Cheat-sheet para referência cruzada no texto
 
 | Argumento da tese | Figura(s) de apoio |
 |---|---|
 | Marginalidade das Humanas no campo de IA (em volume e em taxa interna) | Fig. 11, Fig. 16 |
-| Marginalidade dupla da Antropologia (Humanas é margem, Antro é margem da margem) | Fig. H01 |
-| Crescimento do campo sem fechamento do gap | Fig. 12, Fig. 14, Fig. H02 |
-| Assinatura discursiva: Humanas usam "IA" e correlatos, não "redes neurais" | Fig. 13, Fig. 22 |
+| Marginalidade dupla da Antropologia (Humanas é margem, Antro é margem da margem) | Fig. H01, Comp |
+| Crescimento do campo sem fechamento do gap | Fig. 12, Fig. 14, Fig. H02, Comp (painel A) |
+| Assinatura discursiva: Humanas usam "IA" e correlatos, não "redes neurais" | Fig. 13, Fig. 22, Comp (painel B) |
 | ML supera "IA" no Brasil --- crítica ao uso aglutinador do termo | Fig. 21 |
-| Virada generativa em 2024 | Fig. 23 |
+| Virada generativa em 2024 | Fig. 23, Comp (painel A) |
 | Concentração institucional e regional | Fig. 17, Fig. 18, Fig. H03, Fig. H04 |
 | Vocabulário aplicado das Humanas (educação, ética, trabalho) | Fig. H05 |
+| Comparativo SciELO $\times$ CAPES com metodologia uniforme (síntese de fechamento) | Comp |
 
 ---
 
