@@ -114,11 +114,22 @@ def listar_periodicos(collection: str = "scl") -> list[dict]:
 
 
 def carregar_periodico(issn: str, collection: str = "scl") -> dict | None:
-    """Fetch metadata de um periódico (subject_areas etc.). Cache por ISSN."""
+    """Fetch metadata de um periódico (subject_areas etc.). Cache por ISSN.
+
+    Se o JSON em cache estiver corrompido (truncamento por queda de rede,
+    interrupção do processo etc.), apaga e refaz.
+    """
     cache_path = os.path.join(CACHE_DIR, "journals", f"{issn}.json")
     if os.path.isfile(cache_path):
-        with open(cache_path) as f:
-            return json.load(f)
+        try:
+            with open(cache_path) as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError) as e:
+            sys.stderr.write(f"[cache corrompido journal {issn}, refazendo] {e}\n")
+            try:
+                os.remove(cache_path)
+            except OSError:
+                pass
     try:
         data = _get("/journal/", {"collection": collection, "issn": issn})
         with open(cache_path, "w") as f:
@@ -197,11 +208,22 @@ def listar_pids_periodico(issn: str, date_from: str, date_until: str,
 
 
 def carregar_artigo(pid: str, collection: str = "scl") -> dict | None:
-    """Fetch full article metadata. Cache por PID."""
+    """Fetch full article metadata. Cache por PID.
+
+    Se o JSON em cache estiver corrompido (truncamento por queda de rede,
+    interrupção do processo etc.), apaga e refaz.
+    """
     cache_path = os.path.join(CACHE_DIR, "articles", f"{pid}.json")
     if os.path.isfile(cache_path):
-        with open(cache_path) as f:
-            return json.load(f)
+        try:
+            with open(cache_path) as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError) as e:
+            sys.stderr.write(f"[cache corrompido article {pid}, refazendo] {e}\n")
+            try:
+                os.remove(cache_path)
+            except OSError:
+                pass
     try:
         data = _get("/article/", {"code": pid, "collection": collection, "format": "xylose"})
         with open(cache_path, "w") as f:
