@@ -19,7 +19,8 @@ A coleta foi realizada em dois momentos:
 - **20 de maio de 2026** — expansão da análise CAPES para o dump oficial completo no portal de Dados Abertos da CAPES (`BR-CAPES-BTD-2021A2024-2025-12-01`, versão 3.0), cobrindo **todas as grandes áreas** do conhecimento e o quadriênio 2021–2024 (350.071 registros no universo, ~13 mil trabalhos no campo das **Tecnologias de IA, ML e aprendizado profundo** identificados pelo classificador refinado).
 - **21 de maio de 2026** — subcategorização do campo em **5 subcampos** que reconhecem genealogias distintas (IA stricto sensu, aprendizado de máquina, aprendizado profundo & redes neurais, modelos de linguagem & IA generativa, tecnologias correlatas). Um mesmo trabalho pode estar em vários subcampos; o agrupamento sob um único rótulo guarda-chuva é descritivo, não afirmação de identidade entre as tradições.
 - **21 de maio de 2026** (auditoria) — diagnóstico de um falso positivo na Antropologia (a defesa "Reivindicando o maternar", da UFPR, classificada erroneamente em LLMs por causa do termo "transformer" no sentido literal em inglês) revelou que **564 dos 876 trabalhos** do subcampo LLM caíram lá apenas por essa palavra. Adicionada regra de co-ocorrência: `transformer` só conta como LLM quando aparece com contexto técnico (NLP, attention, BERT, neural, etc.) no mesmo texto. **Corpus final: 12.995 trabalhos** (queda de 341 falsos positivos); subcampo LLM cai de 876 para **506**.
-- **22 de maio de 2026** (SciELO via API) — re-análise da base SciELO substituindo o workflow antigo (export manual RIS pela interface web → parsing custom) por queries programáticas à API oficial ArticleMeta. Filtragem client-side por `subject_areas` (Human Sciences + Applied Social Sciences + Linguistics, Letters and Arts), restrita a 2021–2024 para paridade com CAPES. Aplica o mesmo `classificar_subcampos` que rodou no CAPES, garantindo coerência metodológica. Resultado: **179 artigos** sobre Tecnologias IA/ML/DL (de um universo de 33.902 artigos das áreas-alvo no mesmo período). Substancialmente diferente em escopo e método da coleta inicial de 152 artigos (1983–2025).
+- **22 de maio de 2026** (SciELO via API) — re-análise da base SciELO substituindo o workflow antigo (export manual RIS pela interface web → parsing custom) por queries programáticas à API oficial ArticleMeta. Coleta inicial restrita às áreas-alvo (Human Sciences + Applied Social Sciences + Linguistics, Letters and Arts) para paridade temática com o capítulo da tese: 179 artigos sobre Tecnologias IA/ML/DL.
+- **22 de maio de 2026** (SciELO expandido) — expansão da coleta SciELO para o universo Brasil completo (todas as 8 \textit{subject areas}), por simetria metodológica com a coleta CAPES. Universo: 98.165 artigos publicados em 2021–2024; corpus IA/ML/DL restrito a 2021–2024 estrito: **631 artigos** (502 Foco Central + 129 Correlatos; taxa interna geral 0,70%).
 
 > **Nota sobre o rótulo guarda-chuva:** "Tecnologias de IA, ML e aprendizado profundo" é descritivo. Não afirma que inteligência artificial em sentido estrito, machine learning, deep learning, modelos de linguagem e tecnologias correlatas são a mesma coisa — cada um tem genealogia, comunidade epistêmica e tradição teórica próprias. A função do rótulo é apenas marcar o conjunto de trabalhos que tocam essa constelação. A análise de subcampos (`utils.classificar_subcampos`) preserva as distinções nas figuras de granularidade fina.
 
@@ -53,9 +54,13 @@ analise_bibliometrica_ia_ciencias_humanas/
 │   ├── export_scielo.ris                   (não versionado — coleta inicial)
 │   ├── scielo_*.csv                        (não versionado — coleta inicial)
 │   ├── resultados_detalhados_scielo.xlsx   (saída da análise inicial)
-│   ├── scielo_humanas_universo.csv         (33.902 artigos áreas-alvo 2021–2024)
-│   ├── scielo_ia_subcampos.csv             (179 artigos sobre IA/ML/DL 2021–2024)
-│   ├── scielo_ia_subcampos_auditoria.xlsx  (versão XLSX para revisão humana)
+│   ├── scielo_humanas_universo.csv         (33.902 artigos áreas-alvo 2021–2024 — não versionado)
+│   ├── scielo_ia_subcampos.csv             (179 artigos áreas-alvo — não versionado)
+│   ├── scielo_ia_subcampos_auditoria.xlsx  (versão XLSX para revisão humana, 179 artigos)
+│   ├── scielo_brasil_universo.csv          (98.165 artigos universo Brasil — não versionado)
+│   ├── scielo_brasil_universo_agregado.csv (agregado por subject_area, comitável)
+│   ├── scielo_brasil_ia_subcampos.csv      (~659 artigos universo Brasil — não versionado)
+│   ├── scielo_brasil_ia_subcampos_auditoria.xlsx (versão XLSX para revisão, 631 artigos 2021–2024)
 │   ├── cache_articlemeta/                  (cache local da API, não versionado)
 │   ├── relatorio_completo.txt              (gerado pelo script antigo)
 │   └── auditoria_foco_ia.csv               (gerado pelo script antigo)
@@ -82,46 +87,61 @@ analise_bibliometrica_ia_ciencias_humanas/
 
 ## Principais resultados
 
-### SciELO (2021–2024, via API ArticleMeta) — 179 artigos sobre Tecnologias IA/ML/DL
+### SciELO (2021–2024, via API ArticleMeta, universo Brasil completo) — 631 artigos sobre Tecnologias IA/ML/DL
 
-Análise baseada em queries programáticas à API ArticleMeta (`articlemeta.scielo.org/api/v1`). Universo: 33.902 artigos da coleção Brasil em periódicos cujas `subject_areas` incluem Human Sciences, Applied Social Sciences ou Linguistics, Letters and Arts, publicados entre 2021 e 2024.
+Análise baseada em queries programáticas à API ArticleMeta (`articlemeta.scielo.org/api/v1`). Universo completo: 98.165 artigos publicados na coleção Brasil (todas as \textit{subject\_areas} do SciELO) entre 2021 e 2024.
 
 | Indicador | Valor |
 |-----------|-------|
-| Universo (áreas-alvo, 2021–2024) | 33.902 |
-| **Foco Central (IA, ML, DL ou LLMs)** | **132** |
-| **Correlatos** | **47** |
-| **Total no campo** | **179 (0,53% do universo)** |
-| Crescimento 2021→2024 | 27 → 76 artigos (+181%) |
+| Universo Brasil (2021–2024, todas as áreas) | 98.165 |
+| **Foco Central (IA, ML, DL ou LLMs)** | **502** |
+| **Correlatos** | **129** |
+| **Total no campo (recorte 2021–2024 estrito)** | **631 (0,70% do universo)** |
+| Crescimento 2021→2024 | 107 → 225 artigos (+110%) |
 
-**Distribuição por subcampo (179 artigos; soma > 100% porque artigos podem estar em vários):**
+**Distribuição por subcampo (631 artigos; soma > 100% porque artigos podem estar em vários):**
 
 | Subcampo | Artigos | % do corpus |
 |----------|---:|---:|
-| IA em sentido estrito | 86 | 48,0% |
-| Tecnologias correlatas | 50 | 27,9% |
-| Aprendizado de máquina (ML) | 25 | 14,0% |
-| Modelos de linguagem & IA generativa | 17 | 9,5% |
-| Aprendizado profundo & redes neurais | 16 | 8,9% |
+| IA em sentido estrito | 187 | 29,6% |
+| Aprendizado profundo & redes neurais | 158 | 25,0% |
+| Tecnologias correlatas | 140 | 22,2% |
+| Aprendizado de máquina (ML) | 138 | 21,9% |
+| Modelos de linguagem & IA generativa | 45 | 7,1% |
 
-**Assinatura discursiva:** As humanidades publicadas em periódicos brasileiros conversam com o campo majoritariamente via "IA" como conceito (48%), seguido por correlatos (28%). Técnicas específicas (DL, ML) aparecem em proporção menor. Padrão oposto ao das engenharias e exatas, que escrevem sobre técnicas raramente nomeando "IA".
+**Distribuição por subject_area e taxa interna:**
+
+| Subject area | IA | % do corpus | Universo | Taxa interna |
+|-------------|---:|---:|---:|---:|
+| Health Sciences | 200 | 31,7% | 35.704 | 0,56% |
+| Agricultural Sciences | 98 | 15,5% | 9.810 | 1,00% |
+| Multidisciplinar | 84 | 13,3% | 10.163 | 0,83% |
+| Engineering | 78 | 12,4% | 4.551 | **1,71%** |
+| **Human Sciences** | **72** | **11,4%** | **14.806** | **0,49%** |
+| Applied Social Sciences | 66 | 10,5% | 6.100 | 1,08% |
+| Exact and Earth Sciences | 25 | 4,0% | 2.032 | 1,23% |
+| Biological Sciences | 5 | 0,8% | 4.598 | 0,11% |
+| Linguistics, Letters and Arts | 3 | 0,5% | 2.596 | 0,12% |
+
+**Observações analíticas relevantes:**
+
+- **Saúde lidera em volume absoluto** (200 artigos, 32% do corpus) — diferente do CAPES, onde Engenharias/Exatas dominam o ranking. Periódicos clínicos absorvem IA mais rapidamente que defesas de Saúde.
+- **Engenharia tem a maior taxa interna** (1,71%) — IA é a técnica mais "natural" para artigos de Engenharia publicados.
+- **Human Sciences tem 0,49% de taxa interna**, próximo do que CAPES Humanas mostra (0,67%). Confirmação independente da magnitude da marginalidade do tema nas humanidades publicadas.
 
 **Periódicos com maior volume:**
 
-| Periódico | Artigos |
-|-----------|---------|
-| Anais da Academia Brasileira de Ciências | 21 |
-| Estudos Avançados | 13 |
-| Texto Livre | 9 |
-| Trans/Form/Ação | 9 |
-| RAM. Revista de Administração Mackenzie | 8 |
-| Filosofia Unisinos | 6 |
-| Revista Brasileira de Ensino de Física | 6 |
-| Revista Brasileira de Direito Processual Penal | 5 |
-| Revista Bioética | 5 |
-| Ciência & Educação (Bauru) | 5 |
+| Periódico | Artigos (top 10) |
+|-----------|---|
+| (lista atualizada em `dados_scielo/scielo_brasil_ia_subcampos_auditoria.xlsx`) |
 
-> A presença do *Anais da Academia Brasileira de Ciências* (multidisciplinar) decorre da sua classificação SciELO incluir Human Sciences entre as `subject_areas`. Para análises mais estritas de "Humanas em sentido forte", filtre por subject_areas igual a `Human Sciences` apenas.
+A presença de periódicos multidisciplinares (como *Anais da Academia Brasileira de Ciências*) e de Saúde no topo reflete a ampliação da coleta. Para análises restritas a Humanas, filtre o XLSX pelo `subject_areas_periodico` contendo apenas "Human Sciences".
+
+---
+
+### SciELO (2021–2024, recorte áreas-alvo — coleta intermediária) — 179 artigos
+
+Coleta intermediária restrita às três áreas-alvo (Human Sciences + Applied Social Sciences + Linguistics, Letters and Arts). Útil para focar a análise nas humanidades em sentido amplo, mas substituída pela coleta Brasil completa que oferece o denominador correto para a taxa interna. Os 179 artigos são um subconjunto dos 631 da coleta completa.
 
 ---
 
@@ -505,4 +525,4 @@ Este repositório está disponível sob a licença [MIT](LICENSE). Os dados cole
 
 ---
 
-*Última atualização: 22 de maio de 2026 — re-análise da base SciELO via API ArticleMeta (179 artigos sobre IA/ML/DL em 2021–2024, de um universo de 33.902 artigos das áreas-alvo) e geração do comparativo SciELO × CAPES Humanas com metodologia uniforme. As duas bases confirmam, com classificador idêntico, a marginalidade do tema em Humanas (taxa interna SciELO 0,53%, CAPES Humanas 0,67%) e a marginalidade da Antropologia dentro do recorte de IA-Humanas.*
+*Última atualização: 22 de maio de 2026 — expansão da coleta SciELO para o universo Brasil completo (98.165 artigos, todas as 8 subject_areas) via flag `--todas-as-areas` da API ArticleMeta. Corpus IA/ML/DL passa a 631 artigos (2021–2024 estrito); taxa interna por subject_area torna-se calculável. Confirmação independente da marginalidade nas humanidades: SciELO Human Sciences com 0,49% de taxa interna, CAPES Humanas com 0,67% — magnitudes próximas em duas bases coletadas e classificadas com critérios idênticos. Engenharia aparece como a área de maior taxa interna no SciELO (1,71%), ecoando o que CAPES já mostrava na grande área correspondente.*
