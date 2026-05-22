@@ -59,7 +59,7 @@ analise_bibliometrica_ia_ciencias_humanas/
 │   ├── scielo_ia_subcampos_auditoria.xlsx  (versão XLSX para revisão humana, 179 artigos)
 │   ├── scielo_brasil_universo.csv          (98.165 artigos universo Brasil — não versionado)
 │   ├── scielo_brasil_universo_agregado.csv (agregado por subject_area, comitável)
-│   ├── scielo_brasil_ia_subcampos.csv      (~659 artigos universo Brasil — não versionado)
+│   ├── scielo_brasil_ia_subcampos.csv      (~659 artigos da coleta bruta da API; 631 após recorte 2021–2024 estrito por ano de publicação — ver seção de metodologia. Não versionado.)
 │   ├── scielo_brasil_ia_subcampos_auditoria.xlsx (versão XLSX para revisão, 631 artigos 2021–2024)
 │   ├── cache_articlemeta/                  (cache local da API, não versionado)
 │   ├── relatorio_completo.txt              (gerado pelo script antigo)
