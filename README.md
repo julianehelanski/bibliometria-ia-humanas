@@ -253,35 +253,35 @@ Análise baseada no dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` do portal d
 
 ---
 
-### Comparativo SciELO × CAPES Humanas (2021–2024, mesma metodologia)
+### Comparativo SciELO × CAPES Humanas (2021–2024, mesma metodologia, paridade real)
 
-Com o classificador de subcampos uniforme aplicado às duas bases sobre o mesmo período (2021–2024), tornou-se possível uma comparação rigorosa que a coleta antiga não permitia. Tabelas e figura sintética em `tabelas_comparativas_2026.md` e `figuras/comparativo_scielo_capes_2026.png`.
+Com o classificador de subcampos uniforme aplicado às duas bases sobre o mesmo período (2021–2024), e com o SciELO restrito ao subset estrito de Human Sciences (excluindo multidisciplinares e Applied Social Sciences), tornou-se possível uma comparação rigorosa apples-to-apples. Tabelas e figura sintética em `tabelas_comparativas_2026.md` e `figuras/comparativo_scielo_capes_2026.png`.
 
-| Indicador | SciELO | CAPES Humanas |
+| Indicador | SciELO Human Sciences | CAPES Humanas |
 |-----------|---:|---:|
-| Total no campo (2021–2024) | 179 | 400 |
-| Foco Central | 132 | 234 |
-| Correlatos | 47 | 166 |
-| Crescimento 2021→2024 | +181% (27→76) | +106% (69→142) |
+| Total no campo (2021–2024) | 72 | 400 |
+| Foco Central | 52 | 234 |
+| Correlatos | 20 | 166 |
+| Crescimento 2021→2024 | 16 → 34 (+113%) | 69 → 142 (+106%) |
 
 **Distribuição por subcampo:**
 
-| Subcampo | SciELO | CAPES Humanas |
+| Subcampo | SciELO Human Sciences | CAPES Humanas |
 |----------|---:|---:|
-| IA em sentido estrito | 48,0% | 39,5% |
-| Tecnologias correlatas | 27,9% | 50,2% |
-| Aprendizado de máquina (ML) | 14,0% | 19,5% |
-| LLMs & IA generativa | 9,5% | 5,0% |
-| DL & redes neurais | 8,9% | 8,0% |
+| IA em sentido estrito | 55,6% | 39,5% |
+| Tecnologias correlatas | 30,6% | 50,2% |
+| Aprendizado de máquina (ML) | 13,9% | 19,5% |
+| Aprendizado profundo & redes neurais | 6,9% | 8,0% |
+| Modelos de linguagem & IA generativa | 1,4% | 5,0% |
 
 **Diferenças notáveis entre as duas bases:**
 
-- **SciELO mais conceitual:** 48% via "IA" stricta vs 40% no CAPES.
-- **CAPES mais aplicado:** 50% via correlatos (NLP, big data, automação, robótica) — peso da Educação, Geografia e Psicologia aplicadas.
-- **SciELO captura a virada generativa mais rapidamente:** LLMs como % do corpus já dobra a proporção do CAPES (9,5% vs 5,0%), coerente com o ciclo curto de revisão de periódicos versus o ciclo longo de defesas de mestrado/doutorado.
-- **Crescimento mais agudo no SciELO** (+181% vs +106%): periódicos absorvem o tema "IA" mais depressa do que programas de pós-graduação.
+- **SciELO Human Sciences mais conceitual:** 56% via "IA" stricta vs 40% no CAPES Humanas.
+- **CAPES Humanas mais aplicado:** 50% via correlatos (NLP, big data, automação, robótica) — peso da Educação, Geografia e Psicologia aplicadas. SciELO Human Sciences tem 31% via correlatos.
+- **LLMs ainda raro nos periódicos humanísticos:** apenas 1 artigo (1,4%) no SciELO Human Sciences toca o subcampo "Modelos de linguagem & IA generativa", contra 20 (5,0%) no CAPES Humanas. Isso é coerente com o atraso editorial dos periódicos — defesas iniciadas durante a virada ChatGPT já foram concluídas, mas os artigos correspondentes ainda estão no pipeline de revisão.
+- **Crescimento similar nas duas bases:** SciELO Human Sciences +113%, CAPES Humanas +106% no período 2021–2024.
 
-A marginalidade da Antropologia aparece nas duas bases: 4 defesas no CAPES (1% do recorte Humanas-IA) e nenhum periódico de Antropologia entre os top 10 do SciELO IA-Humanas. As duas leituras combinadas sustentam o argumento da tese com dupla validação empírica.
+A marginalidade da Antropologia aparece nas duas bases: 4 defesas no CAPES Humanas e a revista **Mana** (PPGAS-MN/UFRJ) com 3 artigos no SciELO Human Sciences entre os top 10 periódicos do recorte. As duas leituras combinadas sustentam o argumento da tese com dupla validação empírica.
 
 ---
 
