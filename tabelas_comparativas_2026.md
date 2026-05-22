@@ -1,50 +1,56 @@
 # Tabelas comparativas SciELO × CAPES (2026)
 
-Coleta: SciELO via API ArticleMeta + CAPES via dump oficial 2021-2024.
-Classificação: regex de subcampos do `utils.classificar_subcampos`,
-com regra de co-ocorrência para `transformer` e para a sigla 'IA'.
+Coleta atualizada em 22/05/2026. SciELO via API ArticleMeta com
+universo Brasil completo (todas as 8 subject_areas); CAPES via dump oficial 2021-2024.
+Classificação por regex de subcampos `utils.classificar_subcampos`,
+com regras de co-ocorrência para `transformer` e para a sigla 'IA'.
+
+**Recorte deste documento:** comparativo de paridade — SciELO restrito
+a subject_area = 'Human Sciences' (puro, sem multidisciplinares ou
+Applied Social Sciences) contra CAPES grande área Ciências Humanas.
+Tabelas do panorama Brasil completo (referência) ao final.
 
 ## Sumário (2021–2024)
 
-| Indicador | SciELO | CAPES Humanas |
+| Indicador | SciELO Human Sciences | CAPES Humanas |
 |---|---:|---:|
-| Total no campo | 179 | 400 |
-| Foco Central | 132 | 234 |
-| Correlatos | 47 | 166 |
+| Total no campo | 72 | 400 |
+| Foco Central | 52 | 234 |
+| Correlatos | 20 | 166 |
 
 ## Distribuição por subcampo
 
-| Subcampo | SciELO | % SciELO | CAPES | % CAPES |
+| Subcampo | SciELO Human Sci. | % SciELO | CAPES | % CAPES |
 |---|---:|---:|---:|---:|
-| IA em sentido estrito | 86 | 48.0% | 158 | 39.5% |
-| Aprendizado de máquina (ML) | 25 | 14.0% | 78 | 19.5% |
-| Aprendizado profundo & redes neurais | 16 | 8.9% | 32 | 8.0% |
-| Modelos de linguagem & IA generativa | 17 | 9.5% | 20 | 5.0% |
-| Tecnologias correlatas | 50 | 27.9% | 201 | 50.2% |
+| IA em sentido estrito | 40 | 55.6% | 158 | 39.5% |
+| Aprendizado de máquina (ML) | 10 | 13.9% | 78 | 19.5% |
+| Aprendizado profundo & redes neurais | 5 | 6.9% | 32 | 8.0% |
+| Modelos de linguagem & IA generativa | 1 | 1.4% | 20 | 5.0% |
+| Tecnologias correlatas | 22 | 30.6% | 201 | 50.2% |
 
 ## Evolução temporal
 
-| Ano | SciELO | CAPES |
+| Ano | SciELO Human Sci. | CAPES Humanas |
 |---:|---:|---:|
-| 2021 | 27 | 69 |
-| 2022 | 31 | 81 |
-| 2023 | 45 | 108 |
-| 2024 | 76 | 142 |
+| 2021 | 16 | 69 |
+| 2022 | 10 | 81 |
+| 2023 | 12 | 108 |
+| 2024 | 34 | 142 |
 
-## SciELO — top 10 periódicos
+## SciELO Human Sciences — top 10 periódicos
 
 | Periódico | Artigos |
 |---|---:|
-| Anais da Academia Brasileira de Ciências | 21 |
 | Estudos Avançados | 13 |
-| Texto Livre | 9 |
 | Trans/Form/Ação | 9 |
-| RAM. Revista de Administração Mackenzie | 8 |
 | Filosofia Unisinos | 6 |
 | Revista Brasileira de Ensino de Física | 6 |
-| Revista Brasileira de Direito Processual Penal | 5 |
-| Revista Bioética | 5 |
 | Ciência & Educação (Bauru) | 5 |
+| Psicologia: Reflexão e Crítica | 3 |
+| Mana | 3 |
+| Educação em Revista | 3 |
+| Mercator (Fortaleza) | 2 |
+| Revista Brasileira de Inovação | 2 |
 
 ## CAPES Humanas — top 10 áreas
 
@@ -60,3 +66,28 @@ com regra de co-ocorrência para `transformer` e para a sigla 'IA'.
 | ANTROPOLOGIA | 4 |
 | TEOLOGIA | 4 |
 | ARQUEOLOGIA | 2 |
+
+---
+
+## Panorama de referência: SciELO Brasil completo (todas as áreas)
+
+Para situar os 72 artigos de Human Sciences puro no universo
+mais amplo, segue o agregado do corpus IA/ML/DL no SciELO Brasil completo
+(recorte estrito 2021–2024).
+
+**Total SciELO Brasil 2021–2024:** 631 artigos no campo,
+sendo 502 Foco Central e 129 Correlatos.
+
+**Distribuição por subject_area primária:**
+
+| Subject area | Artigos |
+|---|---:|
+| Health Sciences | 200 |
+| Agricultural Sciences | 98 |
+| Multidisciplinar | 84 |
+| Engineering | 78 |
+| Human Sciences | 72 |
+| Applied Social Sciences | 66 |
+| Exact and Earth Sciences | 25 |
+| Biological Sciences | 5 |
+| Linguistics, Letters and Arts | 3 |

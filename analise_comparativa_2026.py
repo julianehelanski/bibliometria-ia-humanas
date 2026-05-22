@@ -19,6 +19,7 @@ Saídas:
 from __future__ import annotations
 
 import os
+import sys
 
 import numpy as np
 import pandas as pd
@@ -58,18 +59,44 @@ def _bool(s):
 
 
 def carregar_scielo() -> pd.DataFrame:
-    df = pd.read_csv(os.path.join(DADOS_SCIELO_DIR, "scielo_ia_subcampos.csv"), low_memory=False)
+    """Carrega SciELO Brasil completo (universo todas as áreas).
+
+    Filtra para Human Sciences puro para paridade real com CAPES Humanas
+    (ambos os subsets passam pelo mesmo classificar_subcampos).
+    """
+    # Prefere o universo Brasil completo (XLSX), com fallback para o
+    # recorte de áreas-alvo (CSV) caso o XLSX não esteja disponível.
+    xlsx = os.path.join(DADOS_SCIELO_DIR, "scielo_brasil_ia_subcampos_auditoria.xlsx")
+    csv = os.path.join(DADOS_SCIELO_DIR, "scielo_ia_subcampos.csv")
+    if os.path.isfile(xlsx):
+        df = pd.read_excel(xlsx, engine="openpyxl")
+        fonte = "SciELO Brasil completo (XLSX, 8 subject_areas)"
+    elif os.path.isfile(csv):
+        df = pd.read_csv(csv, low_memory=False)
+        fonte = "SciELO recorte 3 áreas-alvo (CSV, fallback)"
+    else:
+        sys.exit("ERRO: rode antes analise_scielo_articlemeta.py")
     df["ano"] = pd.to_numeric(df["ano"], errors="coerce").astype("Int64")
     n_pre = len(df)
     df = df[(df["ano"] >= ANO_MIN) & (df["ano"] <= ANO_MAX)].copy()
-    print(f"SciELO: {n_pre} → {len(df)} após restrição a {ANO_MIN}-{ANO_MAX}")
+    print(f"{fonte}: {n_pre} → {len(df)} após restrição a {ANO_MIN}-{ANO_MAX}")
     return df
 
 
+def carregar_scielo_human_sciences(sci_total: pd.DataFrame) -> pd.DataFrame:
+    """Subset apenas de Human Sciences puro (para paridade com CAPES Humanas).
+
+    Inclui apenas periódicos cuja subject_area é exatamente 'Human Sciences'
+    (excluindo multidisciplinares e outras categorias).
+    """
+    hs = sci_total[sci_total["subject_areas_periodico"]
+                   .fillna("").astype(str).str.strip() == "Human Sciences"].copy()
+    print(f"SciELO Human Sciences (estrito): {len(hs)}")
+    return hs
+
+
 def carregar_capes() -> pd.DataFrame:
-    """Carrega CAPES IA-Humanas (restrito a grande área Ciências Humanas)
-    para comparabilidade com SciELO (que também é só Humanas + Sociais
-    Aplicadas + Letras)."""
+    """Carrega CAPES IA-Humanas (restrito à grande área Ciências Humanas)."""
     df = pd.read_excel(os.path.join(DADOS_CAPES_DIR, "capes_2021_2024_ia_auditoria.xlsx"),
                        engine="openpyxl")
     df["AN_BASE"] = pd.to_numeric(df["AN_BASE"], errors="coerce").astype("Int64")
@@ -87,7 +114,7 @@ def fig_comparativa(sci: pd.DataFrame, cap: pd.DataFrame) -> None:
     s_ano = sci.groupby("ano").size().reindex(range(ANO_MIN, ANO_MAX + 1), fill_value=0)
     c_ano = cap.groupby("AN_BASE").size().reindex(range(ANO_MIN, ANO_MAX + 1), fill_value=0)
     ax.plot(s_ano.index, s_ano.values, marker="o", color=COR_SCIELO, linewidth=2.5,
-            label=f"SciELO (n={s_ano.sum()})")
+            label=f"SciELO Human Sciences (n={s_ano.sum()})")
     ax.plot(c_ano.index, c_ano.values, marker="s", color=COR_CAPES, linewidth=2.5,
             label=f"CAPES Humanas (n={c_ano.sum()})")
     for x, y in zip(s_ano.index, s_ano.values):
@@ -113,7 +140,7 @@ def fig_comparativa(sci: pd.DataFrame, cap: pd.DataFrame) -> None:
     cap_pct = np.array(cap_vals) / max(len(cap), 1) * 100
     x = np.arange(len(labels))
     w = 0.38
-    ax.barh(x + w/2, sci_pct, w, color=COR_SCIELO, label="SciELO", edgecolor="white")
+    ax.barh(x + w/2, sci_pct, w, color=COR_SCIELO, label="SciELO Human Sciences", edgecolor="white")
     ax.barh(x - w/2, cap_pct, w, color=COR_CAPES, label="CAPES Humanas", edgecolor="white")
     for i, (sv, cv) in enumerate(zip(sci_pct, cap_pct)):
         ax.text(sv + 1, i + w/2, f"{sv:.1f}%", va="center", fontsize=7, color=COR_SCIELO)
@@ -131,7 +158,7 @@ def fig_comparativa(sci: pd.DataFrame, cap: pd.DataFrame) -> None:
     for bar, val in zip(bars, top_per.values):
         ax.text(bar.get_width() + 0.3, bar.get_y() + bar.get_height()/2,
                 f"{val}", va="center", fontsize=8)
-    ax.set_title("SciELO: top 10 periódicos", fontsize=10)
+    ax.set_title("SciELO Human Sciences: top 10 periódicos", fontsize=10)
     ax.set_xlabel("Artigos sobre IA/ML/DL")
     ax.set_xlim(0, max(top_per.values) * 1.18)
     # Trunca labels longas
@@ -155,26 +182,38 @@ def fig_comparativa(sci: pd.DataFrame, cap: pd.DataFrame) -> None:
     print(f"  → {out}")
 
 
-def tabela_markdown(sci: pd.DataFrame, cap: pd.DataFrame) -> None:
+def tabela_markdown(sci: pd.DataFrame, cap: pd.DataFrame,
+                    sci_total: pd.DataFrame | None = None) -> None:
+    """Gera tabelas comparativas em Markdown.
+
+    - sci: SciELO Human Sciences puro (paridade com CAPES Humanas).
+    - cap: CAPES grande área Ciências Humanas.
+    - sci_total: SciELO Brasil completo (panorama; opcional, gera seção extra).
+    """
     linhas = []
     linhas.append("# Tabelas comparativas SciELO × CAPES (2026)\n")
-    linhas.append("Coleta: SciELO via API ArticleMeta + CAPES via dump oficial 2021-2024.")
-    linhas.append("Classificação: regex de subcampos do `utils.classificar_subcampos`,")
-    linhas.append("com regra de co-ocorrência para `transformer` e para a sigla 'IA'.\n")
+    linhas.append("Coleta atualizada em 22/05/2026. SciELO via API ArticleMeta com")
+    linhas.append("universo Brasil completo (todas as 8 subject_areas); CAPES via dump oficial 2021-2024.")
+    linhas.append("Classificação por regex de subcampos `utils.classificar_subcampos`,")
+    linhas.append("com regras de co-ocorrência para `transformer` e para a sigla 'IA'.\n")
+    linhas.append("**Recorte deste documento:** comparativo de paridade — SciELO restrito")
+    linhas.append("a subject_area = 'Human Sciences' (puro, sem multidisciplinares ou")
+    linhas.append("Applied Social Sciences) contra CAPES grande área Ciências Humanas.")
+    linhas.append("Tabelas do panorama Brasil completo (referência) ao final.\n")
 
-    # Sumário
+    # Sumário SciELO Human Sciences × CAPES Humanas
     linhas.append("## Sumário (2021–2024)\n")
-    linhas.append("| Indicador | SciELO | CAPES Humanas |")
+    linhas.append("| Indicador | SciELO Human Sciences | CAPES Humanas |")
     linhas.append("|---|---:|---:|")
     linhas.append(f"| Total no campo | {len(sci):,} | {len(cap):,} |")
-    sci_central = (sci["FOCO_IA"] == "Tecnologias IA/ML/DL - Foco Central").sum()
-    cap_central = (cap["FOCO_IA"] == "Tecnologias IA/ML/DL - Foco Central").sum()
+    sci_central = int((sci["FOCO_IA"] == "Tecnologias IA/ML/DL - Foco Central").sum())
+    cap_central = int((cap["FOCO_IA"] == "Tecnologias IA/ML/DL - Foco Central").sum())
     linhas.append(f"| Foco Central | {sci_central} | {cap_central} |")
     linhas.append(f"| Correlatos | {len(sci)-sci_central} | {len(cap)-cap_central} |")
 
     # Subcampos
     linhas.append("\n## Distribuição por subcampo\n")
-    linhas.append("| Subcampo | SciELO | % SciELO | CAPES | % CAPES |")
+    linhas.append("| Subcampo | SciELO Human Sci. | % SciELO | CAPES | % CAPES |")
     linhas.append("|---|---:|---:|---:|---:|")
     for col, label in SUBCAMPOS:
         s = int(_bool(sci[col]).sum()) if col in sci.columns else 0
@@ -183,7 +222,7 @@ def tabela_markdown(sci: pd.DataFrame, cap: pd.DataFrame) -> None:
 
     # Temporal
     linhas.append("\n## Evolução temporal\n")
-    linhas.append("| Ano | SciELO | CAPES |")
+    linhas.append("| Ano | SciELO Human Sci. | CAPES Humanas |")
     linhas.append("|---:|---:|---:|")
     for ano in range(ANO_MIN, ANO_MAX + 1):
         s = int((sci["ano"] == ano).sum())
@@ -191,7 +230,7 @@ def tabela_markdown(sci: pd.DataFrame, cap: pd.DataFrame) -> None:
         linhas.append(f"| {ano} | {s} | {c} |")
 
     # Top periódicos / top áreas
-    linhas.append("\n## SciELO — top 10 periódicos\n")
+    linhas.append("\n## SciELO Human Sciences — top 10 periódicos\n")
     linhas.append("| Periódico | Artigos |")
     linhas.append("|---|---:|")
     for per, n in sci["periodico"].fillna("(s/info)").value_counts().head(10).items():
@@ -203,6 +242,27 @@ def tabela_markdown(sci: pd.DataFrame, cap: pd.DataFrame) -> None:
     for area, n in cap["NM_AREA_CONHECIMENTO"].fillna("(s/info)").value_counts().head(10).items():
         linhas.append(f"| {area} | {n} |")
 
+    # Seção opcional: panorama Brasil completo
+    if sci_total is not None and len(sci_total):
+        linhas.append("\n---\n")
+        linhas.append("## Panorama de referência: SciELO Brasil completo (todas as áreas)\n")
+        linhas.append(f"Para situar os {len(sci):,} artigos de Human Sciences puro no universo")
+        linhas.append(f"mais amplo, segue o agregado do corpus IA/ML/DL no SciELO Brasil completo")
+        linhas.append(f"(recorte estrito 2021–2024).\n")
+        linhas.append(f"**Total SciELO Brasil 2021–2024:** {len(sci_total):,} artigos no campo,")
+        sci_total_central = int((sci_total["FOCO_IA"] == "Tecnologias IA/ML/DL - Foco Central").sum())
+        linhas.append(f"sendo {sci_total_central} Foco Central e {len(sci_total)-sci_total_central} Correlatos.\n")
+        linhas.append("**Distribuição por subject_area primária:**\n")
+        linhas.append("| Subject area | Artigos |")
+        linhas.append("|---|---:|")
+        def _sa(s):
+            if pd.isna(s) or not s: return "(s/info)"
+            parts = [p.strip() for p in str(s).split(";") if p.strip()]
+            return parts[0] if len(parts) == 1 else "Multidisciplinar"
+        sa_counts = sci_total["subject_areas_periodico"].map(_sa).value_counts()
+        for sa, n in sa_counts.items():
+            linhas.append(f"| {sa} | {n} |")
+
     out = "tabelas_comparativas_2026.md"
     with open(out, "w", encoding="utf-8") as f:
         f.write("\n".join(linhas) + "\n")
@@ -211,10 +271,13 @@ def tabela_markdown(sci: pd.DataFrame, cap: pd.DataFrame) -> None:
 
 if __name__ == "__main__":
     print("Carregando SciELO ...")
-    sci = carregar_scielo()
+    sci_total = carregar_scielo()
+    sci_hs = carregar_scielo_human_sciences(sci_total)
     print("Carregando CAPES Humanas ...")
     cap = carregar_capes()
-    print("\nGerando comparativo:")
-    fig_comparativa(sci, cap)
-    tabela_markdown(sci, cap)
+    # O comparativo "humanas × humanas" usa o subset estrito Human Sciences
+    # do SciELO contra CAPES Humanas (paridade real).
+    print("\nGerando comparativo (SciELO Human Sciences × CAPES Humanas):")
+    fig_comparativa(sci_hs, cap)
+    tabela_markdown(sci_hs, cap, sci_total=sci_total)
     print("\nPronto.")
