@@ -345,18 +345,39 @@ Convenções adotadas:
 
 ---
 
+## Comparativo SciELO × CAPES Humanas
+
+### Figura Comparativa — Síntese SciELO × CAPES (2021–2024)
+
+`figuras/comparativo_scielo_capes_2026.png`
+
+```latex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.98\linewidth]{figuras/comparativo_scielo_capes_2026.png}
+  \caption{Análise comparativa SciELO $\times$ CAPES (Ciências Humanas) sobre o quadriênio 2021--2024, com classificador uniforme de subcampos aplicado às duas bases. (A)~Evolução temporal sobreposta: SciELO cresce de 27 para 76 artigos sobre IA, ML e aprendizado profundo (+181\%); CAPES Humanas cresce de 69 para 142 defesas (+106\%). (B)~Distribuição por subcampo lado a lado: o SciELO é mais conceitual (48\% via ``IA em sentido estrito''), enquanto o CAPES é mais aplicado (50\% via tecnologias correlatas, sobretudo via Educação). (C)~Top dez periódicos do SciELO no campo, com destaque para Estudos Avançados, Trans/Form/Ação, Texto Livre e Filosofia Unisinos. (D)~Top dez áreas de conhecimento das defesas CAPES em IA/Humanas: Educação (154), Geografia (64), Psicologia (56), Ciência Política (40), Filosofia (39), e a Antropologia com apenas quatro defesas.}
+  \label{fig:comparativo_scielo_capes_2026}
+  \source{Elaboração própria. Bases: API ArticleMeta (\textit{articlemeta.scielo.org}, coleção \textit{scl}, 179 artigos das áreas-alvo Human Sciences, Applied Social Sciences, Linguistics, Letters and Arts) e Catálogo de Teses e Dissertações da CAPES (BR-CAPES-BTD-2021A2024-2025-12-01, 400 defesas da grande área Ciências Humanas).}
+\end{figure}
+```
+
+**Comentário analítico.** Figura-síntese que fecha o capítulo. Apresenta as duas bases lado a lado, com metodologia idêntica, sustentando os achados centrais: (i) crescimento expressivo do tema nas humanidades brasileiras; (ii) padrões discursivos distintos entre periódicos (mais conceituais) e teses/dissertações (mais aplicadas); (iii) marginalidade persistente da Antropologia na produção pós-graduada brasileira sobre IA.
+
+---
+
 ## Cheat-sheet para referência cruzada no texto
 
 | Argumento da tese | Figura(s) de apoio |
 |---|---|
 | Marginalidade das Humanas no campo de IA (em volume e em taxa interna) | Fig. 11, Fig. 16 |
-| Marginalidade dupla da Antropologia (Humanas é margem, Antro é margem da margem) | Fig. H01 |
-| Crescimento do campo sem fechamento do gap | Fig. 12, Fig. 14, Fig. H02 |
-| Assinatura discursiva: Humanas usam "IA" e correlatos, não "redes neurais" | Fig. 13, Fig. 22 |
+| Marginalidade dupla da Antropologia (Humanas é margem, Antro é margem da margem) | Fig. H01, Comp |
+| Crescimento do campo sem fechamento do gap | Fig. 12, Fig. 14, Fig. H02, Comp (painel A) |
+| Assinatura discursiva: Humanas usam "IA" e correlatos, não "redes neurais" | Fig. 13, Fig. 22, Comp (painel B) |
 | ML supera "IA" no Brasil --- crítica ao uso aglutinador do termo | Fig. 21 |
-| Virada generativa em 2024 | Fig. 23 |
+| Virada generativa em 2024 | Fig. 23, Comp (painel A) |
 | Concentração institucional e regional | Fig. 17, Fig. 18, Fig. H03, Fig. H04 |
 | Vocabulário aplicado das Humanas (educação, ética, trabalho) | Fig. H05 |
+| Comparativo SciELO $\times$ CAPES com metodologia uniforme (síntese de fechamento) | Comp |
 
 ---
 

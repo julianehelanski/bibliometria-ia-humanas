@@ -19,6 +19,7 @@ A coleta foi realizada em dois momentos:
 - **20 de maio de 2026** — expansão da análise CAPES para o dump oficial completo no portal de Dados Abertos da CAPES (`BR-CAPES-BTD-2021A2024-2025-12-01`, versão 3.0), cobrindo **todas as grandes áreas** do conhecimento e o quadriênio 2021–2024 (350.071 registros no universo, ~13 mil trabalhos no campo das **Tecnologias de IA, ML e aprendizado profundo** identificados pelo classificador refinado).
 - **21 de maio de 2026** — subcategorização do campo em **5 subcampos** que reconhecem genealogias distintas (IA stricto sensu, aprendizado de máquina, aprendizado profundo & redes neurais, modelos de linguagem & IA generativa, tecnologias correlatas). Um mesmo trabalho pode estar em vários subcampos; o agrupamento sob um único rótulo guarda-chuva é descritivo, não afirmação de identidade entre as tradições.
 - **21 de maio de 2026** (auditoria) — diagnóstico de um falso positivo na Antropologia (a defesa "Reivindicando o maternar", da UFPR, classificada erroneamente em LLMs por causa do termo "transformer" no sentido literal em inglês) revelou que **564 dos 876 trabalhos** do subcampo LLM caíram lá apenas por essa palavra. Adicionada regra de co-ocorrência: `transformer` só conta como LLM quando aparece com contexto técnico (NLP, attention, BERT, neural, etc.) no mesmo texto. **Corpus final: 12.995 trabalhos** (queda de 341 falsos positivos); subcampo LLM cai de 876 para **506**.
+- **22 de maio de 2026** (SciELO via API) — re-análise da base SciELO substituindo o workflow antigo (export manual RIS pela interface web → parsing custom) por queries programáticas à API oficial ArticleMeta. Filtragem client-side por `subject_areas` (Human Sciences + Applied Social Sciences + Linguistics, Letters and Arts), restrita a 2021–2024 para paridade com CAPES. Aplica o mesmo `classificar_subcampos` que rodou no CAPES, garantindo coerência metodológica. Resultado: **179 artigos** sobre Tecnologias IA/ML/DL (de um universo de 33.902 artigos das áreas-alvo no mesmo período). Substancialmente diferente em escopo e método da coleta inicial de 152 artigos (1983–2025).
 
 > **Nota sobre o rótulo guarda-chuva:** "Tecnologias de IA, ML e aprendizado profundo" é descritivo. Não afirma que inteligência artificial em sentido estrito, machine learning, deep learning, modelos de linguagem e tecnologias correlatas são a mesma coisa — cada um tem genealogia, comunidade epistêmica e tradição teórica próprias. A função do rótulo é apenas marcar o conjunto de trabalhos que tocam essa constelação. A análise de subcampos (`utils.classificar_subcampos`) preserva as distinções nas figuras de granularidade fina.
 
@@ -34,22 +35,30 @@ analise_bibliometrica_ia_ciencias_humanas/
 ├── CITATION.cff                    ← Metadados de citação (lido pelo GitHub)
 ├── requirements.txt                ← Dependências Python
 │
-├── utils.py                        ← Estilo, paleta e regex IA compartilhados
-├── analise_scielo.py               ← Análise dos artigos SciELO
-├── analise_capes.py                ← Análise CAPES (coleta inicial, 2013–2023)
-├── analise_capes_2021_2024.py      ← Análise CAPES (dump oficial 2021–2024, todas as áreas)
-├── analise_capes_humanas.py        ← Zoom IA em Ciências Humanas (subset do dump 2021–2024)
-├── figuras_capes_2021_2024.py      ← Geração das 10 figuras da análise expandida
-├── analise_comparativa.py          ← Figura e tabelas comparativas SciELO × CAPES
-├── gerar_graficos_figuras.py       ← Geração complementar de figuras
-├── tabelas_comparativas.md         ← Tabelas em Markdown geradas pelo script comparativo
+├── utils.py                            ← Estilo, paleta, regex e classificador de subcampos
+├── analise_scielo.py                   ← Análise SciELO (coleta inicial via RIS, 1983–2025)
+├── analise_scielo_articlemeta.py       ← Análise SciELO (API ArticleMeta, 2021–2024)
+├── analise_capes.py                    ← Análise CAPES (coleta inicial, 2013–2023)
+├── analise_capes_2021_2024.py          ← Análise CAPES (dump oficial 2021–2024, todas as áreas)
+├── analise_capes_humanas.py            ← Zoom IA em Ciências Humanas (subset do dump 2021–2024)
+├── figuras_capes_2021_2024.py          ← Geração das figuras da análise expandida
+├── analise_comparativa.py              ← Comparativo SciELO × CAPES (versão antiga, 2025)
+├── analise_comparativa_2026.py         ← Comparativo SciELO × CAPES (versão 2026, metodologia uniforme)
+├── gerar_graficos_figuras.py           ← Geração complementar de figuras
+├── inventario_figuras_capes.md         ← Legendas LaTeX prontas para as figuras CAPES
+├── tabelas_comparativas.md             ← Tabelas Markdown (comparativo antigo)
+├── tabelas_comparativas_2026.md        ← Tabelas Markdown (comparativo novo)
 │
-├── dados_scielo/                   ← Arquivos de entrada/saída SciELO
-│   ├── export_scielo.ris               (não versionado — ver Reprodutibilidade)
-│   ├── scielo_*.csv                    (não versionado)
-│   ├── resultados_detalhados_scielo.xlsx
-│   ├── relatorio_completo.txt          (gerado pelo script)
-│   └── auditoria_foco_ia.csv           (gerado pelo script)
+├── dados_scielo/                       ← Arquivos de entrada/saída SciELO
+│   ├── export_scielo.ris                   (não versionado — coleta inicial)
+│   ├── scielo_*.csv                        (não versionado — coleta inicial)
+│   ├── resultados_detalhados_scielo.xlsx   (saída da análise inicial)
+│   ├── scielo_humanas_universo.csv         (33.902 artigos áreas-alvo 2021–2024)
+│   ├── scielo_ia_subcampos.csv             (179 artigos sobre IA/ML/DL 2021–2024)
+│   ├── scielo_ia_subcampos_auditoria.xlsx  (versão XLSX para revisão humana)
+│   ├── cache_articlemeta/                  (cache local da API, não versionado)
+│   ├── relatorio_completo.txt              (gerado pelo script antigo)
+│   └── auditoria_foco_ia.csv               (gerado pelo script antigo)
 │
 ├── dados_capes/                    ← Arquivos de entrada/saída CAPES
 │   ├── br-capes-btd-*.xlsx             (dump oficial 2021–2024, 4 arquivos, via Git LFS)
@@ -73,7 +82,52 @@ analise_bibliometrica_ia_ciencias_humanas/
 
 ## Principais resultados
 
-### SciELO (1983–2025) — 152 artigos
+### SciELO (2021–2024, via API ArticleMeta) — 179 artigos sobre Tecnologias IA/ML/DL
+
+Análise baseada em queries programáticas à API ArticleMeta (`articlemeta.scielo.org/api/v1`). Universo: 33.902 artigos da coleção Brasil em periódicos cujas `subject_areas` incluem Human Sciences, Applied Social Sciences ou Linguistics, Letters and Arts, publicados entre 2021 e 2024.
+
+| Indicador | Valor |
+|-----------|-------|
+| Universo (áreas-alvo, 2021–2024) | 33.902 |
+| **Foco Central (IA, ML, DL ou LLMs)** | **132** |
+| **Correlatos** | **47** |
+| **Total no campo** | **179 (0,53% do universo)** |
+| Crescimento 2021→2024 | 27 → 76 artigos (+181%) |
+
+**Distribuição por subcampo (179 artigos; soma > 100% porque artigos podem estar em vários):**
+
+| Subcampo | Artigos | % do corpus |
+|----------|---:|---:|
+| IA em sentido estrito | 86 | 48,0% |
+| Tecnologias correlatas | 50 | 27,9% |
+| Aprendizado de máquina (ML) | 25 | 14,0% |
+| Modelos de linguagem & IA generativa | 17 | 9,5% |
+| Aprendizado profundo & redes neurais | 16 | 8,9% |
+
+**Assinatura discursiva:** As humanidades publicadas em periódicos brasileiros conversam com o campo majoritariamente via "IA" como conceito (48%), seguido por correlatos (28%). Técnicas específicas (DL, ML) aparecem em proporção menor. Padrão oposto ao das engenharias e exatas, que escrevem sobre técnicas raramente nomeando "IA".
+
+**Periódicos com maior volume:**
+
+| Periódico | Artigos |
+|-----------|---------|
+| Anais da Academia Brasileira de Ciências | 21 |
+| Estudos Avançados | 13 |
+| Texto Livre | 9 |
+| Trans/Form/Ação | 9 |
+| RAM. Revista de Administração Mackenzie | 8 |
+| Filosofia Unisinos | 6 |
+| Revista Brasileira de Ensino de Física | 6 |
+| Revista Brasileira de Direito Processual Penal | 5 |
+| Revista Bioética | 5 |
+| Ciência & Educação (Bauru) | 5 |
+
+> A presença do *Anais da Academia Brasileira de Ciências* (multidisciplinar) decorre da sua classificação SciELO incluir Human Sciences entre as `subject_areas`. Para análises mais estritas de "Humanas em sentido forte", filtre por subject_areas igual a `Human Sciences` apenas.
+
+---
+
+### SciELO (1983–2025, coleta inicial via interface web) — 152 artigos
+
+A coleta inicial cobriu período histórico amplo (1983–2025) com filtro de "Ciências Humanas" aplicado pelo próprio motor de busca da SciELO. Mantida no repositório por referência histórica; resultados disponíveis em `dados_scielo/resultados_detalhados_scielo.xlsx`. Os números abaixo referem-se a este recorte original.
 
 | Indicador | Valor |
 |-----------|-------|
@@ -179,6 +233,38 @@ Análise baseada no dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` do portal d
 
 ---
 
+### Comparativo SciELO × CAPES Humanas (2021–2024, mesma metodologia)
+
+Com o classificador de subcampos uniforme aplicado às duas bases sobre o mesmo período (2021–2024), tornou-se possível uma comparação rigorosa que a coleta antiga não permitia. Tabelas e figura sintética em `tabelas_comparativas_2026.md` e `figuras/comparativo_scielo_capes_2026.png`.
+
+| Indicador | SciELO | CAPES Humanas |
+|-----------|---:|---:|
+| Total no campo (2021–2024) | 179 | 400 |
+| Foco Central | 132 | 234 |
+| Correlatos | 47 | 166 |
+| Crescimento 2021→2024 | +181% (27→76) | +106% (69→142) |
+
+**Distribuição por subcampo:**
+
+| Subcampo | SciELO | CAPES Humanas |
+|----------|---:|---:|
+| IA em sentido estrito | 48,0% | 39,5% |
+| Tecnologias correlatas | 27,9% | 50,2% |
+| Aprendizado de máquina (ML) | 14,0% | 19,5% |
+| LLMs & IA generativa | 9,5% | 5,0% |
+| DL & redes neurais | 8,9% | 8,0% |
+
+**Diferenças notáveis entre as duas bases:**
+
+- **SciELO mais conceitual:** 48% via "IA" stricta vs 40% no CAPES.
+- **CAPES mais aplicado:** 50% via correlatos (NLP, big data, automação, robótica) — peso da Educação, Geografia e Psicologia aplicadas.
+- **SciELO captura a virada generativa mais rapidamente:** LLMs como % do corpus já dobra a proporção do CAPES (9,5% vs 5,0%), coerente com o ciclo curto de revisão de periódicos versus o ciclo longo de defesas de mestrado/doutorado.
+- **Crescimento mais agudo no SciELO** (+181% vs +106%): periódicos absorvem o tema "IA" mais depressa do que programas de pós-graduação.
+
+A marginalidade da Antropologia aparece nas duas bases: 4 defesas no CAPES (1% do recorte Humanas-IA) e nenhum periódico de Antropologia entre os top 10 do SciELO IA-Humanas. As duas leituras combinadas sustentam o argumento da tese com dupla validação empírica.
+
+---
+
 ### CAPES (2013–2023, coleta inicial restrita a Humanas) — 100 teses e dissertações
 
 A análise inicial cobriu o período 2013–2023 com filtro de grande área aplicado no próprio catálogo web. Os resultados desta análise se mantêm no repositório por referência histórica e metodológica; as figuras correspondentes têm prefixo `capes_01a..10`. Os números abaixo permanecem válidos no recorte mais estreito.
@@ -277,6 +363,8 @@ Para fins de revisão humana caso a caso, os scripts geram planilhas/CSV com a c
 - O dump CAPES traz dados consolidados pela Plataforma Sucupira: programas podem reabrir o calendário de envio dentro do quadriênio, gerando pequenas atualizações retroativas. A versão usada nesta análise é a 3.0 publicada em 01/12/2025.
 - O crescimento bruto entre 2013 e 2023 (3.000%) é matematicamente sensível à base muito pequena do ano inicial. A coexistência com o CAGR mitiga essa distorção.
 - A taxa interna de IA por grande área (Engenharias 12,8%, Humanas 0,7%) depende do regex aplicado. O regex refinado é conservador por desenho: trabalhos de Computação que mencionem só "algoritmo" deixam de ser contados como IA — fronteira deliberada para que "IA" não se confunda com "Computação em geral".
+- O filtro `from`/`until` da API ArticleMeta opera sobre `processing_date` (data de indexação no SciELO), não sobre data de publicação. Por isso, no subset `scielo_ia_subcampos.csv` há alguns artigos antigos re-indexados no período. O comparativo `analise_comparativa_2026.py` aplica restrição estrita ao ano de publicação (2021–2024) para evitar leakage.
+- A coleta SciELO depende de programar — exige instalação de Python e bibliotecas. Esta exigência pode excluir parte da comunidade acadêmica das humanidades, que não tem essa formação como padrão. O repositório procura mitigar a barreira disponibilizando script + instruções, mas a tensão entre rigor metodológico e democratização do método permanece como problema aberto.
 
 ---
 
@@ -305,47 +393,53 @@ Versões fixadas em `requirements.txt`: `pandas`, `numpy`, `matplotlib`, `seabor
    - Gráficos PNG em `figuras/`
    - Planilha consolidada em `dados_capes/resultados_detalhados_capes.xlsx` (inclui aba `Auditoria Foco IA`, `Top Termos`, `Top Bigrams`)
 
-### Script SciELO
+### Script SciELO — versão API (recomendada)
 
-1. Coloque os arquivos em `dados_scielo/`:
-   - `export_scielo.ris`
-   - `scielo_publi_ano.csv`
-   - `scielo_periódicos.csv`
-   - `scielo_tipo__literatura.csv`
-   - `scielo_citavel_naocitavel.csv`
-   - `scielo_areas_tematicas.csv`
-   - `scielo_indice_citacoes.csv`
+Sem necessidade de export manual. Basta:
 
-2. Execute:
-   ```bash
-   python analise_scielo.py
-   ```
+```bash
+pip install requests pandas openpyxl
+python analise_scielo_articlemeta.py
+```
 
-3. Saídas:
-   - Gráficos PNG em `figuras/`
-   - `dados_scielo/relatorio_completo.txt` (lista detalhada por categoria temática)
-   - `dados_scielo/auditoria_foco_ia.csv` (classificação por artigo)
+Default: janela 2021-01-01 → 2024-12-31 e coleta apenas periódicos cujas `subject_areas` incluem Human Sciences, Applied Social Sciences ou Linguistics, Letters and Arts. Para histórico completo, use `--periodo-completo`.
+
+Saídas:
+- `dados_scielo/scielo_humanas_universo.csv` — todos os artigos das áreas-alvo no período.
+- `dados_scielo/scielo_ia_subcampos.csv` — subset IA com classificação por subcampo.
+- `dados_scielo/scielo_ia_subcampos_auditoria.xlsx` — versão XLSX para revisão humana.
+
+Cache em `dados_scielo/cache_articlemeta/` (por PID e por ISSN) permite retomar coletas interrompidas e iterar regex sem rebaixar tudo.
+
+### Script SciELO — versão antiga (RIS manual)
+
+Mantida para reprodução do recorte histórico 1983–2025. Coloque os arquivos em `dados_scielo/` (`export_scielo.ris` + CSVs de filtros) e execute `python analise_scielo.py`.
 
 ### Análise comparativa SciELO × CAPES
 
-Depois de rodar os dois scripts acima, gere a figura e as tabelas comparativas:
+Depois de rodar os scripts da coleta atual em ambas as bases:
 
 ```bash
-python analise_comparativa.py
+python analise_comparativa_2026.py
 ```
 
 Saídas:
-- `figuras/comparativo_scielo_capes.png` e `.svg` — uma única figura com 4 painéis: evolução temporal sobreposta, concentração nos últimos anos, top 10 áreas (CAPES) e top 10 periódicos (SciELO).
-- `tabelas_comparativas.md` — tabelas Markdown: sumário comparativo, publicações por ano (ambas as bases lado a lado), top 10 áreas CAPES, top 10 periódicos SciELO.
-- `tabela_sumario.csv` e `tabela_publicacoes_por_ano.csv` — versões CSV.
+- `figuras/comparativo_scielo_capes_2026.png` e `.svg` — figura com 4 painéis: evolução temporal sobreposta (2021–2024), distribuição por subcampo lado a lado, top 10 periódicos SciELO, top 10 áreas CAPES Humanas.
+- `tabelas_comparativas_2026.md` — sumário comparativo, subcampos, temporal e rankings.
 
-O script aplica também a consolidação de "Ciência Política" (duas grafias com espaçamento diferente nos dados brutos).
+A versão antiga (`analise_comparativa.py` + `tabelas_comparativas.md`) cruzava 152 artigos SciELO 1983–2025 com 100 trabalhos CAPES 2013–2023 e fica no repositório como referência histórica.
 
 ---
 
 ## Reprodutibilidade
 
-### Coleta SciELO
+### Coleta SciELO — versão API (recomendada para reprodução rigorosa)
+
+1. Instale as dependências (`pip install requests pandas openpyxl`).
+2. Execute `python analise_scielo_articlemeta.py` (default 2021–2024, filtro de áreas-alvo client-side via `subject_areas`).
+3. Os critérios estão escritos no código: `SUBJECT_AREAS_ALVO`, `ANO_MIN`/`ANO_MAX`, e o regex de subcampos em `utils.py`.
+
+### Coleta SciELO — versão web (recorte histórico)
 
 1. Acesse [scielo.org](https://scielo.org)
 2. Filtre por **Brasil** > **Ciências Humanas**
@@ -411,4 +505,4 @@ Este repositório está disponível sob a licença [MIT](LICENSE). Os dados cole
 
 ---
 
-*Última atualização: 21 de maio de 2026 — subcategorização do campo em 5 subcampos (IA stricto, ML, DL/redes, LLMs/generativa, correlatos) e auditoria de falsos positivos. Diagnóstico de uma defesa específica em Antropologia (a defesa "Reivindicando o maternar", da UFPR) revelou que o termo `transformer` no regex de LLMs casava 564 vezes com o substantivo literal em inglês ("social transformer", transformadores elétricos da engenharia), não com a arquitetura de rede neural. A correção via regra de co-ocorrência derrubou o corpus de 13.336 para **12.995 trabalhos** e o subcampo LLM de 876 para **506**. Adicionadas figuras capes_21-23 dedicadas à análise por subcampo.*
+*Última atualização: 22 de maio de 2026 — re-análise da base SciELO via API ArticleMeta (179 artigos sobre IA/ML/DL em 2021–2024, de um universo de 33.902 artigos das áreas-alvo) e geração do comparativo SciELO × CAPES Humanas com metodologia uniforme. As duas bases confirmam, com classificador idêntico, a marginalidade do tema em Humanas (taxa interna SciELO 0,53%, CAPES Humanas 0,67%) e a marginalidade da Antropologia dentro do recorte de IA-Humanas.*
