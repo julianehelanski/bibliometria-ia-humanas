@@ -51,8 +51,12 @@ from utils import (
 aplicar_estilo_padrao()
 garantir_diretorio(FIGURAS_DIR)
 
-CSV_IA = os.path.join(DADOS_SCIELO_DIR, "scielo_ia_subcampos.csv")
-CSV_UNIVERSO = os.path.join(DADOS_SCIELO_DIR, "scielo_humanas_universo.csv")
+CSV_IA = os.path.join(DADOS_SCIELO_DIR, "scielo_brasil_ia_subcampos_auditoria.xlsx")
+CSV_UNIVERSO = os.path.join(DADOS_SCIELO_DIR, "scielo_brasil_universo.csv")
+CSV_UNIVERSO_AGREGADO = os.path.join(DADOS_SCIELO_DIR, "scielo_brasil_universo_agregado.csv")
+# Fallbacks: recorte antigo
+CSV_IA_FALLBACK = os.path.join(DADOS_SCIELO_DIR, "scielo_ia_subcampos.csv")
+CSV_UNIVERSO_FALLBACK = os.path.join(DADOS_SCIELO_DIR, "scielo_humanas_universo.csv")
 
 COR_HUMANAS = CORES_INTERMEDIARIAS[0]      # vermelho-muted (Humanas em destaque)
 COR_DEST = CORES_INTERMEDIARIAS[3]         # azul
@@ -60,15 +64,19 @@ COR_NEUTRA = CORES_INTERMEDIARIAS[9]       # cinza-azulado
 
 ANO_MIN, ANO_MAX = 2021, 2024
 
-# Ordem de preferência para classificar cada artigo em UMA subject_area
-# primária (quando o periódico tem várias). Coloca Human Sciences primeiro
-# para preservar o foco do recorte.
-SUBJECT_AREA_PREFERENCE = [
-    "Human Sciences",
+# As 8 subject_areas canônicas do SciELO. Periódicos multi-area viram
+# "Multidisciplinar".
+SUBJECT_AREAS_SCIELO = [
+    "Agricultural Sciences",
     "Applied Social Sciences",
+    "Biological Sciences",
+    "Engineering",
+    "Exact and Earth Sciences",
+    "Health Sciences",
+    "Human Sciences",
     "Linguistics, Letters and Arts",
 ]
-SUBJECT_AREA_OUTROS = "Multidisciplinar / outras"
+SUBJECT_AREA_MULTI = "Multidisciplinar"
 
 KEYWORDS_HEATMAP = [
     ("inteligência artificial", r"\b(intelig[êe]ncia\s+artificial|artificial\s+intelligence)\b"),
@@ -103,24 +111,33 @@ def _bool(s):
 
 
 def _subject_area_primary(sa_str):
-    """Reduz a string 'A; B; C' para UMA área primária na ordem de preferência.
+    """Reduz a string 'A; B; C' para UMA área primária.
 
-    Se nenhuma das três áreas-alvo está presente, devolve 'Multidisciplinar /
-    outras' (caso de periódicos com escopo amplo como Anais da ABC).
+    Periódicos com 1 área: devolve essa área.
+    Periódicos com 2+ áreas: devolve 'Multidisciplinar'.
+    Sem info: devolve '(s/info)'.
     """
     if pd.isna(sa_str) or not sa_str:
         return "(s/info)"
-    sas = {s.strip() for s in str(sa_str).split(";")}
-    for pref in SUBJECT_AREA_PREFERENCE:
-        if pref in sas:
-            return pref
-    return SUBJECT_AREA_OUTROS
+    sas = [s.strip() for s in str(sa_str).split(";") if s.strip()]
+    if not sas:
+        return "(s/info)"
+    if len(sas) == 1:
+        return sas[0]
+    return SUBJECT_AREA_MULTI
 
 
 def carregar_ia() -> pd.DataFrame:
-    if not os.path.isfile(CSV_IA):
+    """Carrega o subset IA. Prefere a versão Brasil completo (98k universo)
+    sobre o recorte antigo (33k universo)."""
+    if os.path.isfile(CSV_IA):
+        print(f"  usando {os.path.basename(CSV_IA)} (universo Brasil completo)")
+        df = pd.read_excel(CSV_IA, engine="openpyxl")
+    elif os.path.isfile(CSV_IA_FALLBACK):
+        print(f"  fallback: usando {os.path.basename(CSV_IA_FALLBACK)} (recorte Humanas)")
+        df = pd.read_csv(CSV_IA_FALLBACK, low_memory=False)
+    else:
         sys.exit(f"ERRO: rode antes analise_scielo_articlemeta.py — falta {CSV_IA}")
-    df = pd.read_csv(CSV_IA, low_memory=False)
     df["ano"] = pd.to_numeric(df["ano"], errors="coerce").astype("Int64")
     n_pre = len(df)
     df = df[(df["ano"] >= ANO_MIN) & (df["ano"] <= ANO_MAX)].copy()
@@ -129,14 +146,44 @@ def carregar_ia() -> pd.DataFrame:
     return df
 
 
-def carregar_universo() -> pd.DataFrame:
-    if not os.path.isfile(CSV_UNIVERSO):
-        return pd.DataFrame()
-    df = pd.read_csv(CSV_UNIVERSO, low_memory=False)
-    df["ano"] = pd.to_numeric(df["ano"], errors="coerce").astype("Int64")
-    df = df[(df["ano"] >= ANO_MIN) & (df["ano"] <= ANO_MAX)].copy()
-    df["subject_area_primary"] = df["subject_areas_periodico"].map(_subject_area_primary)
-    return df
+def carregar_universo() -> pd.DataFrame | None:
+    """Carrega o universo, com vários fallbacks por ordem de preferência:
+    1) CSV agregado pequeno (scielo_brasil_universo_agregado.csv) — leve,
+       comitável.
+    2) CSV completo Brasil (não comitado).
+    3) CSV antigo do recorte Humanas.
+    """
+    if os.path.isfile(CSV_UNIVERSO_AGREGADO):
+        print(f"  usando {os.path.basename(CSV_UNIVERSO_AGREGADO)} (agregado leve)")
+        agg = pd.read_csv(CSV_UNIVERSO_AGREGADO)
+        # Devolve um pseudo-dataframe expandido (uma linha por unidade) só pra
+        # ter a interface igual ao caso original
+        return agg
+    if os.path.isfile(CSV_UNIVERSO):
+        print(f"  usando {os.path.basename(CSV_UNIVERSO)} (universo Brasil completo)")
+        df = pd.read_csv(CSV_UNIVERSO, low_memory=False)
+        df["ano"] = pd.to_numeric(df["ano"], errors="coerce").astype("Int64")
+        df = df[(df["ano"] >= ANO_MIN) & (df["ano"] <= ANO_MAX)].copy()
+        df["subject_area_primary"] = df["subject_areas_periodico"].map(_subject_area_primary)
+        return df
+    if os.path.isfile(CSV_UNIVERSO_FALLBACK):
+        print(f"  fallback: usando {os.path.basename(CSV_UNIVERSO_FALLBACK)} (recorte Humanas)")
+        df = pd.read_csv(CSV_UNIVERSO_FALLBACK, low_memory=False)
+        df["ano"] = pd.to_numeric(df["ano"], errors="coerce").astype("Int64")
+        df = df[(df["ano"] >= ANO_MIN) & (df["ano"] <= ANO_MAX)].copy()
+        df["subject_area_primary"] = df["subject_areas_periodico"].map(_subject_area_primary)
+        return df
+    return None
+
+
+def _counts_universo(universo: pd.DataFrame | None) -> pd.Series | None:
+    """Devolve contagem do universo por subject_area_primary."""
+    if universo is None or not len(universo):
+        return None
+    # Se for o formato agregado (colunas grande_area/total), reconstroi
+    if "subject_area" in universo.columns and "total" in universo.columns:
+        return pd.Series(universo["total"].values, index=universo["subject_area"].values)
+    return universo["subject_area_primary"].value_counts()
 
 
 def texto_classificacao(df):
@@ -158,11 +205,12 @@ def fig11_subject_area(df, universo):
     counts = df["subject_area_primary"].value_counts().sort_values()
     total = counts.sum()
     cores = [_cor_sa(l) for l in counts.index]
+    univ_counts = _counts_universo(universo)
 
-    if universo is not None and len(universo):
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.5), gridspec_kw={"wspace": 0.55})
+    if univ_counts is not None:
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6), gridspec_kw={"wspace": 0.55})
     else:
-        fig, ax1 = plt.subplots(figsize=(10, 5.5))
+        fig, ax1 = plt.subplots(figsize=(10, 6))
         ax2 = None
 
     bars = ax1.barh(counts.index, counts.values, color=cores, edgecolor="white", linewidth=0.5)
@@ -175,7 +223,6 @@ def fig11_subject_area(df, universo):
     ax1.set_xlim(0, counts.max() * 1.25)
 
     if ax2 is not None:
-        univ_counts = universo["subject_area_primary"].value_counts()
         taxa = pd.Series({
             sa: counts.get(sa, 0) / univ_counts.get(sa, np.nan) * 100
             for sa in counts.index
@@ -186,7 +233,7 @@ def fig11_subject_area(df, universo):
             ax2.text(bar.get_width() + taxa.max() * 0.02,
                      bar.get_y() + bar.get_height()/2,
                      f"{val:.2f}%", va="center", fontsize=9)
-        ax2.set_xlabel("Taxa interna: % da área-alvo que é sobre o campo")
+        ax2.set_xlabel("Taxa interna: % da subject area que é sobre o campo")
         ax2.set_xlim(0, taxa.max() * 1.20)
         ax2.set_yticklabels([])
 
@@ -513,7 +560,13 @@ if __name__ == "__main__":
     df = carregar_ia()
     print(f"\nCarregando universo (para taxa interna) ...")
     universo = carregar_universo()
-    print(f"  {len(universo):,} artigos no universo das áreas-alvo 2021-2024")
+    if universo is None:
+        print("  universo indisponível — figura 11 sem taxa interna")
+    else:
+        if "subject_area" in universo.columns and "total" in universo.columns:
+            print(f"  agregado leve: {int(universo['total'].sum()):,} artigos no universo")
+        else:
+            print(f"  {len(universo):,} artigos no universo {ANO_MIN}-{ANO_MAX}")
 
     print("\nGerando figuras:")
     fig11_subject_area(df, universo)
