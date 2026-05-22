@@ -14,3 +14,8 @@ dados_capes/capes_2021_2024_ia.csv
 
 # Cache local da API ArticleMeta — milhares de JSONs pequenos, regeneráveis.
 dados_scielo/cache_articlemeta/
+
+# Subset IA completo de TODAS as áreas (com resumos), gerado por --todas-as-areas.
+# Regenerável; grande demais para versionar. Slim XLSX fica no repo.
+dados_scielo/scielo_brasil_ia_subcampos.csv
+dados_scielo/scielo_brasil_universo.csv
