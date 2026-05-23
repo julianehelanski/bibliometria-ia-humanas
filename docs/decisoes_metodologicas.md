@@ -144,7 +144,49 @@ UnB (29), USP (26), UFRJ (17), UFMG (12), UFC (12), UFRN (11), UNICAMP (10), UFP
 **Distribuição regional** (de 400):
 Sudeste 183 (45,75%), Sul 84 (21,00%), Nordeste 71 (17,75%), Centro-Oeste 55 (13,75%), Norte 7 (1,75%).
 
-### I.8. Fonte dos números
+### I.8. Panorama CAPES (12.995) — top 10 IES e top áreas de conhecimento
+
+**Top 10 áreas de conhecimento no corpus IA total** (12.995):
+
+| Área de conhecimento | Defesas |
+|---|---:|
+| Ciência da Computação | 2.903 |
+| Engenharia Elétrica | 1.838 |
+| Interdisciplinar | 1.083 |
+| Direito | 747 |
+| Administração | 554 |
+| Engenharia Mecânica | 491 |
+| Engenharia de Produção | 400 |
+| Agronomia | 347 |
+| Medicina | 347 |
+| Engenharia Civil | 248 |
+
+**Top 10 IES no corpus IA total** (12.995):
+
+| IES | Defesas |
+|---|---:|
+| USP | 647 |
+| UNICAMP | 486 |
+| UnB | 402 |
+| UFMG | 401 |
+| UFRJ | 376 |
+| UFPE | 343 |
+| UFSC | 337 |
+| UFRGS | 323 |
+| UFPR | 273 |
+| UFC | 253 |
+
+**Distribuição regional do corpus IA total** (12.995):
+
+| Região | Defesas | % |
+|---|---:|---:|
+| Sudeste | 6.730 | 51,79% |
+| Sul | 2.569 | 19,77% |
+| Nordeste | 2.282 | 17,56% |
+| Centro-Oeste | 965 | 7,43% |
+| Norte | 449 | 3,46% |
+
+### I.9. Fonte dos números
 
 - Universo total: contagem de linhas dos 4 XLSX `dados_capes/2021-2024/br-capes-btd-*.xlsx` (Git LFS).
 - Universo por grande área: `dados_capes/capes_2021_2024_universo_por_grande_area.csv` (cache leve gerado pelo `figuras_capes_2021_2024.py` ao percorrer os 4 XLSX uma vez).
@@ -301,4 +343,4 @@ Estas coortes foram superadas durante o trabalho. **Persistem no repositório** 
 4. Em seguida, sincronize README, inventário e tabelas para citar deste arquivo.
 5. **Regra de método:** todo número desta página sai de operação atômica em pandas (`len`, `value_counts`, `groupby().size()`, divisão direta), nunca de soma feita em prosa.
 
-*Última verificação completa: 23 de maio de 2026 — auditoria cruzada de `capes_2021_2024_ia_auditoria.xlsx`, `capes_2021_2024_ia_humanas_completo.xlsx`, `capes_2021_2024_universo_por_grande_area.csv`, `scielo_brasil_ia_subcampos_auditoria.xlsx` e `scielo_brasil_universo_agregado.csv`. Todos os números foram lidos via pandas diretamente das fontes primárias, não inferidos. Achados narrativos novos propagados para README e inventário no mesmo dia: (a) os 3 artigos de Mana são todos de 2024 e todos via big data (subcampo Correlatos), não IA stricto; (b) inversão da hierarquia de subcampos entre as bases — CAPES tem ML > IA stricto, SciELO tem IA stricto > ML; (c) distinção NM_AREA_CONHECIMENTO (disciplinar) vs NM_AREA_AVALIACAO (administrativa CAPES), que afeta especialmente a contagem de Antropologia (4 vs 6).*
+*Última verificação completa: 23 de maio de 2026 — auditoria cruzada de `capes_2021_2024_ia_auditoria.xlsx`, `capes_2021_2024_ia_humanas_completo.xlsx`, `capes_2021_2024_universo_por_grande_area.csv`, `scielo_brasil_ia_subcampos_auditoria.xlsx` e `scielo_brasil_universo_agregado.csv`. Todos os números foram lidos via pandas diretamente das fontes primárias, não inferidos. Achados narrativos novos propagados para README e inventário no mesmo dia: (a) os 3 artigos de Mana são todos de 2024 e todos via big data (subcampo Correlatos), não IA stricto; (b) inversão da hierarquia de subcampos entre as bases — CAPES tem ML > IA stricto, SciELO tem IA stricto > ML; (c) distinção NM_AREA_CONHECIMENTO (disciplinar) vs NM_AREA_AVALIACAO (administrativa CAPES), que afeta especialmente a contagem de Antropologia (4 vs 6). Auditoria figura-a-figura do inventário no mesmo dia detectou e corrigiu quatro captions com números pré-auditoria: (i) capes_15 "53/35/12%" → "55,0/30,2/14,4%" + Doutorado Profissional 0,3%; (ii) capes_h02 "80 → mais de 150" → "69 → 142 (+106%)"; (iii) scielo_15 "português dominante" → INVERSÃO, inglês domina com 487 (77,2%); (iv) capes_17 top IES com ordem verificada (USP 647, UNICAMP 486, UnB 402, UFMG 401, UFRJ 376, etc.).*

@@ -97,7 +97,7 @@ Convenções adotadas:
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.85\linewidth]{figuras/capes_15_nivel_academico.png}
-  \caption{Distribuição do corpus de 12.995 defesas sobre Tecnologias de IA, ML e aprendizado profundo (2021--2024) por grau acadêmico. O Mestrado responde pela maioria das defesas (cerca de 53\%), seguido pelo Doutorado (35\%) e pelo Mestrado Profissional (12\%). O Doutorado Profissional, modalidade ainda incipiente, aparece com participação residual.}
+  \caption{Distribuição do corpus de 12.995 defesas sobre Tecnologias de IA, ML e aprendizado profundo (2021--2024) por grau acadêmico. O Mestrado responde pela maioria das defesas (7.153, 55,0\%), seguido pelo Doutorado (3.925, 30,2\%) e pelo Mestrado Profissional (1.874, 14,4\%). O Doutorado Profissional, modalidade ainda incipiente, aparece com participação residual (43 defesas, 0,3\%).}
   \label{fig:capes_15_nivel_academico}
   \source{Elaboração própria a partir do Catálogo de Teses e Dissertações da CAPES (BR-CAPES-BTD-2021A2024-2025-12-01).}
 \end{figure}
@@ -133,7 +133,7 @@ Convenções adotadas:
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.85\linewidth]{figuras/capes_17_top_instituicoes.png}
-  \caption{Vinte instituições de ensino superior com maior volume de defesas sobre Tecnologias de IA, ML e aprendizado profundo no quadriênio 2021--2024. A concentração nas universidades públicas federais e estaduais é expressiva; USP, UFRJ, UFMG, UNICAMP, UFRGS e UFPE figuram entre as principais.}
+  \caption{Vinte instituições de ensino superior com maior volume de defesas sobre Tecnologias de IA, ML e aprendizado profundo no quadriênio 2021--2024. A concentração nas universidades públicas federais e estaduais é expressiva; USP (647 defesas), UNICAMP (486), UnB (402), UFMG (401), UFRJ (376), UFPE (343), UFSC (337), UFRGS (323), UFPR (273) e UFC (253) lideram o ranking.}
   \label{fig:capes_17_top_instituicoes}
   \source{Elaboração própria a partir do Catálogo de Teses e Dissertações da CAPES (BR-CAPES-BTD-2021A2024-2025-12-01).}
 \end{figure}
@@ -281,7 +281,7 @@ Convenções adotadas:
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.95\linewidth]{figuras/capes_h02_temporal_humanas.png}
-  \caption{Evolução anual (2021--2024) das defesas em Ciências Humanas no campo das Tecnologias de IA, ML e aprendizado profundo, empilhadas por grau acadêmico (Mestrado, Doutorado, Mestrado Profissional). O crescimento é consistente, de cerca de 80 defesas em 2021 para mais de 150 em 2024 --- aproximadamente o dobro, em ritmo proporcionalmente maior do que o do corpus total no mesmo período. O Mestrado responde pela maior parte do crescimento.}
+  \caption{Evolução anual (2021--2024) das defesas em Ciências Humanas no campo das Tecnologias de IA, ML e aprendizado profundo, empilhadas por grau acadêmico (Mestrado, Doutorado, Mestrado Profissional). O crescimento é consistente, de 69 defesas em 2021 para 142 em 2024 --- pouco mais que o dobro (+106\%), em ritmo proporcionalmente próximo ao do corpus CAPES total no mesmo período (+51\%). O Mestrado responde pela maior parte do crescimento.}
   \label{fig:capes_h02_temporal_humanas}
   \source{Elaboração própria a partir do Catálogo de Teses e Dissertações da CAPES (BR-CAPES-BTD-2021A2024-2025-12-01).}
 \end{figure}
@@ -423,7 +423,7 @@ Conjunto de figuras dedicado à análise SciELO via API ArticleMeta, com mesma e
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.85\linewidth]{figuras/scielo_15_idioma.png}
-  \caption{Distribuição dos 631 artigos do corpus SciELO Brasil sobre Tecnologias de IA, ML e aprendizado profundo (2021--2024) pelo idioma de publicação. O português permanece dominante, seguido pelo inglês; o espanhol aparece em proporção menor. Padrão coerente com a vocação majoritariamente lusófona dos periódicos da coleção brasileira do SciELO, ainda que a abertura para o inglês indique circulação internacional crescente.}
+  \caption{Distribuição dos 631 artigos do corpus SciELO Brasil sobre Tecnologias de IA, ML e aprendizado profundo (2021--2024) pelo idioma de publicação. O \textbf{inglês predomina} (487 artigos, 77,2\%), seguido pelo português (127 artigos, 20,1\%) e pelo espanhol (17 artigos, 2,7\%). Padrão coerente com o peso das áreas mais internacionalizadas no recorte expandido (Health Sciences, Engineering, Agricultural Sciences), onde o inglês é o idioma editorial dominante mesmo nos periódicos da coleção brasileira do SciELO. A predominância do inglês é uma inversão do padrão tipicamente lusófono que aparece quando o recorte é restrito a Human Sciences puro.}
   \label{fig:scielo_15_idioma}
   \source{Elaboração própria a partir da API ArticleMeta da SciELO.}
 \end{figure}
