@@ -347,7 +347,7 @@ Convenções adotadas:
 
 ## Painel SciELO 2021–2024 (paralelo ao painel CAPES)
 
-Conjunto de figuras dedicado à análise SciELO via API ArticleMeta, com mesma estrutura analítica do painel CAPES. Universo: **98.165 artigos** da coleção Brasil (todas as 8 \textit{subject\_areas} oficiais do SciELO) publicados em 2021--2024. Corpus IA/ML/DL no recorte estrito 2021--2024: **631 artigos** (502 Foco Central + 129 Correlatos; taxa interna geral 0,70\%). Nas tabelas, periódicos com múltiplas \textit{subject\_areas} aparecem agrupados na categoria sintética "Multidisciplinar" (não-oficial), resultando em 9 linhas: as 8 áreas SciELO + Multidisciplinar.
+Conjunto de figuras dedicado à análise SciELO via API ArticleMeta, com mesma estrutura analítica do painel CAPES. Universo bruto da coleta API: **98.165 artigos**; universo restrito a 2021–2024 estrito por ano de publicação (denominador correto da taxa interna): **90.360 artigos**. Corpus IA/ML/DL no recorte estrito: **631 artigos** (502 Foco Central + 129 Correlatos; taxa interna geral 631/90.360 = 0,70\%). Nas tabelas, periódicos com múltiplas \textit{subject\_areas} aparecem agrupados na categoria sintética "Multidisciplinar" (não-oficial), resultando em 9 linhas: as 8 áreas SciELO + Multidisciplinar.
 
 ### Figura SciELO 11 — Distribuição por subject_area (volume + taxa interna)
 
@@ -479,7 +479,7 @@ Conjunto de figuras dedicado à análise SciELO via API ArticleMeta, com mesma e
 \end{figure}
 ```
 
-**Comentário analítico.** Paralelo à Fig. 21 do painel CAPES. Com o universo SciELO expandido, IA em sentido estrito ainda lidera mas com margem reduzida; DL/redes neurais e ML aparecem em volume comparável. A diferença com CAPES (onde ML predomina) permanece: SciELO, mesmo com Saúde e Engenharia incluídas, ainda é mais "IA conceitual" em proporção. O contraste sustenta o argumento sobre a distinção entre escrita periódica e escrita de pós-graduação.
+**Comentário analítico.** Paralelo à Fig. 21 do painel CAPES. **Inversão de hierarquia entre as duas bases:** no CAPES, ML lidera (40,7\%) e IA em sentido estrito é o quarto subcampo (29,4\%); no SciELO Brasil completo, IA em sentido estrito lidera (29,6\%) e ML é o quarto (21,9\%). A inversão se mantém mesmo com Saúde e Engenharia incluídas no recorte SciELO. Sustenta o argumento sobre a distinção entre escrita periódica (mais "IA como conceito") e escrita de pós-graduação (mais "técnica aplicada").
 
 ---
 
@@ -531,7 +531,7 @@ Conjunto de figuras dedicado à análise SciELO via API ArticleMeta, com mesma e
 \end{figure}
 ```
 
-**Comentário analítico.** Figura-síntese que fecha o capítulo. Apresenta as duas bases lado a lado, com metodologia idêntica, sustentando os achados centrais: (i) crescimento expressivo do tema nas humanidades brasileiras; (ii) padrões discursivos distintos entre periódicos (mais conceituais) e teses/dissertações (mais aplicadas); (iii) marginalidade persistente da Antropologia na produção pós-graduada brasileira sobre IA.
+**Comentário analítico.** Figura-síntese que fecha o capítulo. Apresenta as duas bases lado a lado, com metodologia idêntica, sustentando os achados centrais: (i) crescimento expressivo do tema nas humanidades brasileiras; (ii) padrões discursivos distintos entre periódicos (mais conceituais) e teses/dissertações (mais aplicadas); (iii) marginalidade persistente da Antropologia na produção pós-graduada brasileira sobre IA. **Observação qualitativa sobre Mana** (painel C): os 3 artigos da revista são todos de 2024 e todos abordam o tema via *big data*, não via IA stricto sensu — sinal de que a Antropologia entra na conversa tarde e tematicamente desviada, fato que deve ser comentado no texto que acompanha a figura.
 
 ---
 
