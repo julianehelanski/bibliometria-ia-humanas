@@ -79,7 +79,7 @@ Convenções adotadas:
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.95\linewidth]{figuras/capes_14_temporal_total.png}
-  \caption{Evolução anual do corpus completo (2021--2024) discriminado em Foco Central (presença de termos de IA, ML, DL ou LLMs) e Correlatos (presença apenas de tecnologias adjacentes como robótica, NLP, big data ou visão computacional). O total cresce de 2.716 defesas em 2021 para 4.020 em 2024 (acréscimo de 48\% em quatro anos, CAGR aproximado de 14\% a.a.). O Foco Central representa a maior parte do crescimento; Correlatos mantém-se relativamente estável em volume absoluto.}
+  \caption{Evolução anual do corpus completo (2021--2024) discriminado em Foco Central (presença de termos de IA, ML, DL ou LLMs) e Correlatos (presença apenas de tecnologias adjacentes como robótica, NLP, big data ou visão computacional). O total cresce de 2.615 defesas em 2021 para 3.936 em 2024 (acréscimo de 51\% em quatro anos, CAGR aproximado de 15\% a.a.). O Foco Central representa a maior parte do crescimento; Correlatos mantém-se relativamente estável em volume absoluto.}
   \label{fig:capes_14_temporal_total}
   \source{Elaboração própria a partir do Catálogo de Teses e Dissertações da CAPES (BR-CAPES-BTD-2021A2024-2025-12-01).}
 \end{figure}
@@ -305,7 +305,7 @@ Convenções adotadas:
 \end{figure}
 ```
 
-**Comentário analítico.** A USP, instituição da pesquisadora, aparece em segundo lugar (27 defesas), o que situa esta tese dentro do contexto institucional onde o tema ganhou tração nas Humanas.
+**Comentário analítico.** A USP, instituição da pesquisadora, aparece em segundo lugar (26 defesas, após UnB com 29), o que situa esta tese dentro do contexto institucional onde o tema ganhou tração nas Humanas.
 
 ---
 

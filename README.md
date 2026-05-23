@@ -244,9 +244,9 @@ Análise baseada no dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` do portal d
 | Teologia | 4 | 1,0% |
 | Arqueologia | 2 | 0,5% |
 
-**Top 10 IES em IA-Humanas:** UnB (30), USP (27), UFRJ (18), UFRN (13), UFMG (12), UFC (12), UFRGS (11), UNICAMP (10), UFRRJ (9), UFPE (8).
+**Top 10 IES em IA-Humanas:** UnB (29), USP (26), UFRJ (17), UFMG (12), UFC (12), UFRN (11), UNICAMP (10), UFPE (8), UFRGS (8), UFF (8).
 
-**Concentração regional:** Sudeste 200 (45,4%), Sul 96 (21,8%), Nordeste 79 (17,9%), Centro-Oeste 59 (13,4%), Norte 7 (1,6%).
+**Concentração regional:** Sudeste 183 (45,8%), Sul 84 (21,0%), Nordeste 71 (17,8%), Centro-Oeste 55 (13,8%), Norte 7 (1,8%).
 
 **Marginalidade em camadas (confirmação empírica do argumento da tese):**
 - IA é marginal em Humanas (0,7% da produção da grande área)
@@ -369,7 +369,7 @@ Mais inclusiva, justificável pelo recorte estreito de área que já filtrava o 
 ### Auditoria
 
 Para fins de revisão humana caso a caso, os scripts geram planilhas/CSV com a classificação por registro:
-- `dados_capes/capes_2021_2024_ia_auditoria.xlsx` — versão slim (sem resumos integrais) para os 13.336 trabalhos IA da análise expandida.
+- `dados_capes/capes_2021_2024_ia_auditoria.xlsx` — versão slim (sem resumos integrais) para os 12.995 trabalhos IA da análise expandida (corpus pós-correção do regex `transformer`).
 - `dados_capes/capes_2021_2024_ia.csv` — versão completa (com resumos), regenerável; não versionada.
 - `dados_capes/resultados_detalhados_capes.xlsx` — aba `Auditoria Foco IA` da análise antiga.
 - `dados_scielo/auditoria_foco_ia.csv` — auditoria do SciELO.
