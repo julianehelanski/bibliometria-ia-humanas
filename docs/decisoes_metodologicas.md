@@ -17,7 +17,8 @@ A motivação para este arquivo: durante a sessão de coleta e processamento, v�
 | **SciELO bruto** | Coleta da API ArticleMeta com `from=2021-01-01 & until=2024-12-31`, todas as subject_areas, classificador IA aplicado. Filtro from/until opera sobre `processing_date` | 659 |
 | **SciELO recorte estrito** | Linhas do bruto com `ano de publicação` entre 2021 e 2024 inclusive | **631** |
 | SciELO Human Sciences puro | Recorte estrito + `subject_areas_periodico` exatamente igual a "Human Sciences" (sem multi-área) | 72 |
-| SciELO Brasil universo | Universo bruto da coleta (todas subject_areas, antes de classificar IA) | 98.165 |
+| SciELO Brasil universo bruto | Universo bruto da coleta (todas subject_areas, todos os anos retornados pela API, antes de classificar IA) | 98.165 |
+| **SciELO Brasil universo do recorte** | Universo restrito a `ano de publicação` 2021–2024 (denominador da taxa interna) | **90.360** |
 
 > **Onde a tese cita:** "**631 artigos no recorte estrito** 2021–2024" para o panorama SciELO; "**72 artigos**" para o subset Human Sciences puro usado no comparativo com CAPES Humanas.
 
@@ -65,9 +66,11 @@ Subtotal pré-2021: **23**. Subtotal pós-2024: **5**. Verificação: 23 + 5 = 2
 
 ---
 
-## SciELO Brasil universo (98.165) — distribuição por subject_area
+## SciELO Brasil universo do recorte (90.360) — distribuição por subject_area
 
 Necessário para calcular taxa interna por área. Fonte: `dados_scielo/scielo_brasil_universo_agregado.csv`.
+
+> **Atenção ao denominador:** as taxas internas abaixo usam o universo do recorte estrito 2021–2024 (90.360 artigos), NÃO o universo bruto da coleta (98.165). A diferença de ~7.800 artigos corresponde a artigos com data de publicação fora da janela 2021–2024 que a API devolveu por filtrar `processing_date`. A taxa geral SciELO (631/90.360 = 0,70%) é apples-to-apples: numerador e denominador no mesmo recorte temporal.
 
 | Subject area | N | Taxa interna IA |
 |---|---:|---:|
@@ -138,4 +141,4 @@ Estas coortes foram superadas durante o trabalho. **Persistem no repositório** 
 3. Faça um commit dedicado ("decisoes_metodologicas: atualiza N para Y após verificação de X") — não junte com mudança de figura ou texto.
 4. Em seguida, sincronize README, inventário e tabelas para citar deste arquivo.
 
-*Última verificação: 23 de maio de 2026 — auditoria completa do XLSX `scielo_brasil_ia_subcampos_auditoria.xlsx` (659 linhas brutas, 631 no recorte) e do agregado `scielo_brasil_universo_agregado.csv` (98.165 universo total, 8 oficiais + Multidisciplinar).*
+*Última verificação: 23 de maio de 2026 — auditoria completa do XLSX `scielo_brasil_ia_subcampos_auditoria.xlsx` (659 linhas brutas, 631 no recorte) e do agregado `scielo_brasil_universo_agregado.csv` (90.360 no recorte estrito 2021–2024, 98.165 no bruto da coleta API; 8 subject_areas oficiais + categoria sintética "Multidisciplinar"). Verificação cruzada com `capes_2021_2024_ia_humanas_completo.xlsx` confirma 400 IA-Humanas, distribuição por área conforme a tabela, e correção das estatísticas regionais e top IES que tinham ficado em coorte antiga (441) no README/inventário.*

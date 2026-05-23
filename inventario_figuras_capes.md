@@ -305,7 +305,7 @@ Convenções adotadas:
 \end{figure}
 ```
 
-**Comentário analítico.** A USP, instituição da pesquisadora, aparece em segundo lugar (27 defesas), o que situa esta tese dentro do contexto institucional onde o tema ganhou tração nas Humanas.
+**Comentário analítico.** A USP, instituição da pesquisadora, aparece em segundo lugar (26 defesas, após UnB com 29), o que situa esta tese dentro do contexto institucional onde o tema ganhou tração nas Humanas.
 
 ---
 
