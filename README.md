@@ -285,7 +285,11 @@ Com o classificador de subcampos uniforme aplicado às duas bases sobre o mesmo 
 - **LLMs ainda raro nos periódicos humanísticos:** apenas 1 artigo (1,4%) no SciELO Human Sciences toca o subcampo "Modelos de linguagem & IA generativa", contra 20 (5,0%) no CAPES Humanas. Isso é coerente com o atraso editorial dos periódicos — defesas iniciadas durante a virada ChatGPT já foram concluídas, mas os artigos correspondentes ainda estão no pipeline de revisão.
 - **Crescimento similar nas duas bases:** SciELO Human Sciences +113%, CAPES Humanas +106% no período 2021–2024.
 
-A marginalidade da Antropologia aparece nas duas bases: 4 defesas no CAPES Humanas e a revista **Mana** (PPGAS-MN/UFRJ) com 3 artigos no SciELO Human Sciences entre os top 10 periódicos do recorte. As duas leituras combinadas sustentam o argumento da tese com dupla validação empírica.
+A marginalidade da Antropologia aparece nas duas bases: 4 defesas no CAPES Humanas (6 pela área de avaliação Antropologia/Arqueologia) e a revista **Mana** (PPGAS-MN/UFRJ) com 3 artigos no SciELO Human Sciences entre os top 10 periódicos do recorte. As duas leituras combinadas sustentam o argumento da tese com dupla validação empírica.
+
+> **Achado qualitativo sobre os 3 artigos de Mana:** todos os três foram publicados em **2024** e todos abordam o tema via **big data** (subcampo Correlatos), não via IA stricto sensu. Os títulos são: "Reflexões sobre big data, sexualidades, datificação e moralidades no pornô digital"; "Quem Precisa de Big Data?: sobre dados e informação na agricultura de precisão"; "Big Data: Modos de fazer, comparar e governar". Ou seja, quando a Antropologia brasileira entra na conversa nos periódicos de referência, entra **pela porta dos correlatos** (não pela IA propriamente) e **em 2024** (recente). Esse desvio temático e o atraso temporal são, eles próprios, parte do argumento da tese sobre a emergência tardia e periférica do tema no campo antropológico — não um detalhe da contagem.
+
+> **Inversão da hierarquia de subcampos entre as bases:** no CAPES, "Aprendizado de máquina" lidera (40,7%) e "IA em sentido estrito" é o quarto (29,4%). No SciELO restrito a 2021–2024, a ordem se inverte: "IA em sentido estrito" lidera (29,6%) e "Aprendizado de máquina" é o quarto (21,9%). Padrão coerente com o argumento de que **periódicos publicam mais "IA como conceito" enquanto defesas trabalham mais com técnica aplicada**. Tabelas completas em [`docs/decisoes_metodologicas.md`](docs/decisoes_metodologicas.md) §I.5 (CAPES) e §II.5 (SciELO).
 
 ---
 

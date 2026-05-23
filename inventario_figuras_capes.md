@@ -479,7 +479,7 @@ Conjunto de figuras dedicado à análise SciELO via API ArticleMeta, com mesma e
 \end{figure}
 ```
 
-**Comentário analítico.** Paralelo à Fig. 21 do painel CAPES. Com o universo SciELO expandido, IA em sentido estrito ainda lidera mas com margem reduzida; DL/redes neurais e ML aparecem em volume comparável. A diferença com CAPES (onde ML predomina) permanece: SciELO, mesmo com Saúde e Engenharia incluídas, ainda é mais "IA conceitual" em proporção. O contraste sustenta o argumento sobre a distinção entre escrita periódica e escrita de pós-graduação.
+**Comentário analítico.** Paralelo à Fig. 21 do painel CAPES. **Inversão de hierarquia entre as duas bases:** no CAPES, ML lidera (40,7\%) e IA em sentido estrito é o quarto subcampo (29,4\%); no SciELO Brasil completo, IA em sentido estrito lidera (29,6\%) e ML é o quarto (21,9\%). A inversão se mantém mesmo com Saúde e Engenharia incluídas no recorte SciELO. Sustenta o argumento sobre a distinção entre escrita periódica (mais "IA como conceito") e escrita de pós-graduação (mais "técnica aplicada").
 
 ---
 
@@ -531,7 +531,7 @@ Conjunto de figuras dedicado à análise SciELO via API ArticleMeta, com mesma e
 \end{figure}
 ```
 
-**Comentário analítico.** Figura-síntese que fecha o capítulo. Apresenta as duas bases lado a lado, com metodologia idêntica, sustentando os achados centrais: (i) crescimento expressivo do tema nas humanidades brasileiras; (ii) padrões discursivos distintos entre periódicos (mais conceituais) e teses/dissertações (mais aplicadas); (iii) marginalidade persistente da Antropologia na produção pós-graduada brasileira sobre IA.
+**Comentário analítico.** Figura-síntese que fecha o capítulo. Apresenta as duas bases lado a lado, com metodologia idêntica, sustentando os achados centrais: (i) crescimento expressivo do tema nas humanidades brasileiras; (ii) padrões discursivos distintos entre periódicos (mais conceituais) e teses/dissertações (mais aplicadas); (iii) marginalidade persistente da Antropologia na produção pós-graduada brasileira sobre IA. **Observação qualitativa sobre Mana** (painel C): os 3 artigos da revista são todos de 2024 e todos abordam o tema via *big data*, não via IA stricto sensu — sinal de que a Antropologia entra na conversa tarde e tematicamente desviada, fato que deve ser comentado no texto que acompanha a figura.
 
 ---
 
