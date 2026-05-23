@@ -72,9 +72,13 @@ Crescimento bruto 2021→2024: +50,5%. CAGR aproximado: 14,6% a.a.
 
 > **Achado:** ML supera IA stricta em volume (5.284 vs 3.821). LLMs é o menor dos cinco (506) após a correção do regex `transformer` — antes da correção, era 876, inflado por falsos positivos de "transformer" no sentido literal (transformador elétrico, "social transformer" em textos não-técnicos).
 
-### I.6. CAPES IA-Humanas (400) por área de conhecimento
+### I.6. CAPES IA-Humanas (400) — duas taxonomias
 
-| Área | Defesas | % de IA-Humanas |
+A CAPES opera com **duas classificações distintas** que precisam ser declaradas. O `XLSX` traz ambas como colunas (`NM_AREA_CONHECIMENTO` e `NM_AREA_AVALIACAO`). Os números abaixo são lidos diretamente da planilha; em ambas as colunas a soma fecha em 400.
+
+**Por área de conhecimento (NM_AREA_CONHECIMENTO):**
+
+| Área de conhecimento | Defesas | % de IA-Humanas |
 |---|---:|---:|
 | Educação | 154 | 38,50% |
 | Geografia | 64 | 16,00% |
@@ -87,6 +91,50 @@ Crescimento bruto 2021→2024: +50,5%. CAGR aproximado: 14,6% a.a.
 | Teologia | 4 | 1,00% |
 | Arqueologia | 2 | 0,50% |
 | **Soma** | **400** ✓ | 100% |
+
+**Por área de avaliação (NM_AREA_AVALIACAO — taxonomia administrativa da CAPES):**
+
+| Área de avaliação CAPES | Defesas |
+|---|---:|
+| Educação | 154 |
+| Geografia | 64 |
+| Psicologia | 56 |
+| Ciência Política e Relações Internacionais | 40 |
+| Filosofia | 39 |
+| Sociologia | 25 |
+| História | 12 |
+| **Antropologia / Arqueologia** | **6** |
+| Ciências da Religião e Teologia | 4 |
+| **Soma** | **400** ✓ |
+
+**Diferenças entre as duas taxonomias:**
+
+| Área de conhecimento | Área de avaliação | Mudança |
+|---|---|---|
+| Antropologia (4) + Arqueologia (2) | **Antropologia / Arqueologia (6)** | **Agrupamento** (CAPES une as duas no organograma de programas) |
+| Ciência Política (40) | Ciência Política e Relações Internacionais (40) | Mesmo número, nome ampliado |
+| Teologia (4) | Ciências da Religião e Teologia (4) | Mesmo número, nome ampliado |
+| Educação, Geografia, Psicologia, Filosofia, Sociologia, História | (idem) | Nome idêntico |
+
+### I.6.1. Implicação para a tese — Antropologia 4 ou 6?
+
+A tese pode dizer qualquer um dos dois números, **desde que declare o critério**:
+
+- "**4 defesas em Antropologia**, segundo a área de conhecimento (NM_AREA_CONHECIMENTO) da CAPES" → recorte estrito da disciplina antropológica.
+- "**6 defesas na área de avaliação Antropologia / Arqueologia**, segundo o organograma administrativo da CAPES (NM_AREA_AVALIACAO)" → recorte institucional, que reflete como os programas de pós-graduação são, de fato, organizados pela agência.
+
+A recomendação para o texto é **declarar ambos**:
+
+> "A área de Antropologia registra **4 defesas sobre IA** em 2021–2024 (área de conhecimento); na taxonomia de avaliação da CAPES, que agrupa Antropologia e Arqueologia em uma única área administrativa, são **6 defesas**. Ambos os recortes apontam para presença muito baixa frente a Educação (154) ou Geografia (64) — a marginalidade do tema na Antropologia brasileira independe do critério taxonômico adotado."
+
+Essa formulação blinda a tese contra a arguição "4 pela área de conhecimento ou 6 pela área de avaliação?", e mostra domínio das duas chaves de classificação.
+
+### I.6.2. Implicação para Teologia e Ciência Política
+
+- **Teologia** mantém 4 defesas em ambas as colunas, mas o nome oficial CAPES (que entrará na tese se o critério for área de avaliação) é **"Ciências da Religião e Teologia"**, não apenas "Teologia".
+- **Ciência Política** mantém 40 defesas em ambas as colunas, mas o nome oficial é **"Ciência Política e Relações Internacionais"**. Essa é a denominação que aparece em currículos Lattes, comitês de avaliação e portarias da CAPES.
+
+Decisão recomendada: **na narrativa da tese, usar os nomes da NM_AREA_AVALIACAO** (que são os formalmente reconhecidos pela CAPES), com a especificação entre parênteses quando relevante.
 
 ### I.7. CAPES IA-Humanas — top 10 IES e regiões
 
@@ -222,4 +270,4 @@ Estas coortes foram superadas durante o trabalho. **Persistem no repositório** 
 4. Em seguida, sincronize README, inventário e tabelas para citar deste arquivo.
 5. **Regra de método:** todo número desta página sai de operação atômica em pandas (`len`, `value_counts`, `groupby().size()`, divisão direta), nunca de soma feita em prosa.
 
-*Última verificação completa: 23 de maio de 2026 — auditoria cruzada de `capes_2021_2024_ia_auditoria.xlsx`, `capes_2021_2024_ia_humanas_completo.xlsx`, `capes_2021_2024_universo_por_grande_area.csv`, `scielo_brasil_ia_subcampos_auditoria.xlsx` e `scielo_brasil_universo_agregado.csv`. Todos os números acima foram lidos via pandas diretamente das fontes primárias, não inferidos.*
+*Última verificação completa: 23 de maio de 2026 — auditoria cruzada de `capes_2021_2024_ia_auditoria.xlsx`, `capes_2021_2024_ia_humanas_completo.xlsx`, `capes_2021_2024_universo_por_grande_area.csv`, `scielo_brasil_ia_subcampos_auditoria.xlsx` e `scielo_brasil_universo_agregado.csv`. Todos os números acima foram lidos via pandas diretamente das fontes primárias, não inferidos. Bloco I.6 expandido com a distinção entre NM_AREA_CONHECIMENTO (taxonomia disciplinar) e NM_AREA_AVALIACAO (taxonomia administrativa CAPES), que afeta especialmente a contagem de Antropologia (4 vs 6).*

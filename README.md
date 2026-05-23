@@ -231,7 +231,7 @@ Análise baseada no dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` do portal d
 | Modelos de linguagem & IA generativa | 20 | 5,0% |
 
 
-| Área de conhecimento | Trabalhos | % de IA-Humanas |
+| Área de conhecimento (NM_AREA_CONHECIMENTO) | Trabalhos | % de IA-Humanas |
 |----------------------|---:|---:|
 | Educação | 154 | 38,5% |
 | Geografia | 64 | 16,0% |
@@ -244,14 +244,16 @@ Análise baseada no dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` do portal d
 | Teologia | 4 | 1,0% |
 | Arqueologia | 2 | 0,5% |
 
+> **Nota sobre taxonomia CAPES:** a CAPES opera com duas classificações distintas — `NM_AREA_CONHECIMENTO` (disciplinar, usada na tabela acima) e `NM_AREA_AVALIACAO` (administrativa, usada no organograma de programas). Pela área de avaliação, **Antropologia e Arqueologia formam uma única categoria** ("Antropologia / Arqueologia"), totalizando **6 defesas**. Teologia aparece como "Ciências da Religião e Teologia" (mesmo número, 4); Ciência Política aparece como "Ciência Política e Relações Internacionais" (mesmo número, 40). Ver [`docs/decisoes_metodologicas.md`](docs/decisoes_metodologicas.md) §I.6 para a tabela completa e a recomendação textual para a tese.
+
 **Top 10 IES em IA-Humanas:** UnB (29), USP (26), UFRJ (17), UFMG (12), UFC (12), UFRN (11), UNICAMP (10), UFPE (8), UFRGS (8), UFF (8).
 
 **Concentração regional:** Sudeste 183 (45,8%), Sul 84 (21,0%), Nordeste 71 (17,8%), Centro-Oeste 55 (13,8%), Norte 7 (1,8%).
 
 **Marginalidade em camadas (confirmação empírica do argumento da tese):**
 - IA é marginal em Humanas (0,7% da produção da grande área)
-- A Antropologia é marginal dentro do corpus IA-Humanas (1,0% das 400 defesas em IA-Humanas)
-- Quatro trabalhos sobre IA em Antropologia em quatro anos (após auditoria de falsos positivos) — densidade muito baixa frente a Educação (154) ou Geografia (64).
+- A Antropologia é marginal dentro do corpus IA-Humanas (1,0% das 400 defesas em IA-Humanas, contando estritamente pela área de conhecimento; 1,5% se considerada a área de avaliação Antropologia/Arqueologia)
+- Quatro trabalhos sobre IA em Antropologia em quatro anos pelo critério disciplinar estrito; seis pelo critério administrativo da CAPES — densidade muito baixa nas duas leituras frente a Educação (154) ou Geografia (64).
 
 ---
 
