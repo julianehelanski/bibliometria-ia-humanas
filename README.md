@@ -85,6 +85,8 @@ analise_bibliometrica_ia_ciencias_humanas/
 
 ---
 
+> **Fonte canônica dos números:** [`docs/decisoes_metodologicas.md`](docs/decisoes_metodologicas.md). Esse arquivo trava cada número usado na tese, com a coorte exata, a planilha fonte e a operação pandas que o produziu. Em caso de divergência entre este README e o arquivo canônico, **o arquivo canônico prevalece**.
+
 ## Principais resultados
 
 ### SciELO (2021–2024, via API ArticleMeta, universo Brasil completo) — 631 artigos sobre Tecnologias IA/ML/DL
