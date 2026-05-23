@@ -369,7 +369,7 @@ Mais inclusiva, justificável pelo recorte estreito de área que já filtrava o 
 ### Auditoria
 
 Para fins de revisão humana caso a caso, os scripts geram planilhas/CSV com a classificação por registro:
-- `dados_capes/capes_2021_2024_ia_auditoria.xlsx` — versão slim (sem resumos integrais) para os 13.336 trabalhos IA da análise expandida.
+- `dados_capes/capes_2021_2024_ia_auditoria.xlsx` — versão slim (sem resumos integrais) para os 12.995 trabalhos IA da análise expandida (corpus pós-correção do regex `transformer`).
 - `dados_capes/capes_2021_2024_ia.csv` — versão completa (com resumos), regenerável; não versionada.
 - `dados_capes/resultados_detalhados_capes.xlsx` — aba `Auditoria Foco IA` da análise antiga.
 - `dados_scielo/auditoria_foco_ia.csv` — auditoria do SciELO.
