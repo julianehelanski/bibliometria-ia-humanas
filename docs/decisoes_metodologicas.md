@@ -217,9 +217,40 @@ Taxa SciELO geral: 631/90.360 = 0,70%.
 
 > **Atenção ao denominador:** as taxas internas acima usam o universo do recorte estrito 2021–2024 (90.360), NÃO o universo bruto da coleta (98.165). Numerador e denominador são apples-to-apples.
 
-### II.5. Fonte dos números
+### II.5. SciELO recorte 631 — distribuição por subcampo (multi-label; soma > 100%)
 
-- Universo bruto e recorte: `dados_scielo/scielo_brasil_ia_subcampos_auditoria.xlsx` (659 linhas brutas).
+| Subcampo | Artigos | % do corpus |
+|---|---:|---:|
+| IA em sentido estrito | 187 | 29,64% |
+| Aprendizado profundo & redes neurais | 158 | 25,04% |
+| Tecnologias correlatas | 140 | 22,19% |
+| Aprendizado de máquina (ML) | 138 | 21,87% |
+| Modelos de linguagem & IA generativa | 45 | 7,13% |
+
+> **Comparação com CAPES (bloco I.5):** o SciELO inverte a hierarquia. No CAPES, ML lidera (40,66%) e IA stricto é o quarto (29,40%); no SciELO, IA stricto lidera (29,64%) e ML é o quarto (21,87%). Padrão coerente com a tese de que periódicos publicam mais "IA como conceito" e defesas trabalham mais com técnica aplicada.
+
+### II.6. SciELO Human Sciences puro (72) — top 10 periódicos
+
+Subset que vai para o comparativo SciELO × CAPES.
+
+| Periódico | Artigos |
+|---|---:|
+| Estudos Avançados | 13 |
+| Trans/Form/Ação | 9 |
+| Filosofia Unisinos | 6 |
+| Revista Brasileira de Ensino de Física | 6 |
+| Ciência & Educação (Bauru) | 5 |
+| Psicologia: Reflexão e Crítica | 3 |
+| **Mana** | **3** |
+| Educação em Revista | 3 |
+| Mercator (Fortaleza) | 2 |
+| Revista Brasileira de Inovação | 2 |
+
+> **Achado para a Antropologia:** dos **3 artigos publicados em Mana** (periódico antropológico de referência do PPGAS-MN/UFRJ), **todos são de 2024** e **todos tocam o tema via big data** (subcampo Correlatos), não via IA stricta. Títulos: "Reflexões sobre big data, sexualidades, datificação e moralidades no pornô digital"; "Quem Precisa de Big Data?: sobre dados e informação na agricultura de precisão"; "Big Data: Modos de fazer, comparar e governar". A Antropologia, quando entra na conversa nos periódicos, entra pela porta dos correlatos (não pela IA stricto sensu) e em 2024 (recente). Isso fortalece o argumento da tese sobre a emergência tardia e tematicamente desviada do tema no campo antropológico.
+
+### II.7. Fonte dos números
+
+- Universo bruto e recorte: `dados_scielo/scielo_brasil_ia_subcampos_auditoria.xlsx` (659 linhas brutas, 631 no recorte).
 - Universo por subject_area (recorte): `dados_scielo/scielo_brasil_universo_agregado.csv` (90.360 totalizados).
 - Cache completo da coleta: `dados_scielo/cache_articlemeta/` (~98k JSONs, gitignored).
 
