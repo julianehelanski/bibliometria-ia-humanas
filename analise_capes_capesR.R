@@ -191,6 +191,11 @@ RE_HUMANAS_AREA <- paste0(
   "ci[êe]ncias?\\s+humanas"
 )
 
+# Exclusões: áreas que casam o regex acima mas NÃO pertencem à grande área
+# Ciências Humanas na tabela CAPES. "Educação Física" é Ciências da Saúde
+# (entra só por conter "educação").
+RE_EXCLUIR_AREA <- "educa[çc][ãa]o\\s+f[íi]sica"
+
 col_ga   <- cols$grande_area
 col_area <- cols$area
 if (!is.na(col_ga)) {
@@ -199,11 +204,13 @@ if (!is.na(col_ga)) {
     filter(str_detect(.data[[col_ga]], regex("humanas", ignore_case = TRUE)))
   message("    filtro de Humanas pela coluna de grande área: ", col_ga)
 } else if (!is.na(col_area)) {
-  # Schema do capesR: sem grande área. Filtra pela lista de áreas CAPES.
+  # Schema do capesR: sem grande área. Filtra pela lista de áreas CAPES,
+  # removendo as exclusões (ex.: Educação Física).
   message("[info] sem coluna de grande área; filtrando Ciências Humanas pela ",
           "coluna '", col_area, "' (lista de áreas CAPES).")
   humanas <- dados %>%
-    filter(str_detect(.data[[col_area]], regex(RE_HUMANAS_AREA, ignore_case = TRUE)))
+    filter(str_detect(.data[[col_area]], regex(RE_HUMANAS_AREA, ignore_case = TRUE)),
+           !str_detect(.data[[col_area]], regex(RE_EXCLUIR_AREA, ignore_case = TRUE)))
   areas_mantidas <- sort(unique(as.character(humanas[[col_area]])))
   message("    áreas mantidas (", length(areas_mantidas), "): ",
           paste(head(areas_mantidas, 40), collapse = " | "))
