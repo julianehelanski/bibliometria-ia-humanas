@@ -168,7 +168,7 @@ message("==> Baixando/lendo dados CAPES via capesR (anos: ",
 arquivos <- download_capes_data(ANOS, destination = DESTINO_DADOS)
 dados    <- read_capes_data(arquivos)
 
-message("    registros lidos: ", format(nrow(dados), big.mark = "."))
+message("    registros lidos: ", format(nrow(dados), big.mark = ".", decimal.mark = ","))
 message("    colunas: ", paste(head(names(dados), 30), collapse = ", "))
 
 cols <- lapply(COLMAP, function(cands) achar_col(dados, cands))
@@ -181,13 +181,38 @@ if (length(faltando) > 0) {
 # =============================================================================
 # 2. Filtrar Ciências Humanas + classificar foco em IA
 # =============================================================================
-col_ga <- cols$grande_area
-if (is.na(col_ga)) stop("Não encontrei a coluna de grande área. Inspecione names(dados).")
+# Áreas que compõem a grande área "Ciências Humanas" na CAPES. Usado quando o
+# schema NÃO traz coluna de grande área — caso do capesR, que só tem `area`.
+RE_HUMANAS_AREA <- paste0(
+  "antropologia|arqueologia|",
+  "ci[êe]ncia\\s+pol[íi]tica|rela[çc][õo]es\\s+internacionais|",
+  "educa[çc][ãa]o|filosofia|geografia|hist[óo]ria|",
+  "psicologia|sociologia|teologia|ci[êe]ncias?\\s+da\\s+religi[ãa]o|",
+  "ci[êe]ncias?\\s+humanas"
+)
 
-humanas <- dados %>%
-  filter(str_detect(.data[[col_ga]], regex("humanas", ignore_case = TRUE)))
+col_ga   <- cols$grande_area
+col_area <- cols$area
+if (!is.na(col_ga)) {
+  # Schema tem grande área (ex.: dump oficial): filtra direto.
+  humanas <- dados %>%
+    filter(str_detect(.data[[col_ga]], regex("humanas", ignore_case = TRUE)))
+  message("    filtro de Humanas pela coluna de grande área: ", col_ga)
+} else if (!is.na(col_area)) {
+  # Schema do capesR: sem grande área. Filtra pela lista de áreas CAPES.
+  message("[info] sem coluna de grande área; filtrando Ciências Humanas pela ",
+          "coluna '", col_area, "' (lista de áreas CAPES).")
+  humanas <- dados %>%
+    filter(str_detect(.data[[col_area]], regex(RE_HUMANAS_AREA, ignore_case = TRUE)))
+  areas_mantidas <- sort(unique(as.character(humanas[[col_area]])))
+  message("    áreas mantidas (", length(areas_mantidas), "): ",
+          paste(head(areas_mantidas, 40), collapse = " | "))
+} else {
+  stop("Não encontrei coluna de grande área nem de área. Inspecione names(dados).")
+}
 
-message("    registros em Ciências Humanas: ", format(nrow(humanas), big.mark = "."))
+message("    registros em Ciências Humanas: ",
+        format(nrow(humanas), big.mark = ".", decimal.mark = ","))
 
 # Texto de classificação = título (+ resumo + keywords quando existirem)
 montar_texto <- function(df) {
@@ -205,7 +230,7 @@ humanas <- humanas %>%
 
 ia_hum <- humanas %>% filter(FOCO_IA %in% c("Foco Central", "Correlato"))
 message("    trabalhos IA em Humanas (Central+Correlato): ",
-        format(nrow(ia_hum), big.mark = "."))
+        format(nrow(ia_hum), big.mark = ".", decimal.mark = ","))
 
 # Corpus auditável
 out_csv <- file.path(DADOS_CAPES, "capes_capesR_ia_humanas.csv")
