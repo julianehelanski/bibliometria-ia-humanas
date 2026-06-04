@@ -1,6 +1,6 @@
 # Análise Bibliométrica: Inteligência Artificial nas Ciências Humanas Brasileiras
 
-Scripts e dados utilizados na análise bibliométrica apresentada no Capítulo 2 da tese de doutorado *Seguindo actantes: uma etnografia da inteligência artificial no Brasil*, defendida no Programa de Pós-Graduação em Antropologia Social (PPGAS) da Universidade de São Paulo (USP).
+Scripts e dados utilizados na análise bibliométrica apresentada no Capítulo 2 da tese de doutorado *Tecno-etnografia de um centro de inteligência artificial: seguindo cientistas e engenheiros --- universidade afora*, no Programa de Pós-Graduação em Ciências Sociais (PPGCS) da Universidade Estadual de Campinas (Unicamp).
 
 ---
 
