@@ -3,6 +3,12 @@
 %  Trecho pronto para inserir na tese. Requer \usepackage{graphicx}.
 %  As figuras são geradas por figuras_openalex.py (pasta figuras/).
 %  Números: ver docs/decisoes_metodologicas.md, bloco IV (fonte canônica).
+%
+%  Convenções (idênticas às do inventario_figuras_capes.md):
+%   - \label segue o padrão fig:openalex_NN_descritor (autoref/Cref).
+%   - \source{...} é o comando comum em teses brasileiras; troque por
+%     \fonte{}, \floatfoot{} ou similar conforme o template do PPGAS-USP.
+%   - largura padrão 0.95\linewidth — ajuste conforme o layout.
 % =====================================================================
 
 \subsection{A produção de IA nas Humanidades em perspectiva internacional (OpenAlex)}
@@ -28,76 +34,81 @@ título ou resumo. Ou seja, somente cerca de 8,5\% das obras que o classificador
 do OpenAlex sinaliza como ``IA'' contêm esse vocabulário explícito --- diferença
 atribuível tanto à generosidade do conceito algorítmico quanto à ausência de
 resumo em parte das obras. As comparações internacionais de volume e penetração
-(Figuras~\ref{fig:openalex-ranking}, \ref{fig:openalex-taxa}
-e~\ref{fig:openalex-brasil-temporal}) empregam a definição por conceito, mais
+(Figuras~\ref{fig:openalex_01_ranking_paises},
+\ref{fig:openalex_02_taxa_interna_paises}
+e~\ref{fig:openalex_03_brasil_temporal}) empregam a definição por conceito, mais
 inclusiva e uniforme entre países; a análise de subcampos
-(Figura~\ref{fig:openalex-subcampos}) emprega a régua de palavra-chave,
-comparável às outras fontes.
+(Figura~\ref{fig:openalex_04_subcampos_3bases}) emprega a régua de
+palavra-chave, comparável às outras fontes.
 
 % ---------------------------------------------------------------------
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.95\linewidth]{figuras/openalex_01_ranking_paises.png}
-  \caption[Ranking de países por volume de IA nas Humanidades (OpenAlex,
-  2016--2024)]{Os quinze maiores produtores de publicações sobre inteligência
+  \caption{Os quinze maiores produtores de publicações sobre inteligência
   artificial na grande área de Humanidades, 2016--2024, segundo o OpenAlex
-  (definição por conceito). O Brasil, destacado, ocupa a 14.\textsuperscript{a}
-  posição mundial. Fonte: elaboração própria a partir do OpenAlex.}
-  \label{fig:openalex-ranking}
+  (definição por conceito). O Brasil, destacado em vermelho, ocupa a
+  14.\textsuperscript{a} posição mundial em volume absoluto (9.996 obras),
+  atrás de produtores como Estados Unidos (cerca de 60,9 mil), China (51,3 mil),
+  Reino Unido (42,8 mil) e Alemanha (27,5 mil).}
+  \label{fig:openalex_01_ranking_paises}
+  \source{Elaboração própria a partir do OpenAlex (2016--2024).}
 \end{figure}
 
-A Figura~\ref{fig:openalex-ranking} evidencia forte concentração geográfica: os
-Estados Unidos (cerca de 60,9 mil obras) e a China (51,3 mil) lideram com larga
-vantagem, seguidos pelo Reino Unido (42,8 mil) e pela Alemanha (27,5 mil). Cabe
-notar uma inversão reveladora: nas estatísticas de IA \emph{em todas as áreas}
---- como as do \textit{Country Activity Tracker} do CSET ---, a China supera os
-Estados Unidos em volume; quando o recorte é a Humanidades, os Estados Unidos
-retomam a dianteira. A interseção entre IA e Humanidades tem, portanto, uma
-geografia própria, distinta da IA tomada em sentido amplo. O Brasil, com 9.996
-obras, figura em 14.\textsuperscript{o} lugar --- presença não desprezível em
-volume absoluto, mas que, como se verá, oculta uma baixíssima penetração
-relativa.
+A Figura~\ref{fig:openalex_01_ranking_paises} evidencia forte concentração
+geográfica: os Estados Unidos (cerca de 60,9 mil obras) e a China (51,3 mil)
+lideram com larga vantagem, seguidos pelo Reino Unido (42,8 mil) e pela Alemanha
+(27,5 mil). Cabe notar uma inversão reveladora: nas estatísticas de IA \emph{em
+todas as áreas} --- como as do \textit{Country Activity Tracker} do CSET ---, a
+China supera os Estados Unidos em volume; quando o recorte é a Humanidades, os
+Estados Unidos retomam a dianteira. A interseção entre IA e Humanidades tem,
+portanto, uma geografia própria, distinta da IA tomada em sentido amplo. O
+Brasil, com 9.996 obras, figura em 14.\textsuperscript{o} lugar --- presença não
+desprezível em volume absoluto, mas que, como se verá, oculta uma baixíssima
+penetração relativa.
 
 % ---------------------------------------------------------------------
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.95\linewidth]{figuras/openalex_02_taxa_interna_paises.png}
-  \caption[Penetração da IA nas Humanidades por país (taxa interna,
-  2016--2024)]{Taxa interna --- proporção das publicações de Humanidades de cada
-  país que tocam o campo da IA --- entre os quinze maiores produtores,
-  2016--2024. Apesar do volume, o Brasil apresenta a menor taxa do grupo
-  (1,57\%), contra 16,89\% da China. Fonte: elaboração própria a partir do
-  OpenAlex.}
-  \label{fig:openalex-taxa}
+  \caption{Taxa interna --- proporção das publicações de Humanidades de cada país
+  que tocam o campo da IA --- entre os quinze maiores produtores, 2016--2024.
+  Apesar do volume, o Brasil (destacado em vermelho) apresenta a menor taxa do
+  grupo (1,57\%), contra 16,89\% da China, 13,20\% do Japão e 6,15\% dos Estados
+  Unidos.}
+  \label{fig:openalex_02_taxa_interna_paises}
+  \source{Elaboração própria a partir do OpenAlex (2016--2024).}
 \end{figure}
 
 A leitura por \emph{taxa interna} --- isto é, a fração das Humanidades de cada
 país que dialoga com a IA --- altera radicalmente o quadro
-(Figura~\ref{fig:openalex-taxa}). A China lidera a penetração com 16,89\%,
-seguida por Japão (13,20\%), Índia (10,54\%) e Países Baixos (10,07\%); os
-Estados Unidos, primeiros em volume, exibem penetração intermediária (6,15\%). O
-Brasil ocupa o \emph{último} lugar entre os quinze maiores produtores, com apenas
-1,57\%. O dado é tanto mais expressivo quando se observa que o Brasil possui o
-segundo maior \emph{universo} de Humanidades do conjunto (636.607 obras, atrás
-apenas dos Estados Unidos): não se trata, pois, de um país que produz pouco em
-Humanidades, mas de um país cuja vasta produção humanística pouco se conecta à
-IA. Esse achado replica, em escala internacional, a ``marginalidade'' já
-diagnosticada na CAPES (0,67\% das defesas de Humanas tocam a IA) e no
-SciELO, conferindo-lhe robustez por triangulação entre fontes independentes.
+(Figura~\ref{fig:openalex_02_taxa_interna_paises}). A China lidera a penetração
+com 16,89\%, seguida por Japão (13,20\%), Índia (10,54\%) e Países Baixos
+(10,07\%); os Estados Unidos, primeiros em volume, exibem penetração
+intermediária (6,15\%). O Brasil ocupa o \emph{último} lugar entre os quinze
+maiores produtores, com apenas 1,57\%. O dado é tanto mais expressivo quando se
+observa que o Brasil possui o segundo maior \emph{universo} de Humanidades do
+conjunto (636.607 obras, atrás apenas dos Estados Unidos): não se trata, pois, de
+um país que produz pouco em Humanidades, mas de um país cuja vasta produção
+humanística pouco se conecta à IA. Esse achado replica, em escala internacional,
+a ``marginalidade'' já diagnosticada na CAPES (0,67\% das defesas de Humanas
+tocam a IA) e no SciELO, conferindo-lhe robustez por triangulação entre fontes
+independentes.
 
 % ---------------------------------------------------------------------
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.95\linewidth]{figuras/openalex_03_brasil_temporal.png}
-  \caption[Evolução anual da IA nas Humanidades no Brasil (OpenAlex,
-  2016--2024)]{Brasil: volume anual de publicações de IA nas Humanidades
-  (barras) e taxa interna (linha), 2016--2024. A retração de 2024 deve-se,
-  muito provavelmente, à indexação ainda incompleta do ano no OpenAlex, não a um
-  declínio real. Fonte: elaboração própria a partir do OpenAlex.}
-  \label{fig:openalex-brasil-temporal}
+  \caption{Brasil: volume anual de publicações de IA nas Humanidades (barras) e
+  taxa interna (linha), 2016--2024. O volume cresce de 864 obras (2016) a 1.382
+  (2023), enquanto a taxa interna permanece estável entre 1,2\% e 1,9\%. A
+  retração de 2024 deve-se, muito provavelmente, à indexação ainda incompleta do
+  ano no OpenAlex, não a um declínio real.}
+  \label{fig:openalex_03_brasil_temporal}
+  \source{Elaboração própria a partir do OpenAlex (2016--2024).}
 \end{figure}
 
-A trajetória temporal brasileira (Figura~\ref{fig:openalex-brasil-temporal})
+A trajetória temporal brasileira (Figura~\ref{fig:openalex_03_brasil_temporal})
 mostra crescimento sustentado entre 2016 (864 obras) e 2023 (1.382 obras),
 acompanhado de uma taxa interna que oscila entre 1,2\% e 1,9\%, com pico em 2022
 (1,86\%). A aparente queda de 2024 (975 obras) deve ser lida com cautela: o
@@ -113,27 +124,29 @@ pelo campo.
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.95\linewidth]{figuras/openalex_04_subcampos_3bases.png}
-  \caption[Distribuição por subcampos de IA: CAPES, SciELO e OpenAlex]{Peso
-  relativo dos subcampos de IA (rótulos múltiplos) em cada fonte: CAPES
-  e SciELO referem-se ao corpus de IA total da base; OpenAlex, ao recorte de
-  Humanidades do Brasil (régua de palavra-chave). Fonte: elaboração própria.}
-  \label{fig:openalex-subcampos}
+  \caption{Peso relativo dos subcampos de IA (rótulos múltiplos; a soma excede
+  100\%) em cada fonte. CAPES e SciELO referem-se ao corpus de IA total da base;
+  OpenAlex, ao recorte de Humanidades do Brasil (régua de palavra-chave). A
+  hierarquia entre IA estrita e aprendizado de máquina (ML) varia entre as
+  fontes, e os modelos de linguagem (LLM) constituem o menor subcampo nas três.}
+  \label{fig:openalex_04_subcampos_3bases}
+  \source{Elaboração própria a partir de CAPES, SciELO e OpenAlex.}
 \end{figure}
 
-A Figura~\ref{fig:openalex-subcampos} compara o peso dos subcampos --- IA em
-sentido estrito, aprendizado de máquina (ML), aprendizado profundo (DL), modelos
-de linguagem e IA generativa (LLM) e tecnologias correlatas --- entre as três
-fontes. A comparação deve respeitar uma ressalva de escopo: os percentuais da
-CAPES e do SciELO referem-se ao corpus de IA \emph{total} de cada
-base, ao passo que os do OpenAlex referem-se ao recorte de Humanidades do Brasil.
-Ainda assim, dois padrões se destacam. Primeiro, a hierarquia entre IA estrita e
-ML varia conforme a fonte: na CAPES o ML predomina (40,7\% contra
-29,4\% de IA estrita), no SciELO a relação se inverte (29,6\% contra 21,9\%), e
-no OpenAlex os dois subcampos \emph{empatam} (33,9\% cada). Segundo, os modelos
-de linguagem e a IA generativa (LLM) constituem, sistematicamente, o menor
-subcampo nas três bases (3,9\% na CAPES, 7,1\% no SciELO e 6,6\% no
-OpenAlex) --- indício de que, no período analisado, a virada generativa ainda não
-se traduzira em produção acadêmica expressiva nas Humanidades.
+A Figura~\ref{fig:openalex_04_subcampos_3bases} compara o peso dos subcampos ---
+IA em sentido estrito, aprendizado de máquina (ML), aprendizado profundo (DL),
+modelos de linguagem e IA generativa (LLM) e tecnologias correlatas --- entre as
+três fontes. A comparação deve respeitar uma ressalva de escopo: os percentuais
+da CAPES e do SciELO referem-se ao corpus de IA \emph{total} de cada base, ao
+passo que os do OpenAlex referem-se ao recorte de Humanidades do Brasil. Ainda
+assim, dois padrões se destacam. Primeiro, a hierarquia entre IA estrita e ML
+varia conforme a fonte: na CAPES o ML predomina (40,7\% contra 29,4\% de IA
+estrita), no SciELO a relação se inverte (29,6\% contra 21,9\%), e no OpenAlex os
+dois subcampos \emph{empatam} (33,9\% cada). Segundo, os modelos de linguagem e a
+IA generativa (LLM) constituem, sistematicamente, o menor subcampo nas três bases
+(3,9\% na CAPES, 7,1\% no SciELO e 6,6\% no OpenAlex) --- indício de que, no
+período analisado, a virada generativa ainda não se traduzira em produção
+acadêmica expressiva nas Humanidades.
 
 % ---------------------------------------------------------------------
 \paragraph{Síntese e limitações.} Tomadas em conjunto, as evidências do OpenAlex
