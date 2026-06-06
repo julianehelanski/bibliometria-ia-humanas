@@ -22,3 +22,9 @@ dados_capes/capesR_cache/
 # Regenerável; grande demais para versionar. Slim XLSX fica no repo.
 dados_scielo/scielo_brasil_ia_subcampos.csv
 dados_scielo/scielo_brasil_universo.csv
+
+# Cache local da API OpenAlex — regenerável.
+dados_openalex/cache_openalex/
+# Corpus OpenAlex completo (com abstracts), regenerável pelo script. O XLSX
+# slim de auditoria fica no repo.
+dados_openalex/openalex_ia_humanas_corpus_*.csv
