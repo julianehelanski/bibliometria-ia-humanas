@@ -57,7 +57,7 @@ python analise_openalex.py --modo corpus --pais BR --mailto voce@exemplo.com
 | `--modo` | `agregado` | `agregado` = contagens via group_by; `corpus` = baixa obras e classifica subcampos |
 | `--pais` | (global) | código ISO-2 (ex.: `BR`, `US`). No modo agregado, sem país sai também o ranking por país |
 | `--ano-inicial` / `--ano-final` | 2016 / 2024 | janela temporal (alinhada ao OWID/CSET) |
-| `--humanidades-filtro` | `primary_topic.field.id:12\|33` | recorte AMPLO (Artes e Humanidades + Ciências Sociais), para aproximar o "Ciências Humanas" da CAPES — **confirme os IDs com `--listar-campos`**. Estrito (só Artes e Humanidades): `primary_topic.field.id:12`. Espelhando a CAPES com Psicologia: `primary_topic.field.id:12\|32\|33` |
+| `--humanidades-filtro` | `primary_topic.field.id:12\|32\|33` | recorte AMPLO (Artes e Humanidades + Psicologia + Ciências Sociais), que espelha o "Ciências Humanas" da CAPES — **IDs confirmados em 2026-06-06 via `--listar-campos`**. Sem Psicologia: `primary_topic.field.id:12\|33`. Estrito (só Artes e Humanidades): `primary_topic.field.id:12` |
 | `--ia-filtro` | `concepts.id:C154945302` | conceito "Artificial intelligence" |
 | `--listar-campos` | — | lista os IDs de field da API e sai |
 
@@ -76,12 +76,12 @@ python analise_openalex.py --modo corpus --pais BR --mailto voce@exemplo.com
   *cada* país presente nas afiliações dos autores. Para contagem única por obra,
   deduplique por `openalex_id`.
 - **Definição de "Humanidades" é uma escolha — declare-a.** O default é o recorte
-  AMPLO `12|33` (Artes e Humanidades + Ciências Sociais), que aproxima o "Ciências
-  Humanas" da CAPES (Sociologia, Ciência Política, Geografia, Antropologia,
-  Educação, Filosofia, História...). Atenção: a CAPES inclui **Psicologia** em
-  Ciências Humanas, mas no OpenAlex Psicologia é o *field* separado **32** — para
-  fidelidade total à CAPES use `12|32|33`. Para o recorte estrito de Artes e
-  Humanidades, use `12`. Seja qual for a escolha, declare o critério na tese.
+  AMPLO `12|32|33` (Artes e Humanidades + Psicologia + Ciências Sociais), escolhido
+  para espelhar o "Ciências Humanas" da CAPES (Sociologia, Ciência Política,
+  Geografia, Antropologia, Educação, Filosofia, História e **Psicologia** — esta
+  última é o *field* separado 32 no OpenAlex). Alternativas: `12|33` (sem
+  Psicologia) ou `12` (estrito, só Artes e Humanidades). Seja qual for a escolha,
+  declare o critério na tese.
 - **Cobertura difere das bases nacionais.** O OpenAlex indexa sobretudo o que tem
   metadados em inglês/internacionais; não substitui CAPES nem SciELO para o
   recorte brasileiro, complementa-os.
