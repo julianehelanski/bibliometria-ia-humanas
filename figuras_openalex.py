@@ -189,12 +189,135 @@ def fig_subcampos_3bases() -> None:
     _salvar(fig, "openalex_04_subcampos_3bases.png")
 
 
+def fig_bolha_universo_penetracao(top: int = 40) -> None:
+    """openalex_05 — bolhas: universo de Humanidades x taxa interna (tamanho = volume)."""
+    df = _ler_csv("openalex_ia_humanas_por_pais_global.csv")
+    if df is None:
+        return
+    df = df[df["pais_codigo"].astype(str).str.strip() != ""].copy()
+    df = df.sort_values("count_ia_hum", ascending=False).head(top)
+    is_br = df["pais"].str.contains("brazil|brasil", case=False, na=False)
+    tam = 40 + 3000 * df["count_ia_hum"] / df["count_ia_hum"].max()
+
+    fig, ax = plt.subplots(figsize=(11, 7))
+    ax.scatter(df.loc[~is_br, "count_universo_hum"], df.loc[~is_br, "taxa_interna_%"],
+               s=tam[~is_br], color=COR_NEUTRA, alpha=0.6, edgecolor="white", linewidth=0.5)
+    ax.scatter(df.loc[is_br, "count_universo_hum"], df.loc[is_br, "taxa_interna_%"],
+               s=tam[is_br], color=COR_BRASIL, alpha=0.9, edgecolor="black",
+               linewidth=0.9, zorder=5)
+    rotular = set(df.sort_values("count_ia_hum", ascending=False).head(6)["pais"]) \
+        | set(df.loc[is_br, "pais"])
+    for _, r in df.iterrows():
+        if r["pais"] in rotular:
+            ax.annotate(r["pais"], (r["count_universo_hum"], r["taxa_interna_%"]),
+                        fontsize=8, xytext=(6, 5), textcoords="offset points")
+    ax.set_xscale("log")
+    ax.set_xlabel("Universo de publicações em Humanidades (escala log)")
+    ax.set_ylabel("Taxa interna: % das Humanidades que tocam IA")
+    ax.set_title("Tamanho do campo × penetração da IA nas Humanidades\n"
+                 "(bolha = volume de publicações de IA; Brasil em vermelho)")
+    _salvar(fig, "openalex_05_bolha_universo_penetracao.png")
+
+
+def _radar(ax, valores, label, cor) -> None:
+    n = len(valores)
+    angulos = np.linspace(0, 2 * np.pi, n, endpoint=False).tolist()
+    valores = list(valores) + [valores[0]]
+    angulos = angulos + [angulos[0]]
+    ax.plot(angulos, valores, color=cor, linewidth=2, label=label)
+    ax.fill(angulos, valores, color=cor, alpha=0.1)
+
+
+def fig_radar_subcampos() -> None:
+    """openalex_06 — radar dos subcampos comparando as 3 bases."""
+    df = _ler_csv("openalex_ia_humanas_resumo_BR.csv")
+    if df is None:
+        return
+    foco = df[df["tipo"] == "FOCO_IA"]
+    n_ia = int(foco[foco["categoria"] != "Outros Temas"]["obras_unicas"].sum())
+    if n_ia == 0:
+        return
+    sub = df[df["tipo"] == "SUBCAMPO"].set_index("categoria")["obras_unicas"]
+    openalex_sub = {SUB_MAP[k]: 100 * v / n_ia for k, v in sub.items() if k in SUB_MAP}
+
+    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
+    _radar(ax, [CAPES_SUB[s] for s in SUB_ORDER], "CAPES (corpus IA total)", CORES_INTERMEDIARIAS[2])
+    _radar(ax, [SCIELO_SUB[s] for s in SUB_ORDER], "SciELO (corpus IA total)", CORES_INTERMEDIARIAS[3])
+    _radar(ax, [openalex_sub.get(s, 0) for s in SUB_ORDER], "OpenAlex (Brasil, Humanas)", COR_BRASIL)
+    ax.set_xticks(np.linspace(0, 2 * np.pi, len(SUB_ORDER), endpoint=False))
+    ax.set_xticklabels(SUB_ORDER)
+    ax.set_title("Perfil de subcampos de IA por fonte (% do corpus IA)", pad=24)
+    ax.legend(loc="upper right", bbox_to_anchor=(1.35, 1.12), fontsize=8)
+    _salvar(fig, "openalex_06_radar_subcampos.png")
+
+
+def fig_quadrante_paises(top: int = 40) -> None:
+    """openalex_07 — quadrante volume × penetração (medianas), Brasil destacado."""
+    df = _ler_csv("openalex_ia_humanas_por_pais_global.csv")
+    if df is None:
+        return
+    df = df[df["pais_codigo"].astype(str).str.strip() != ""].copy()
+    df = df.sort_values("count_ia_hum", ascending=False).head(top)
+    is_br = df["pais"].str.contains("brazil|brasil", case=False, na=False)
+    mx, my = df["count_ia_hum"].median(), df["taxa_interna_%"].median()
+
+    fig, ax = plt.subplots(figsize=(11, 7))
+    ax.scatter(df.loc[~is_br, "count_ia_hum"], df.loc[~is_br, "taxa_interna_%"],
+               color=COR_NEUTRA, alpha=0.6)
+    ax.scatter(df.loc[is_br, "count_ia_hum"], df.loc[is_br, "taxa_interna_%"],
+               color=COR_BRASIL, s=130, edgecolor="black", linewidth=0.9, zorder=5)
+    ax.axvline(mx, color="gray", linestyle="--", linewidth=0.8)
+    ax.axhline(my, color="gray", linestyle="--", linewidth=0.8)
+    ax.set_xscale("log")
+    rotular = set(df.sort_values("count_ia_hum", ascending=False).head(8)["pais"]) \
+        | set(df.loc[is_br, "pais"])
+    for _, r in df.iterrows():
+        if r["pais"] in rotular:
+            ax.annotate(r["pais"], (r["count_ia_hum"], r["taxa_interna_%"]),
+                        fontsize=8, xytext=(6, 3), textcoords="offset points")
+    xmin, xmax = df["count_ia_hum"].min(), df["count_ia_hum"].max()
+    ymin, ymax = df["taxa_interna_%"].min(), df["taxa_interna_%"].max()
+    ax.text(xmax, ymax, "Líderes", fontsize=9, ha="right", va="top", color="gray", style="italic")
+    ax.text(xmin, ymax, "Nicho", fontsize=9, ha="left", va="top", color="gray", style="italic")
+    ax.text(xmax, ymin, "Gigantes latentes", fontsize=9, ha="right", va="bottom", color="gray", style="italic")
+    ax.text(xmin, ymin, "Periféricos", fontsize=9, ha="left", va="bottom", color="gray", style="italic")
+    ax.set_xlabel("Volume de publicações de IA nas Humanidades (escala log)")
+    ax.set_ylabel("Taxa interna (%)")
+    ax.set_title("Quadrantes: volume × penetração da IA nas Humanidades\n"
+                 "(linhas tracejadas = medianas; Brasil em vermelho)")
+    _salvar(fig, "openalex_07_quadrante_paises.png")
+
+
+def fig_trajetoria_brasil() -> None:
+    """openalex_08 — trajetória do Brasil em (volume, taxa interna) ano a ano."""
+    df = _ler_csv("openalex_ia_humanas_por_ano_BR.csv")
+    if df is None:
+        return
+    df = df.sort_values("ano")
+    fig, ax = plt.subplots(figsize=(10, 7))
+    ax.plot(df["count_ia_hum"], df["taxa_interna_%"], color=COR_NEUTRA, linewidth=1.2, zorder=1)
+    ax.scatter(df["count_ia_hum"], df["taxa_interna_%"], color=COR_BRASIL, s=90,
+               edgecolor="black", linewidth=0.7, zorder=3)
+    for _, r in df.iterrows():
+        ax.annotate(str(int(r["ano"])), (r["count_ia_hum"], r["taxa_interna_%"]),
+                    fontsize=8, xytext=(7, 4), textcoords="offset points")
+    ax.set_xlabel("Volume de publicações de IA nas Humanidades")
+    ax.set_ylabel("Taxa interna (%)")
+    ax.set_title("Brasil: trajetória em volume × penetração (2016–2024)\n"
+                 "o volume cresce, mas a penetração anda de lado")
+    _salvar(fig, "openalex_08_trajetoria_brasil.png")
+
+
 def main() -> None:
     print("Gerando figuras OpenAlex em figuras/ ...")
     fig_ranking_paises()
     fig_taxa_interna_paises()
     fig_brasil_temporal()
     fig_subcampos_3bases()
+    fig_bolha_universo_penetracao()
+    fig_radar_subcampos()
+    fig_quadrante_paises()
+    fig_trajetoria_brasil()
     print("Concluído.")
 
 
