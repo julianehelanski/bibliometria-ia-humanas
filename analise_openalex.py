@@ -485,6 +485,26 @@ def modo_corpus(args) -> None:
     print(f"XLSX para auditoria (obras únicas, {len(unicas):,}): {out_xlsx}")
 
 
+def resolver_subfield_id(nome: str, mailto: str | None) -> tuple[str | None, str | None]:
+    """Resolve o id de um subfield do OpenAlex pelo nome (ex.: 'Anthropology')."""
+    params = _params_base(mailto)
+    params["filter"] = f"display_name.search:{nome}"
+    try:
+        data = _get("/subfields", params)
+    except Exception as e:
+        sys.stderr.write(f"[erro] não consegui resolver subfield '{nome}': {e}\n")
+        return None, None
+    resultados = data.get("results", [])
+    if not resultados:
+        return None, None
+    # Prefere correspondência exata (case-insensitive) ao primeiro do ranking.
+    for r in resultados:
+        if str(r.get("display_name", "")).strip().lower() == nome.strip().lower():
+            return str(r["id"]).rsplit("/", 1)[-1], r["display_name"]
+    r = resultados[0]
+    return str(r.get("id", "")).rsplit("/", 1)[-1], r.get("display_name")
+
+
 def _quebrar_por(filtro_universo: str, filtro_ia: str, dimensao: str,
                  mailto: str | None, rotulo_col: str) -> pd.DataFrame:
     """Cruza universo × IA por uma dimensão de group_by, com taxa de IA por item."""
@@ -493,7 +513,7 @@ def _quebrar_por(filtro_universo: str, filtro_ia: str, dimensao: str,
     if uni.empty:
         return uni
     df = uni.merge(iat, on=["key", "nome"], how="left", suffixes=("_universo", "_ia"))
-    df = df.rename(columns={"nome": rotulo_col}).drop(columns=["key"])
+    df = df.rename(columns={"nome": rotulo_col, "key": f"{rotulo_col}_id"})
     df["count_ia"] = df["count_ia"].fillna(0).astype(int)
     df = df.sort_values("count_universo", ascending=False)
     df["pct_do_universo"] = (
@@ -517,6 +537,36 @@ def modo_temas(args) -> None:
         [hum, f"publication_year:{args.ano_inicial}-{args.ano_final}"] + pais_part)
     filtro_ia = montar_filtro(args.ano_inicial, args.ano_final, ia, hum, args.pais)
     suf = f"_{args.pais.upper()}" if args.pais else "_global"
+
+    # --- Mergulho em áreas específicas (ex.: "Anthropology"); aceita vários,
+    #     separados por vírgula (ex.: as ciências sociais). ---
+    if args.subfield:
+        nomes = [s.strip() for s in args.subfield.split(",") if s.strip()]
+        for nome in nomes:
+            sid, snome = resolver_subfield_id(nome, args.mailto)
+            if not sid:
+                print(f"[pulado] não encontrei o subfield '{nome}'. "
+                      "Confira o nome na coluna 'subfield' do CSV de temas.\n")
+                continue
+            clausula = f"primary_topic.subfield.id:{sid}"
+            fu = filtro_universo + "," + clausula
+            fi = filtro_ia + "," + clausula
+            slug = "".join(c if c.isalnum() else "_" for c in snome.lower()).strip("_")
+            print(f"=== Temas DENTRO de '{snome}' (id {sid}) "
+                  + (f"| {args.pais.upper()} " if args.pais else "") + "===")
+            tops = _quebrar_por(fu, fi, "primary_topic.id", args.mailto, "topic")
+            if tops.empty:
+                print("  (sem obras nesse recorte)\n")
+                continue
+            out = os.path.join(DADOS_OPENALEX_DIR, f"openalex_topics_{slug}{suf}.csv")
+            tops.to_csv(out, index=False)
+            print(f"Top 20 temas em {snome} "
+                  f"(universo: {tops['count_universo'].sum():,} obras; "
+                  f"taxa de IA da área: {100*tops['count_ia'].sum()/tops['count_universo'].sum():.2f}%):")
+            print(tops.head(20)[["topic", "count_universo", "pct_do_universo",
+                                 "count_ia", "taxa_ia_%"]].to_string(index=False))
+            print(f"-> {out}\n")
+        return
 
     print("=== OpenAlex — modo temas (composição por subfield + topic) ===")
     print(f"Janela: {args.ano_inicial}–{args.ano_final}"
@@ -566,6 +616,10 @@ def main() -> None:
     parser.add_argument("--ano-final", type=int, default=ANO_FINAL_DEFAULT)
     parser.add_argument("--sem-cache", action="store_true",
                         help="Ignora o cache e rebaixa as obras da API (modo corpus)")
+    parser.add_argument("--subfield", default=None,
+                        help="(modo temas) Mergulha em uma ou mais áreas por nome, "
+                             "separadas por vírgula, e quebra por tema específico. "
+                             'Ex.: --subfield "Anthropology,Sociology and Political Science"')
     parser.add_argument("--ia-filtro", default=IA_FILTRO,
                         help=f"Filtro de IA da API (default: {IA_FILTRO})")
     parser.add_argument("--humanidades-filtro", default=HUMANIDADES_FILTRO,
