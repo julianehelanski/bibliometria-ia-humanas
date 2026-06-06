@@ -211,6 +211,36 @@ def fig_painel_areas(sufixo: str, top: int = 10, areas=AREAS_SOCIAIS) -> None:
     print(f"  -> {out}")
 
 
+def fig_areas_individuais(sufixo: str, top: int = 12, areas=AREAS_SOCIAIS) -> None:
+    """openalex_13..15 — uma figura por ciência social, barras na paleta categórica.
+
+    Versão "desmembrada" do painel: cada área num gráfico próprio, com mais
+    espaço para os rótulos. A penetração da IA aparece no texto "IA x%" ao lado
+    de cada barra (a cor é apenas categórica, igual ao treemap).
+    """
+    for i, (slug, titulo) in enumerate(areas):
+        df = _ler(f"openalex_topics_{slug}{sufixo}.csv")
+        if df is None or df.empty:
+            continue
+        d = df.sort_values("count_universo", ascending=False).head(top).iloc[::-1]
+        cores = [PALETA_CATEGORICA[j % len(PALETA_CATEGORICA)] for j in range(len(d))]
+        fig, ax = plt.subplots(figsize=(11, 7))
+        ax.barh(d["topic"].astype(str), d["count_universo"], color=cores, edgecolor="white")
+        for y, (v, t) in enumerate(zip(d["count_universo"], d["taxa_ia_%"])):
+            ax.text(v, y, f"  {int(v):,}".replace(",", ".") + f"  ·  IA {t:.1f}%",
+                    va="center", fontsize=8)
+        ax.set_xlabel("publicações no universo de Humanidades (2016–2024)")
+        ax.set_title(f"{titulo} — temas mais frequentes (Brasil)", fontsize=12)
+        ax.margins(x=0.22)
+        fig.tight_layout()
+        numero = 13 + i
+        out = os.path.join(garantir_diretorio(FIGURAS_DIR),
+                           f"openalex_{numero}_{slug}.png")
+        fig.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+        plt.close(fig)
+        print(f"  -> {out}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pais", default="BR", help="Sufixo do país (default BR; use vazio p/ global)")
@@ -220,6 +250,7 @@ def main() -> None:
     fig_treemap(sufixo)
     fig_topics(sufixo)
     fig_painel_areas(sufixo)
+    fig_areas_individuais(sufixo)
     print("Concluído.")
 
 
