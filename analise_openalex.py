@@ -59,6 +59,7 @@ Boa cidadania de API (OpenAlex "polite pool"):
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -301,13 +302,16 @@ def reconstruir_abstract(inv_index: dict | None) -> str:
     return " ".join(palavra for _, palavra in posicoes)
 
 
+# Campos pedidos por obra (reduz o payload e fixa a chave de cache).
+SELECT_WORKS = ",".join([
+    "id", "title", "publication_year", "language",
+    "abstract_inverted_index", "authorships", "primary_topic",
+])
+
+
 def iter_works(filtro: str, mailto: str | None) -> Iterator[dict]:
     """Itera todas as obras de um filtro via paginação por cursor."""
     cursor = "*"
-    select = ",".join([
-        "id", "title", "publication_year", "language",
-        "abstract_inverted_index", "authorships", "primary_topic",
-    ])
     baixados = 0
     while cursor:
         params = _params_base(mailto)
@@ -315,7 +319,7 @@ def iter_works(filtro: str, mailto: str | None) -> Iterator[dict]:
             "filter": filtro,
             "per-page": PER_PAGE,
             "cursor": cursor,
-            "select": select,
+            "select": SELECT_WORKS,
         })
         data = _get("/works", params)
         resultados = data.get("results", [])
@@ -329,6 +333,30 @@ def iter_works(filtro: str, mailto: str | None) -> Iterator[dict]:
         if not resultados:
             break
     sys.stderr.write("\n")
+
+
+def coletar_works(filtro: str, mailto: str | None, usar_cache: bool = True) -> list[dict]:
+    """Coleta todas as obras de um filtro, com cache em disco.
+
+    O resultado completo é salvo num único JSON, identificado por um hash do
+    filtro + campos pedidos. Re-rodadas com o MESMO filtro carregam do cache,
+    evitando rebaixar tudo da API. Use usar_cache=False para forçar atualização.
+    """
+    chave = hashlib.md5(f"{filtro}|{SELECT_WORKS}".encode()).hexdigest()[:16]
+    cache_dir = garantir_diretorio(os.path.join(CACHE_DIR, "works"))
+    cache_path = os.path.join(cache_dir, f"{chave}.json")
+    if usar_cache and os.path.isfile(cache_path):
+        try:
+            with open(cache_path, encoding="utf-8") as f:
+                works = json.load(f)
+            print(f"  (cache) {len(works):,} obras carregadas de {cache_path}")
+            return works
+        except (json.JSONDecodeError, OSError) as e:
+            sys.stderr.write(f"[cache corrompido, refazendo] {e}\n")
+    works = list(iter_works(filtro, mailto))
+    with open(cache_path, "w", encoding="utf-8") as f:
+        json.dump(works, f, ensure_ascii=False)
+    return works
 
 
 def extrair_campos_obra(obra: dict) -> list[dict]:
@@ -385,8 +413,9 @@ def modo_corpus(args) -> None:
         print("AVISO: sem --pais o corpus global de IA×Humanidades pode ter "
               "centenas de milhares de obras. Considere restringir.\n")
 
+    works = coletar_works(filtro, args.mailto, usar_cache=not args.sem_cache)
     registros: list[dict] = []
-    for obra in iter_works(filtro, args.mailto):
+    for obra in works:
         registros.extend(extrair_campos_obra(obra))
 
     df = pd.DataFrame(registros)
@@ -469,6 +498,8 @@ def main() -> None:
                         help="Código ISO-2 (ex.: BR, US). Sem isto = global.")
     parser.add_argument("--ano-inicial", type=int, default=ANO_INICIAL_DEFAULT)
     parser.add_argument("--ano-final", type=int, default=ANO_FINAL_DEFAULT)
+    parser.add_argument("--sem-cache", action="store_true",
+                        help="Ignora o cache e rebaixa as obras da API (modo corpus)")
     parser.add_argument("--ia-filtro", default=IA_FILTRO,
                         help=f"Filtro de IA da API (default: {IA_FILTRO})")
     parser.add_argument("--humanidades-filtro", default=HUMANIDADES_FILTRO,

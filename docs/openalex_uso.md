@@ -60,6 +60,13 @@ python analise_openalex.py --modo corpus --pais BR --mailto voce@exemplo.com
 | `--humanidades-filtro` | `primary_topic.field.id:12\|32\|33` | recorte AMPLO (Artes e Humanidades + Psicologia + Ciências Sociais), que espelha o "Ciências Humanas" da CAPES — **IDs confirmados em 2026-06-06 via `--listar-campos`**. Sem Psicologia: `primary_topic.field.id:12\|33`. Estrito (só Artes e Humanidades): `primary_topic.field.id:12` |
 | `--ia-filtro` | `concepts.id:C154945302` | conceito "Artificial intelligence" |
 | `--listar-campos` | — | lista os IDs de field da API e sai |
+| `--sem-cache` | — | ignora o cache e rebaixa as obras da API (modo corpus) |
+
+> **Cache (modo corpus):** a coleta completa de obras é salva em
+> `dados_openalex/cache_openalex/works/` (um JSON por filtro). Re-rodadas com o
+> mesmo filtro carregam do cache em vez de rebaixar tudo da API — útil para
+> iterar regex/análises. Use `--sem-cache` para forçar atualização (ex.: depois
+> que o OpenAlex indexar mais obras do ano corrente).
 
 ## Saídas (em `dados_openalex/`)
 
