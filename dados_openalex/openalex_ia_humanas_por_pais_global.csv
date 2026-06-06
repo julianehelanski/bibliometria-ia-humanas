@@ -1,0 +1,209 @@
+pais_codigo,pais,count_ia_hum,count_universo_hum,taxa_interna_%
+US,United States of America,119181.0,1621928.0,7.348
+ID,Indonesia,60943.0,990707.0,6.151
+CN,China,51300.0,303733.0,16.89
+GB,United Kingdom of Great Britain and Northern Ireland,42823.0,594599.0,7.202
+DE,Germany,27504.0,419966.0,6.549
+CA,Canada,19373.0,268052.0,7.227
+AU,Australia,18841.0,247256.0,7.62
+IN,India,18344.0,174025.0,10.541
+FR,France,17637.0,602401.0,2.928
+RU,Russian Federation,17069.0,244134.0,6.992
+IT,Italy,14850.0,183463.0,8.094
+ES,Spain,14518.0,330647.0,4.391
+NL,Netherlands,14411.0,143099.0,10.071
+JP,Japan,13603.0,103026.0,13.203
+BR,Brazil,9996.0,636607.0,1.57
+PL,Poland,8975.0,199337.0,4.502
+TR,Turkey,8710.0,235128.0,3.704
+MY,Malaysia,8471.0,85409.0,9.918
+SE,Sweden,7561.0,78173.0,9.672
+CH,Switzerland,7248.0,96520.0,7.509
+KR,"Korea, Republic of",6785.0,59838.0,11.339
+IR,"Iran, Islamic Republic of",6483.0,84044.0,7.714
+BE,Belgium,6280.0,95070.0,6.606
+NO,Norway,5377.0,66455.0,8.091
+ZA,South Africa,5288.0,85191.0,6.207
+HK,Hong Kong,5270.0,43220.0,12.193
+TW,"Taiwan, Province of China",5213.0,33563.0,15.532
+PT,Portugal,5151.0,95060.0,5.419
+FI,Finland,4986.0,56900.0,8.763
+DK,Denmark,4604.0,81028.0,5.682
+IL,Israel,4526.0,50919.0,8.889
+AT,Austria,4415.0,58699.0,7.521
+UA,Ukraine,4256.0,67543.0,6.301
+PK,Pakistan,3892.0,49775.0,7.819
+SA,Saudi Arabia,3770.0,28920.0,13.036
+NZ,New Zealand,3625.0,42576.0,8.514
+IE,Ireland,3521.0,45801.0,7.688
+SG,Singapore,3488.0,29373.0,11.875
+MX,Mexico,3447.0,122116.0,2.823
+RO,Romania,3150.0,36897.0,8.537
+GR,Greece,3122.0,37174.0,8.398
+CZ,Czechia,2997.0,45078.0,6.648
+TH,Thailand,2660.0,25657.0,10.368
+HU,Hungary,2355.0,47668.0,4.94
+NG,Nigeria,2346.0,50704.0,4.627
+CL,Chile,2209.0,71998.0,3.068
+PH,Philippines,2167.0,29503.0,7.345
+BD,Bangladesh,2163.0,21789.0,9.927
+IQ,Iraq,2041.0,20167.0,10.12
+CO,Colombia,1994.0,78706.0,2.533
+VN,Viet Nam,1769.0,17397.0,10.168
+AE,United Arab Emirates,1703.0,16174.0,10.529
+EG,Egypt,1655.0,26169.0,6.324
+AR,Argentina,1632.0,88519.0,1.844
+UZ,Uzbekistan,1498.0,24665.0,6.073
+SI,Slovenia,1463.0,21996.0,6.651
+RS,Serbia,1374.0,18502.0,7.426
+HR,Croatia,1304.0,26996.0,4.83
+JO,Jordan,1224.0,12449.0,9.832
+SK,Slovakia,1223.0,18139.0,6.742
+EC,Ecuador,1161.0,34230.0,3.392
+MO,Macao,1120.0,7836.0,14.293
+CY,Cyprus,1094.0,11726.0,9.33
+LT,Lithuania,1069.0,14860.0,7.194
+BG,Bulgaria,1057.0,12510.0,8.449
+GH,Ghana,1049.0,15913.0,6.592
+MA,Morocco,1038.0,12711.0,8.166
+KZ,Kazakhstan,1022.0,18057.0,5.66
+PE,Peru,876.0,39848.0,2.198
+EE,Estonia,799.0,10394.0,7.687
+DZ,Algeria,744.0,18157.0,4.098
+KE,Kenya,723.0,16869.0,4.286
+TN,Tunisia,711.0,10761.0,6.607
+QA,Qatar,706.0,7697.0,9.172
+LK,Sri Lanka,677.0,7981.0,8.483
+LU,Luxembourg,651.0,11693.0,5.567
+ET,Ethiopia,622.0,11421.0,5.446
+LV,Latvia,618.0,9973.0,6.197
+NP,Nepal,607.0,9451.0,6.423
+OM,Oman,577.0,4859.0,11.875
+LB,Lebanon,521.0,7630.0,6.828
+TJ,Tajikistan,483.0,7625.0,6.334
+MK,North Macedonia,474.0,6472.0,7.324
+AZ,Azerbaijan,398.0,7046.0,5.649
+BA,Bosnia and Herzegovina,370.0,6283.0,5.889
+BY,Belarus,360.0,5277.0,6.822
+MT,Malta,352.0,3520.0,10.0
+CU,Cuba,338.0,14976.0,2.257
+SS,South Sudan,334.0,4189.0,7.973
+KW,Kuwait,334.0,3682.0,9.071
+UG,Uganda,314.0,6340.0,4.953
+TZ,"Tanzania, United Republic of",310.0,6976.0,4.444
+MD,"Moldova, Republic of",295.0,5523.0,5.341
+IS,Iceland,295.0,4298.0,6.864
+MZ,Mozambique,281.0,5688.0,4.94
+YE,Yemen,272.0,2402.0,11.324
+SD,Sudan,268.0,3198.0,8.38
+GE,Georgia,266.0,5175.0,5.14
+CR,Costa Rica,266.0,13309.0,1.999
+AM,Armenia,264.0,4571.0,5.776
+AL,Albania,262.0,3937.0,6.655
+MN,Mongolia,258.0,5170.0,4.99
+ZW,Zimbabwe,253.0,5362.0,4.718
+PS,"Palestine, State of",232.0,3325.0,6.977
+UY,Uruguay,230.0,9867.0,2.331
+BH,Bahrain,219.0,2458.0,8.91
+PR,Puerto Rico,219.0,6526.0,3.356
+BN,Brunei Darussalam,214.0,2421.0,8.839
+XK,Kosovo,203.0,2667.0,7.612
+CM,Cameroon,192.0,5293.0,3.627
+VE,"Venezuela, Bolivarian Republic of",182.0,10348.0,1.759
+KG,Kyrgyzstan,171.0,3701.0,4.62
+ZM,Zambia,148.0,2877.0,5.144
+RW,Rwanda,146.0,2157.0,6.769
+KH,Cambodia,144.0,3058.0,4.709
+AF,Afghanistan,143.0,2187.0,6.539
+BO,"Bolivia, Plurinational State of",141.0,8660.0,1.628
+NA,Namibia,118.0,1488.0,7.93
+BW,Botswana,114.0,1815.0,6.281
+LY,Libya,104.0,1099.0,9.463
+BI,Burundi,101.0,2766.0,3.651
+MW,Malawi,91.0,1772.0,5.135
+MM,Myanmar,86.0,1772.0,4.853
+ME,Montenegro,84.0,1611.0,5.214
+BT,Bhutan,80.0,557.0,14.363
+BJ,Benin,79.0,3656.0,2.161
+TT,Trinidad and Tobago,79.0,1388.0,5.692
+FJ,Fiji,73.0,1352.0,5.399
+PY,Paraguay,71.0,5146.0,1.38
+SN,Senegal,68.0,2482.0,2.74
+MU,Mauritius,65.0,770.0,8.442
+PA,Panama,65.0,3186.0,2.04
+DO,Dominican Republic,64.0,2375.0,2.695
+CI,Côte d'Ivoire,59.0,3896.0,1.514
+CD,"Congo, Democratic Republic of the",59.0,2397.0,2.461
+JM,Jamaica,58.0,1380.0,4.203
+SY,Syrian Arab Republic,55.0,1237.0,4.446
+GT,Guatemala,53.0,3216.0,1.648
+CG,Congo,50.0,1078.0,4.638
+LS,Lesotho,46.0,500.0,9.2
+NI,Nicaragua,45.0,3804.0,1.183
+BB,Barbados,43.0,598.0,7.191
+SV,El Salvador,36.0,3325.0,1.083
+RE,Réunion,34.0,2207.0,1.541
+HN,Honduras,31.0,1392.0,2.227
+SZ,Eswatini,30.0,449.0,6.682
+GU,Guam,30.0,441.0,6.803
+BF,Burkina Faso,29.0,1147.0,2.528
+ML,Mali,28.0,1330.0,2.105
+AO,Angola,27.0,1703.0,1.585
+LI,Liechtenstein,26.0,377.0,6.897
+SO,Somalia,25.0,1090.0,2.294
+LA,Lao People's Democratic Republic,23.0,864.0,2.662
+TG,Togo,22.0,969.0,2.27
+MV,Maldives,21.0,273.0,7.692
+NE,Niger,20.0,809.0,2.472
+BS,Bahamas,20.0,375.0,5.333
+MG,Madagascar,19.0,934.0,2.034
+TL,Timor-Leste,19.0,460.0,4.13
+TM,Turkmenistan,18.0,1192.0,1.51
+MC,Monaco,17.0,185.0,9.189
+GP,Guadeloupe,16.0,1040.0,1.538
+CW,Curaçao,15.0,276.0,5.435
+PF,French Polynesia,14.0,717.0,1.953
+SM,San Marino,13.0,144.0,9.028
+PG,Papua New Guinea,13.0,394.0,3.299
+GY,Guyana,13.0,410.0,3.171
+GD,Grenada,13.0,231.0,5.628
+SL,Sierra Leone,13.0,502.0,2.59
+NC,New Caledonia,12.0,694.0,1.729
+GI,Gibraltar,10.0,193.0,5.181
+ER,Eritrea,10.0,151.0,6.623
+AG,Antigua and Barbuda,9.0,573.0,1.571
+KN,Saint Kitts and Nevis,8.0,175.0,4.571
+GM,Gambia,8.0,381.0,2.1
+HT,Haiti,8.0,423.0,1.891
+WS,Samoa,8.0,191.0,4.188
+VA,Holy See,8.0,304.0,2.632
+FO,Faroe Islands,8.0,176.0,4.545
+GA,Gabon,7.0,322.0,2.174
+LC,Saint Lucia,7.0,0.0,
+GW,Guinea-Bissau,7.0,621.0,1.127
+CV,Cabo Verde,7.0,311.0,2.251
+VI,"Virgin Islands, U.S.",7.0,145.0,4.828
+KP,"Korea, Democratic People's Republic of",6.0,0.0,
+GL,Greenland,6.0,230.0,2.609
+KY,Cayman Islands,6.0,111.0,5.405
+PW,Palau,6.0,109.0,5.505
+TC,Turks and Caicos Islands,6.0,0.0,
+BZ,Belize,6.0,101.0,5.941
+MQ,Martinique,5.0,766.0,0.653
+LR,Liberia,5.0,221.0,2.262
+MF,Saint Martin (French part),5.0,140.0,3.571
+VG,"Virgin Islands, British",4.0,0.0,
+AD,Andorra,4.0,105.0,3.81
+AW,Aruba,4.0,0.0,
+ST,Sao Tome and Principe,4.0,911.0,0.439
+NU,Niue,4.0,0.0,
+BM,Bermuda,3.0,0.0,
+DM,Dominica,3.0,0.0,
+AS,American Samoa,0.0,154.0,0.0
+GN,Guinea,0.0,293.0,0.0
+TD,Chad,0.0,381.0,0.0
+VU,Vanuatu,0.0,166.0,0.0
+SR,Suriname,0.0,248.0,0.0
+GF,French Guiana,0.0,542.0,0.0
+YT,Mayotte,0.0,98.0,0.0
+CF,Central African Republic,0.0,111.0,0.0
