@@ -415,11 +415,42 @@ def modo_corpus(args) -> None:
     out_csv = os.path.join(DADOS_OPENALEX_DIR, f"openalex_ia_humanas_corpus{suf}.csv")
     df.to_csv(out_csv, index=False)
     print(f"\nCorpus salvo em {out_csv}")
-    print("Distribuição FOCO_IA (linhas obra × país):")
-    print(df["FOCO_IA"].value_counts().to_string())
+
+    # === Números canônicos: por OBRA ÚNICA (sem dupla contagem por país) ===
+    # As linhas obra×país inflam obras com coautoria internacional. O número
+    # que vai para a tese é o de obras únicas — mesma lógica das outras bases.
+    unicas = df.drop_duplicates(subset=["openalex_id"]).copy()
+    subcampo_cols = ["SUBCAMPO_IA_STRICTO", "SUBCAMPO_ML", "SUBCAMPO_DL",
+                     "SUBCAMPO_LLM", "SUBCAMPO_CORRELATOS"]
+
+    foco_unicas = unicas["FOCO_IA"].value_counts()
+    print(f"\n=== Resumo por OBRA ÚNICA ({len(unicas):,} obras) ===")
+    print("FOCO_IA:")
+    print(foco_unicas.to_string())
+    n_ia = int(foco_unicas.drop("Outros Temas", errors="ignore").sum())
+    print(f"  -> obras que tocam IA por palavra-chave: {n_ia:,} de {len(unicas):,}")
+
+    print("\nSubcampos (multi-label; uma obra pode contar em vários):")
+    contagem_sub = unicas[subcampo_cols].sum().sort_values(ascending=False)
+    for col, n in contagem_sub.items():
+        print(f"  {col:24} {int(n):>6}")
+
+    print(f"\n(Referência: contagem por linha obra×país = {len(df):,} linhas; "
+          f"a inflação vem da coautoria internacional.)")
+
+    # Resumo enxuto em CSV (tidy), para citar em decisoes_metodologicas.md.
+    linhas_resumo = [
+        {"tipo": "FOCO_IA", "categoria": k, "obras_unicas": int(v)}
+        for k, v in foco_unicas.items()
+    ] + [
+        {"tipo": "SUBCAMPO", "categoria": col, "obras_unicas": int(n)}
+        for col, n in contagem_sub.items()
+    ]
+    out_resumo = os.path.join(DADOS_OPENALEX_DIR, f"openalex_ia_humanas_resumo{suf}.csv")
+    pd.DataFrame(linhas_resumo).to_csv(out_resumo, index=False)
+    print(f"\nResumo (obras únicas) salvo em {out_resumo}")
 
     # XLSX de auditoria (só obras únicas, para inspeção manual).
-    unicas = df.drop_duplicates(subset=["openalex_id"]).copy()
     out_xlsx = os.path.join(DADOS_OPENALEX_DIR, f"openalex_ia_humanas_auditoria{suf}.xlsx")
     unicas.to_excel(out_xlsx, index=False, engine="openpyxl")
     print(f"XLSX para auditoria (obras únicas, {len(unicas):,}): {out_xlsx}")
