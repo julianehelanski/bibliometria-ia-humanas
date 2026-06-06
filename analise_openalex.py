@@ -65,6 +65,7 @@ import sys
 import time
 from typing import Iterator
 
+import numpy as np
 import pandas as pd
 import requests
 
@@ -196,6 +197,18 @@ def listar_campos(mailto: str | None) -> None:
 # MODO AGREGADO — group_by, sem baixar obras
 # =============================================================================
 
+def taxa_interna(num: pd.Series, den: pd.Series) -> np.ndarray:
+    """Taxa % = 100 * num/den, segura quanto a tipo e a divisão por zero.
+
+    Mantém dtype numérico (evita o object dtype que pd.NA introduz) e
+    devolve NaN onde o denominador é zero, para não quebrar arredondamento
+    nem poluir o CSV com infinitos.
+    """
+    num = pd.to_numeric(num, errors="coerce").astype(float)
+    den = pd.to_numeric(den, errors="coerce").astype(float)
+    return np.where(den > 0, (100.0 * num / den).round(3), np.nan)
+
+
 def contar_group_by(filtro: str, group_by: str, mailto: str | None) -> pd.DataFrame:
     """Retorna DataFrame [key, nome, count] para um group_by da API."""
     params = _params_base(mailto)
@@ -240,9 +253,8 @@ def modo_agregado(args) -> None:
     por_ano = por_ano.rename(columns={"key": "ano"}).drop(columns=["nome"])
     por_ano["ano"] = pd.to_numeric(por_ano["ano"], errors="coerce")
     por_ano = por_ano.sort_values("ano").fillna(0)
-    por_ano["taxa_interna_%"] = (
-        100 * por_ano["count_ia_hum"] / por_ano["count_universo_hum"].replace(0, pd.NA)
-    ).round(3)
+    por_ano["taxa_interna_%"] = taxa_interna(
+        por_ano["count_ia_hum"], por_ano["count_universo_hum"])
 
     # Por país (só faz sentido no recorte global)
     if not args.pais:
@@ -252,10 +264,8 @@ def modo_agregado(args) -> None:
                                  suffixes=("_ia_hum", "_universo_hum"))
         por_pais = por_pais.rename(columns={"key": "pais_codigo", "nome": "pais"})
         por_pais = por_pais.fillna(0).sort_values("count_ia_hum", ascending=False)
-        por_pais["taxa_interna_%"] = (
-            100 * por_pais["count_ia_hum"]
-            / por_pais["count_universo_hum"].replace(0, pd.NA)
-        ).round(3)
+        por_pais["taxa_interna_%"] = taxa_interna(
+            por_pais["count_ia_hum"], por_pais["count_universo_hum"])
     else:
         por_pais = None
 
