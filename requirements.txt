@@ -4,3 +4,7 @@ matplotlib>=3.7
 seaborn>=0.12
 openpyxl>=3.1
 requests>=2.31
+
+# Opcional — apenas para o mapa-múndi (figuras_openalex_mapa.py):
+# geopandas<1.0
+# pycountry
