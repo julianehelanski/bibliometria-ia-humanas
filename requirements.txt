@@ -8,3 +8,6 @@ requests>=2.31
 # Opcional — apenas para o mapa-múndi (figuras_openalex_mapa.py):
 # geopandas<1.0
 # pycountry
+
+# Opcional — apenas para o treemap temático (figuras_openalex_temas.py):
+# squarify

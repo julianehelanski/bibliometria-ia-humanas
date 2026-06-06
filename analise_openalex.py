@@ -485,50 +485,69 @@ def modo_corpus(args) -> None:
     print(f"XLSX para auditoria (obras únicas, {len(unicas):,}): {out_xlsx}")
 
 
-def modo_temas(args) -> None:
-    """Composição temática (subfields) do universo de Humanidades vs. subconjunto IA.
+def _quebrar_por(filtro_universo: str, filtro_ia: str, dimensao: str,
+                 mailto: str | None, rotulo_col: str) -> pd.DataFrame:
+    """Cruza universo × IA por uma dimensão de group_by, com taxa de IA por item."""
+    uni = contar_group_by(filtro_universo, dimensao, mailto)
+    iat = contar_group_by(filtro_ia, dimensao, mailto)
+    if uni.empty:
+        return uni
+    df = uni.merge(iat, on=["key", "nome"], how="left", suffixes=("_universo", "_ia"))
+    df = df.rename(columns={"nome": rotulo_col}).drop(columns=["key"])
+    df["count_ia"] = df["count_ia"].fillna(0).astype(int)
+    df = df.sort_values("count_universo", ascending=False)
+    df["pct_do_universo"] = (
+        100 * df["count_universo"] / df["count_universo"].sum()).round(2)
+    df["taxa_ia_%"] = taxa_interna(df["count_ia"], df["count_universo"])
+    return df
 
-    Responde "sobre o que o país publica em Humanidades?" e "onde a IA penetra?":
-    faz group_by por primary_topic.subfield.id no universo de Humanidades e no
-    subconjunto que toca IA, e cruza os dois para dar a taxa de IA por tema.
+
+def modo_temas(args) -> None:
+    """Composição temática do universo de Humanidades vs. subconjunto de IA.
+
+    Responde "sobre o que o país publica em Humanidades?" e "onde a IA penetra?"
+    em dois níveis de granularidade:
+      - subfield (≈30-40 áreas, ex.: "Sociology and Political Science")
+      - topic    (temas específicos, ex.: "Racial inequality", "Teacher training")
+    Cruza cada nível com o subconjunto de IA, dando a taxa de penetração por item.
     """
     ia, hum = args.ia_filtro, args.humanidades_filtro
     pais_part = [f"authorships.countries:{args.pais.upper()}"] if args.pais else []
     filtro_universo = ",".join(
         [hum, f"publication_year:{args.ano_inicial}-{args.ano_final}"] + pais_part)
     filtro_ia = montar_filtro(args.ano_inicial, args.ano_final, ia, hum, args.pais)
+    suf = f"_{args.pais.upper()}" if args.pais else "_global"
 
-    print("=== OpenAlex — modo temas (composição por subfield) ===")
+    print("=== OpenAlex — modo temas (composição por subfield + topic) ===")
     print(f"Janela: {args.ano_inicial}–{args.ano_final}"
           + (f" | país: {args.pais.upper()}" if args.pais else " | global"))
     print(f"Universo Humanidades: {filtro_universo}")
     print(f"IA∩Humanidades:      {filtro_ia}\n")
 
-    uni = contar_group_by(filtro_universo, "primary_topic.subfield.id", args.mailto)
-    iat = contar_group_by(filtro_ia, "primary_topic.subfield.id", args.mailto)
-    if uni.empty:
+    # --- Nível 1: subfields ---
+    subf = _quebrar_por(filtro_universo, filtro_ia, "primary_topic.subfield.id",
+                        args.mailto, "subfield")
+    if subf.empty:
         print("Universo vazio — verifique os filtros (--listar-campos).")
         return
+    out_subf = os.path.join(DADOS_OPENALEX_DIR, f"openalex_temas_humanas{suf}.csv")
+    subf.to_csv(out_subf, index=False)
+    print("Top 20 SUBFIELDS no universo de Humanidades:")
+    print("  [pct_do_universo] = peso no total; [taxa_ia] = % do tema que toca IA\n")
+    print(subf.head(20)[["subfield", "count_universo", "pct_do_universo",
+                         "count_ia", "taxa_ia_%"]].to_string(index=False))
+    print(f"\nTotal de obras no universo: {subf['count_universo'].sum():,}")
+    print(f"-> {out_subf}\n")
 
-    temas = uni.merge(iat, on=["key", "nome"], how="left", suffixes=("_universo", "_ia"))
-    temas = temas.rename(columns={"nome": "subfield"}).drop(columns=["key"])
-    temas["count_ia"] = temas["count_ia"].fillna(0).astype(int)
-    temas = temas.sort_values("count_universo", ascending=False)
-    temas["pct_do_universo"] = (
-        100 * temas["count_universo"] / temas["count_universo"].sum()).round(2)
-    temas["taxa_ia_%"] = taxa_interna(temas["count_ia"], temas["count_universo"])
-
-    suf = f"_{args.pais.upper()}" if args.pais else "_global"
-    out = os.path.join(DADOS_OPENALEX_DIR, f"openalex_temas_humanas{suf}.csv")
-    temas.to_csv(out, index=False)
-
-    print("Top 20 temas (subfields) no universo de Humanidades:")
-    print("  [%_universo] = peso do tema no total; [taxa_ia] = % do tema que toca IA\n")
-    vis = temas.head(20)[["subfield", "count_universo", "pct_do_universo",
-                          "count_ia", "taxa_ia_%"]]
-    print(vis.to_string(index=False))
-    print(f"\nTotal de obras no universo: {temas['count_universo'].sum():,}")
-    print(f"-> {out}")
+    # --- Nível 2: topics (temas específicos) ---
+    tops = _quebrar_por(filtro_universo, filtro_ia, "primary_topic.id",
+                        args.mailto, "topic")
+    out_tops = os.path.join(DADOS_OPENALEX_DIR, f"openalex_topics_humanas{suf}.csv")
+    tops.to_csv(out_tops, index=False)
+    print("Top 25 TOPICS (temas específicos) no universo de Humanidades:")
+    print(tops.head(25)[["topic", "count_universo", "pct_do_universo",
+                         "count_ia", "taxa_ia_%"]].to_string(index=False))
+    print(f"\n-> {out_tops}")
 
 
 def main() -> None:
