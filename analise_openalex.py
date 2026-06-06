@@ -97,14 +97,24 @@ garantir_diretorio(CACHE_DIR)
 IA_FILTRO = "concepts.id:C154945302"
 
 # HUMANIDADES: classificação por *field* (taxonomia Scopus/ASJC do OpenAlex).
-# >>> O ID abaixo é o PADRÃO PROVÁVEL para "Arts and Humanities", mas IDs de
-#     campo PRECISAM ser confirmados no seu ambiente com `--listar-campos`,
-#     porque a taxonomia do OpenAlex evolui. NÃO confie cegamente neste valor.
+# Recorte AMPLO (default), para aproximar o "Ciências Humanas" da CAPES — que é
+# mais largo que só "Artes e Humanidades": inclui Sociologia, Ciência Política,
+# Geografia, Antropologia, Educação etc. (Ciências Sociais), além de Filosofia,
+# História e Religião (Artes e Humanidades). Por isso combinamos dois fields
+# com a sintaxe OR ("|") do OpenAlex:
+#   12 = Arts and Humanities
+#   33 = Social Sciences
 #
-# Para um recorte mais amplo (equivalente à janela SciELO "Human Sciences +
-# Applied Social Sciences + Linguistics, Letters and Arts"), use a sintaxe OR
-# do OpenAlex com "|", p.ex.:  --humanidades-filtro "primary_topic.field.id:12|33"
-HUMANIDADES_FILTRO = "primary_topic.field.id:12"  # "Arts and Humanities" (VERIFICAR)
+# >>> Os IDs PRECISAM ser confirmados no seu ambiente com `--listar-campos`,
+#     porque a taxonomia do OpenAlex evolui. NÃO confie cegamente nestes valores.
+#
+# Observação: a CAPES classifica **Psicologia** dentro de "Ciências Humanas"
+# (14% do corpus IA-Humanas), mas no OpenAlex Psicologia é o field SEPARADO 32.
+# Para espelhar a CAPES com fidelidade total, inclua-o:
+#   --humanidades-filtro "primary_topic.field.id:12|32|33"
+# Para o recorte estrito "só Artes e Humanidades", use:
+#   --humanidades-filtro "primary_topic.field.id:12"
+HUMANIDADES_FILTRO = "primary_topic.field.id:12|33"  # Artes/Humanidades + Ciências Sociais (VERIFICAR)
 
 # Recorte temporal default — alinhado ao OWID/CSET (2016–2024) para comparação.
 ANO_INICIAL_DEFAULT = 2016
