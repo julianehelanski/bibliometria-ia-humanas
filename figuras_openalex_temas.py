@@ -72,33 +72,68 @@ def _colorbar(fig, ax, teto: float = TETO_TREEMAP) -> None:
     cb.set_label(f"% das publicações do tema que usam IA (escala até {teto:.0f}%+)")
 
 
-def fig_treemap(sufixo: str, top: int = 18) -> None:
-    """openalex_10 — treemap: tamanho = volume, cor = penetração da IA."""
+# Paleta categórica clara (estilo Web of Science): cada área uma cor própria,
+# todas pastéis para o rótulo preto ficar legível.
+PALETA_CATEGORICA = (
+    list(plt.cm.Set3.colors) + list(plt.cm.Pastel1.colors) + list(plt.cm.Pastel2.colors)
+)
+
+
+def fig_treemap(sufixo: str, top: int = 16) -> None:
+    """openalex_10 — treemap de COMPOSIÇÃO (estilo Web of Science).
+
+    Cada área é uma cor categórica própria; tamanho = volume. A penetração da
+    IA NÃO é codificada aqui (fica no painel openalex_12 e nas barras), para o
+    treemap ficar limpo e legível.
+    """
     df = _ler(f"openalex_temas_humanas{sufixo}.csv")
     if df is None:
         return
-    df = df.sort_values("count_universo", ascending=False).head(top)
-    cores = [_cor(t) for t in df["taxa_ia_%"]]
-    # Rótulo só nos retângulos com peso suficiente, para não poluir.
-    labels = [
-        f"{r['subfield']}\n{r['pct_do_universo']:.1f}%" if r["pct_do_universo"] >= 1.3 else ""
-        for _, r in df.iterrows()
-    ]
+    df = df.sort_values("count_universo", ascending=False).reset_index(drop=True)
+    total = df["count_universo"].sum()
 
-    fig, ax = plt.subplots(figsize=(14, 8))
+    # Top N áreas + um bloco "Outros" agregando a cauda.
+    topo = df.head(top).copy()
+    resto = df.iloc[top:]
+    if len(resto):
+        topo = pd.concat([topo, pd.DataFrame([{
+            "subfield": f"Outros ({len(resto)} áreas)",
+            "count_universo": int(resto["count_universo"].sum()),
+            "pct_do_universo": round(100 * resto["count_universo"].sum() / total, 2),
+        }])], ignore_index=True)
+
     if squarify is None:
         sys.stderr.write("[aviso] squarify ausente; gerando barra no lugar do treemap.\n")
-        d = df.iloc[::-1]
-        ax.barh(d["subfield"], d["count_universo"], color=[_cor(t) for t in d["taxa_ia_%"]])
-    else:
-        squarify.plot(sizes=df["count_universo"], label=labels, color=cores,
-                      ax=ax, pad=True, ec="white",
-                      text_kwargs={"fontsize": 9, "color": "black"})
-        ax.axis("off")
-    _colorbar(fig, ax)
+        fig, ax = plt.subplots(figsize=(12, 9))
+        d = topo.iloc[::-1]
+        ax.barh(d["subfield"], d["count_universo"], color=PALETA_CATEGORICA[:len(d)])
+        out = os.path.join(garantir_diretorio(FIGURAS_DIR), "openalex_10_treemap_temas.png")
+        fig.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+        plt.close(fig)
+        print(f"  -> {out}")
+        return
+
+    import textwrap
+    cores = [PALETA_CATEGORICA[i % len(PALETA_CATEGORICA)] for i in range(len(topo))]
+    labels = []
+    for _, r in topo.iterrows():
+        share = r["count_universo"] / total
+        nome = "\n".join(textwrap.wrap(str(r["subfield"]), 18))
+        if share >= 0.03:                      # áreas grandes: nome + %
+            labels.append(f"{nome}\n{r['pct_do_universo']:.1f}%")
+        elif share >= 0.013:                   # médias: só o nome
+            labels.append(nome)
+        else:                                  # pequenas: sem rótulo (evita sobreposição)
+            labels.append("")
+
+    fig, ax = plt.subplots(figsize=(16, 9))
+    squarify.plot(sizes=topo["count_universo"], label=labels, color=cores,
+                  ax=ax, pad=True, ec="white",
+                  text_kwargs={"fontsize": 9, "color": "black"})
+    ax.axis("off")
     ax.set_title("De que é feita a produção brasileira em Ciências Humanas\n"
-                 "tamanho = volume de publicações · cor = penetração da IA no tema",
-                 fontsize=13)
+                 "áreas (subfields) por volume de publicações, 2016–2024",
+                 fontsize=14)
     fig.tight_layout()
     out = os.path.join(garantir_diretorio(FIGURAS_DIR), "openalex_10_treemap_temas.png")
     fig.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
