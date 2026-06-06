@@ -59,12 +59,14 @@ Boa cidadania de API (OpenAlex "polite pool"):
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
 import time
 from typing import Iterator
 
+import numpy as np
 import pandas as pd
 import requests
 
@@ -97,24 +99,25 @@ garantir_diretorio(CACHE_DIR)
 IA_FILTRO = "concepts.id:C154945302"
 
 # HUMANIDADES: classificação por *field* (taxonomia Scopus/ASJC do OpenAlex).
-# Recorte AMPLO (default), para aproximar o "Ciências Humanas" da CAPES — que é
-# mais largo que só "Artes e Humanidades": inclui Sociologia, Ciência Política,
-# Geografia, Antropologia, Educação etc. (Ciências Sociais), além de Filosofia,
-# História e Religião (Artes e Humanidades). Por isso combinamos dois fields
-# com a sintaxe OR ("|") do OpenAlex:
+# Recorte AMPLO (default), escolhido para espelhar o "Ciências Humanas" da CAPES
+# com fidelidade. A CAPES é mais larga que só "Artes e Humanidades": inclui
+# Sociologia, Ciência Política, Geografia, Antropologia, Educação (Ciências
+# Sociais), Filosofia, História, Religião (Artes e Humanidades) E Psicologia.
+# No OpenAlex esses três blocos são *fields* distintos, combinados com a
+# sintaxe OR ("|"):
 #   12 = Arts and Humanities
+#   32 = Psychology         (a CAPES conta Psicologia em Ciências Humanas: ~14%
+#                            do corpus IA-Humanas, daí a inclusão)
 #   33 = Social Sciences
 #
 # >>> Os IDs PRECISAM ser confirmados no seu ambiente com `--listar-campos`,
-#     porque a taxonomia do OpenAlex evolui. NÃO confie cegamente nestes valores.
+#     porque a taxonomia do OpenAlex evolui. (Conferidos em 2026-06-06:
+#     12=Arts and Humanities, 32=Psychology, 33=Social Sciences.)
 #
-# Observação: a CAPES classifica **Psicologia** dentro de "Ciências Humanas"
-# (14% do corpus IA-Humanas), mas no OpenAlex Psicologia é o field SEPARADO 32.
-# Para espelhar a CAPES com fidelidade total, inclua-o:
-#   --humanidades-filtro "primary_topic.field.id:12|32|33"
-# Para o recorte estrito "só Artes e Humanidades", use:
-#   --humanidades-filtro "primary_topic.field.id:12"
-HUMANIDADES_FILTRO = "primary_topic.field.id:12|33"  # Artes/Humanidades + Ciências Sociais (VERIFICAR)
+# Recortes alternativos (passe via --humanidades-filtro):
+#   "primary_topic.field.id:12|33"  -> sem Psicologia
+#   "primary_topic.field.id:12"     -> estrito, só Artes e Humanidades
+HUMANIDADES_FILTRO = "primary_topic.field.id:12|32|33"  # Humanidades + Sociais + Psicologia
 
 # Recorte temporal default — alinhado ao OWID/CSET (2016–2024) para comparação.
 ANO_INICIAL_DEFAULT = 2016
@@ -195,6 +198,18 @@ def listar_campos(mailto: str | None) -> None:
 # MODO AGREGADO — group_by, sem baixar obras
 # =============================================================================
 
+def taxa_interna(num: pd.Series, den: pd.Series) -> np.ndarray:
+    """Taxa % = 100 * num/den, segura quanto a tipo e a divisão por zero.
+
+    Mantém dtype numérico (evita o object dtype que pd.NA introduz) e
+    devolve NaN onde o denominador é zero, para não quebrar arredondamento
+    nem poluir o CSV com infinitos.
+    """
+    num = pd.to_numeric(num, errors="coerce").astype(float)
+    den = pd.to_numeric(den, errors="coerce").astype(float)
+    return np.where(den > 0, (100.0 * num / den).round(3), np.nan)
+
+
 def contar_group_by(filtro: str, group_by: str, mailto: str | None) -> pd.DataFrame:
     """Retorna DataFrame [key, nome, count] para um group_by da API."""
     params = _params_base(mailto)
@@ -239,9 +254,8 @@ def modo_agregado(args) -> None:
     por_ano = por_ano.rename(columns={"key": "ano"}).drop(columns=["nome"])
     por_ano["ano"] = pd.to_numeric(por_ano["ano"], errors="coerce")
     por_ano = por_ano.sort_values("ano").fillna(0)
-    por_ano["taxa_interna_%"] = (
-        100 * por_ano["count_ia_hum"] / por_ano["count_universo_hum"].replace(0, pd.NA)
-    ).round(3)
+    por_ano["taxa_interna_%"] = taxa_interna(
+        por_ano["count_ia_hum"], por_ano["count_universo_hum"])
 
     # Por país (só faz sentido no recorte global)
     if not args.pais:
@@ -251,10 +265,8 @@ def modo_agregado(args) -> None:
                                  suffixes=("_ia_hum", "_universo_hum"))
         por_pais = por_pais.rename(columns={"key": "pais_codigo", "nome": "pais"})
         por_pais = por_pais.fillna(0).sort_values("count_ia_hum", ascending=False)
-        por_pais["taxa_interna_%"] = (
-            100 * por_pais["count_ia_hum"]
-            / por_pais["count_universo_hum"].replace(0, pd.NA)
-        ).round(3)
+        por_pais["taxa_interna_%"] = taxa_interna(
+            por_pais["count_ia_hum"], por_pais["count_universo_hum"])
     else:
         por_pais = None
 
@@ -290,13 +302,16 @@ def reconstruir_abstract(inv_index: dict | None) -> str:
     return " ".join(palavra for _, palavra in posicoes)
 
 
+# Campos pedidos por obra (reduz o payload e fixa a chave de cache).
+SELECT_WORKS = ",".join([
+    "id", "title", "publication_year", "language",
+    "abstract_inverted_index", "authorships", "primary_topic",
+])
+
+
 def iter_works(filtro: str, mailto: str | None) -> Iterator[dict]:
     """Itera todas as obras de um filtro via paginação por cursor."""
     cursor = "*"
-    select = ",".join([
-        "id", "title", "publication_year", "language",
-        "abstract_inverted_index", "authorships", "primary_topic",
-    ])
     baixados = 0
     while cursor:
         params = _params_base(mailto)
@@ -304,7 +319,7 @@ def iter_works(filtro: str, mailto: str | None) -> Iterator[dict]:
             "filter": filtro,
             "per-page": PER_PAGE,
             "cursor": cursor,
-            "select": select,
+            "select": SELECT_WORKS,
         })
         data = _get("/works", params)
         resultados = data.get("results", [])
@@ -318,6 +333,30 @@ def iter_works(filtro: str, mailto: str | None) -> Iterator[dict]:
         if not resultados:
             break
     sys.stderr.write("\n")
+
+
+def coletar_works(filtro: str, mailto: str | None, usar_cache: bool = True) -> list[dict]:
+    """Coleta todas as obras de um filtro, com cache em disco.
+
+    O resultado completo é salvo num único JSON, identificado por um hash do
+    filtro + campos pedidos. Re-rodadas com o MESMO filtro carregam do cache,
+    evitando rebaixar tudo da API. Use usar_cache=False para forçar atualização.
+    """
+    chave = hashlib.md5(f"{filtro}|{SELECT_WORKS}".encode()).hexdigest()[:16]
+    cache_dir = garantir_diretorio(os.path.join(CACHE_DIR, "works"))
+    cache_path = os.path.join(cache_dir, f"{chave}.json")
+    if usar_cache and os.path.isfile(cache_path):
+        try:
+            with open(cache_path, encoding="utf-8") as f:
+                works = json.load(f)
+            print(f"  (cache) {len(works):,} obras carregadas de {cache_path}")
+            return works
+        except (json.JSONDecodeError, OSError) as e:
+            sys.stderr.write(f"[cache corrompido, refazendo] {e}\n")
+    works = list(iter_works(filtro, mailto))
+    with open(cache_path, "w", encoding="utf-8") as f:
+        json.dump(works, f, ensure_ascii=False)
+    return works
 
 
 def extrair_campos_obra(obra: dict) -> list[dict]:
@@ -374,8 +413,9 @@ def modo_corpus(args) -> None:
         print("AVISO: sem --pais o corpus global de IA×Humanidades pode ter "
               "centenas de milhares de obras. Considere restringir.\n")
 
+    works = coletar_works(filtro, args.mailto, usar_cache=not args.sem_cache)
     registros: list[dict] = []
-    for obra in iter_works(filtro, args.mailto):
+    for obra in works:
         registros.extend(extrair_campos_obra(obra))
 
     df = pd.DataFrame(registros)
@@ -404,11 +444,42 @@ def modo_corpus(args) -> None:
     out_csv = os.path.join(DADOS_OPENALEX_DIR, f"openalex_ia_humanas_corpus{suf}.csv")
     df.to_csv(out_csv, index=False)
     print(f"\nCorpus salvo em {out_csv}")
-    print("Distribuição FOCO_IA (linhas obra × país):")
-    print(df["FOCO_IA"].value_counts().to_string())
+
+    # === Números canônicos: por OBRA ÚNICA (sem dupla contagem por país) ===
+    # As linhas obra×país inflam obras com coautoria internacional. O número
+    # que vai para a tese é o de obras únicas — mesma lógica das outras bases.
+    unicas = df.drop_duplicates(subset=["openalex_id"]).copy()
+    subcampo_cols = ["SUBCAMPO_IA_STRICTO", "SUBCAMPO_ML", "SUBCAMPO_DL",
+                     "SUBCAMPO_LLM", "SUBCAMPO_CORRELATOS"]
+
+    foco_unicas = unicas["FOCO_IA"].value_counts()
+    print(f"\n=== Resumo por OBRA ÚNICA ({len(unicas):,} obras) ===")
+    print("FOCO_IA:")
+    print(foco_unicas.to_string())
+    n_ia = int(foco_unicas.drop("Outros Temas", errors="ignore").sum())
+    print(f"  -> obras que tocam IA por palavra-chave: {n_ia:,} de {len(unicas):,}")
+
+    print("\nSubcampos (multi-label; uma obra pode contar em vários):")
+    contagem_sub = unicas[subcampo_cols].sum().sort_values(ascending=False)
+    for col, n in contagem_sub.items():
+        print(f"  {col:24} {int(n):>6}")
+
+    print(f"\n(Referência: contagem por linha obra×país = {len(df):,} linhas; "
+          f"a inflação vem da coautoria internacional.)")
+
+    # Resumo enxuto em CSV (tidy), para citar em decisoes_metodologicas.md.
+    linhas_resumo = [
+        {"tipo": "FOCO_IA", "categoria": k, "obras_unicas": int(v)}
+        for k, v in foco_unicas.items()
+    ] + [
+        {"tipo": "SUBCAMPO", "categoria": col, "obras_unicas": int(n)}
+        for col, n in contagem_sub.items()
+    ]
+    out_resumo = os.path.join(DADOS_OPENALEX_DIR, f"openalex_ia_humanas_resumo{suf}.csv")
+    pd.DataFrame(linhas_resumo).to_csv(out_resumo, index=False)
+    print(f"\nResumo (obras únicas) salvo em {out_resumo}")
 
     # XLSX de auditoria (só obras únicas, para inspeção manual).
-    unicas = df.drop_duplicates(subset=["openalex_id"]).copy()
     out_xlsx = os.path.join(DADOS_OPENALEX_DIR, f"openalex_ia_humanas_auditoria{suf}.xlsx")
     unicas.to_excel(out_xlsx, index=False, engine="openpyxl")
     print(f"XLSX para auditoria (obras únicas, {len(unicas):,}): {out_xlsx}")
@@ -427,6 +498,8 @@ def main() -> None:
                         help="Código ISO-2 (ex.: BR, US). Sem isto = global.")
     parser.add_argument("--ano-inicial", type=int, default=ANO_INICIAL_DEFAULT)
     parser.add_argument("--ano-final", type=int, default=ANO_FINAL_DEFAULT)
+    parser.add_argument("--sem-cache", action="store_true",
+                        help="Ignora o cache e rebaixa as obras da API (modo corpus)")
     parser.add_argument("--ia-filtro", default=IA_FILTRO,
                         help=f"Filtro de IA da API (default: {IA_FILTRO})")
     parser.add_argument("--humanidades-filtro", default=HUMANIDADES_FILTRO,
