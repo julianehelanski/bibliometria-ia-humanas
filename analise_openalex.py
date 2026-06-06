@@ -485,11 +485,58 @@ def modo_corpus(args) -> None:
     print(f"XLSX para auditoria (obras únicas, {len(unicas):,}): {out_xlsx}")
 
 
+def modo_temas(args) -> None:
+    """Composição temática (subfields) do universo de Humanidades vs. subconjunto IA.
+
+    Responde "sobre o que o país publica em Humanidades?" e "onde a IA penetra?":
+    faz group_by por primary_topic.subfield.id no universo de Humanidades e no
+    subconjunto que toca IA, e cruza os dois para dar a taxa de IA por tema.
+    """
+    ia, hum = args.ia_filtro, args.humanidades_filtro
+    pais_part = [f"authorships.countries:{args.pais.upper()}"] if args.pais else []
+    filtro_universo = ",".join(
+        [hum, f"publication_year:{args.ano_inicial}-{args.ano_final}"] + pais_part)
+    filtro_ia = montar_filtro(args.ano_inicial, args.ano_final, ia, hum, args.pais)
+
+    print("=== OpenAlex — modo temas (composição por subfield) ===")
+    print(f"Janela: {args.ano_inicial}–{args.ano_final}"
+          + (f" | país: {args.pais.upper()}" if args.pais else " | global"))
+    print(f"Universo Humanidades: {filtro_universo}")
+    print(f"IA∩Humanidades:      {filtro_ia}\n")
+
+    uni = contar_group_by(filtro_universo, "primary_topic.subfield.id", args.mailto)
+    iat = contar_group_by(filtro_ia, "primary_topic.subfield.id", args.mailto)
+    if uni.empty:
+        print("Universo vazio — verifique os filtros (--listar-campos).")
+        return
+
+    temas = uni.merge(iat, on=["key", "nome"], how="left", suffixes=("_universo", "_ia"))
+    temas = temas.rename(columns={"nome": "subfield"}).drop(columns=["key"])
+    temas["count_ia"] = temas["count_ia"].fillna(0).astype(int)
+    temas = temas.sort_values("count_universo", ascending=False)
+    temas["pct_do_universo"] = (
+        100 * temas["count_universo"] / temas["count_universo"].sum()).round(2)
+    temas["taxa_ia_%"] = taxa_interna(temas["count_ia"], temas["count_universo"])
+
+    suf = f"_{args.pais.upper()}" if args.pais else "_global"
+    out = os.path.join(DADOS_OPENALEX_DIR, f"openalex_temas_humanas{suf}.csv")
+    temas.to_csv(out, index=False)
+
+    print("Top 20 temas (subfields) no universo de Humanidades:")
+    print("  [%_universo] = peso do tema no total; [taxa_ia] = % do tema que toca IA\n")
+    vis = temas.head(20)[["subfield", "count_universo", "pct_do_universo",
+                          "count_ia", "taxa_ia_%"]]
+    print(vis.to_string(index=False))
+    print(f"\nTotal de obras no universo: {temas['count_universo'].sum():,}")
+    print(f"-> {out}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--modo", choices=["agregado", "corpus"], default="agregado",
-                        help="agregado=group_by rápido (default); corpus=baixa obras")
+    parser.add_argument("--modo", choices=["agregado", "corpus", "temas"], default="agregado",
+                        help="agregado=group_by rápido (default); corpus=baixa obras; "
+                             "temas=composição por subfield (universo vs. IA)")
     parser.add_argument("--listar-campos", action="store_true",
                         help="Lista os IDs de field da API e sai (confirme Humanidades)")
     parser.add_argument("--mailto", default=None,
@@ -518,6 +565,8 @@ def main() -> None:
 
     if args.modo == "agregado":
         modo_agregado(args)
+    elif args.modo == "temas":
+        modo_temas(args)
     else:
         modo_corpus(args)
 
