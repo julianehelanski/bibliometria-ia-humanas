@@ -4,7 +4,7 @@ Este arquivo trava os números canônicos da análise bibliométrica. Qualquer d
 
 A motivação para este arquivo: durante a sessão de coleta e processamento, vários relatos narrativos contendo somas manuais introduziram erros aritméticos pontuais (por exemplo, "8 artigos antes de 2021" quando o correto é 23; "2020 × 3" quando o correto é 2020 × 17). Os valores que provêm de operações pandas diretas sobre as planilhas se mantiveram corretos. **Regra adotada:** todo número que vai para a tese sai de operação atômica em pandas (ou da própria contagem nas planilhas via Excel), nunca de soma feita em prosa.
 
-Este documento está organizado em quatro blocos: (I) números canônicos CAPES, (II) números canônicos SciELO, (III) comparativo SciELO × CAPES Humanas, (IV) coortes históricas descartadas.
+Este documento está organizado em seis blocos: (I) números canônicos CAPES, (II) números canônicos SciELO, (III) comparativo SciELO × CAPES Humanas, (IV) números canônicos OpenAlex, (V) coortes históricas descartadas, (VI) como atualizar.
 
 ---
 
@@ -315,7 +315,85 @@ Subset que vai para o comparativo SciELO × CAPES.
 
 ---
 
-## IV. Coortes históricas (NÃO usar como fonte para a tese)
+## IV. OpenAlex — produção internacional de IA nas Humanidades 2016–2024
+
+Terceira fonte, de escopo **internacional**. Coleta via API REST (`analise_openalex.py`), aplicando o **mesmo `utils.classificar_subcampos`** das outras bases. Permite o que CAPES e SciELO não dão: comparação por país e contexto mundial.
+
+### IV.1. Recorte (definição de "Humanidades" no OpenAlex)
+
+O OpenAlex não tem uma área "Ciências Humanas"; tem *fields* (taxonomia Scopus/ASJC). Para espelhar o "Ciências Humanas" da CAPES adotamos o recorte **amplo** `12|32|33`:
+
+| ID | Field OpenAlex | Equivalência CAPES |
+|---:|---|---|
+| 12 | Arts and Humanities | Filosofia, História, Teologia, Artes |
+| 32 | Psychology | Psicologia (a CAPES conta em Humanas; OpenAlex separa) |
+| 33 | Social Sciences | Sociologia, Ciência Política, Geografia, Antropologia, Educação |
+
+IDs confirmados em 2026-06-06 via `--listar-campos`. IA = conceito `C154945302` ("Artificial intelligence"). Janela 2016–2024 (alinhada à base OWID/CSET).
+
+### IV.2. Duas definições de "IA" — declarar qual
+
+A MESMA base produz números muito diferentes conforme a definição de IA:
+
+| Definição | Critério | Brasil IA-Humanas |
+|---|---|---:|
+| **Conceito OpenAlex** | tag algorítmica `C154945302` | **9.996** |
+| **Palavra-chave** | `utils.classificar_subcampos` em título+resumo (mesma régua de CAPES/SciELO) | **849** |
+
+> **Achado:** apenas **8,5%** das obras que o OpenAlex marca como IA contêm vocabulário de IA em título/resumo. O número comparável às outras bases do projeto é **849** (palavra-chave), não 9.996. Provável causa do abismo: conceito do OpenAlex generoso + obras sem resumo (régua tem menos texto para casar).
+
+### IV.3. Brasil — coorte palavra-chave por obra única (849)
+
+Contagem por **obra única** (deduplicada por `openalex_id`; a contagem por linha obra×país = 15.438 infla ~54% por coautoria internacional).
+
+| FOCO_IA | Obras únicas |
+|---|---:|
+| Foco Central | 713 |
+| Correlato | 136 |
+| **Total que toca IA** | **849** |
+| (Outros Temas, do universo-conceito) | 9.147 |
+
+### IV.4. Brasil — subcampos (multi-label; soma > total)
+
+| Subcampo | Obras | % de 849 |
+|---|---:|---:|
+| IA em sentido estrito | 288 | 33,9% |
+| Aprendizado de máquina (ML) | 288 | 33,9% |
+| Tecnologias correlatas | 242 | 28,5% |
+| Aprendizado profundo & redes neurais | 228 | 26,9% |
+| Modelos de linguagem & IA generativa | 56 | 6,6% |
+
+> **Triangulação dos subcampos:** CAPES tem ML > IA stricto; SciELO tem IA stricto > ML; **OpenAlex empata (288 = 288)**. LLM é o menor nas três bases (CAPES 3,89% / SciELO 7,13% / OpenAlex 6,6%).
+
+### IV.5. Contexto internacional (conceito OpenAlex, por país, 2016–2024)
+
+Top por volume de IA-Humanas (definição conceito). Universo = todas as obras de Humanidades do país; taxa interna = IA-Humanas / universo.
+
+| País | IA-Humanas | Universo | Taxa interna |
+|---|---:|---:|---:|
+| Estados Unidos | ~60.943 | 990.707 | 6,15% |
+| China | 51.300 | 303.733 | **16,89%** |
+| Reino Unido | 42.823 | 594.599 | 7,20% |
+| Alemanha | 27.504 | 419.966 | 6,55% |
+| **Brasil** | **9.996** | **636.607** | **1,57%** |
+
+> **Achado para a tese:** o Brasil tem o **2º maior universo de Humanidades** do top mundial (636.607, atrás só dos EUA), mas a **menor taxa interna do top-20 (1,57%)**. Confirma, em escala internacional, a "marginalidade" já vista na CAPES (0,67%): o gargalo brasileiro não é produzir pouco em Humanidades, é o quão pouco dessa produção dialoga com IA. (Nota: 2024 provavelmente subestimado por indexação incompleta no OpenAlex.)
+
+### IV.6. Ressalvas
+
+- **Viés de idioma:** OpenAlex privilegia metadados em inglês → subestima produção em português/chinês (afeta Brasil e China).
+- **Contagem por país:** uma obra conta uma vez por país de afiliação (colaboração internacional entra em vários); os números canônicos por obra única do bloco IV.3 deduplicam isso.
+- **`primary_topic`** é o tópico principal atribuído por modelo; obras multidisciplinares caem num único *field*.
+
+### IV.7. Fonte dos números
+
+- Por país e por ano (definição conceito): `dados_openalex/openalex_ia_humanas_por_pais_global.csv`, `openalex_ia_humanas_por_ano_BR.csv`.
+- Coorte palavra-chave (849) e subcampos: `dados_openalex/openalex_ia_humanas_resumo_BR.csv` e `openalex_ia_humanas_auditoria_BR.xlsx`.
+- Corpus completo (regenerável, gitignored): `openalex_ia_humanas_corpus_BR.csv`.
+
+---
+
+## V. Coortes históricas (NÃO usar como fonte para a tese)
 
 Estas coortes foram superadas durante o trabalho. **Persistem no repositório** por reprodutibilidade do processo, **não como evidência válida**.
 
@@ -335,7 +413,7 @@ Estas coortes foram superadas durante o trabalho. **Persistem no repositório** 
 
 ---
 
-## V. Como atualizar este arquivo
+## VI. Como atualizar este arquivo
 
 1. Quando refizer uma coleta ou um recorte, ATUALIZE este arquivo **antes** de mudar o README ou qualquer figura.
 2. Para cada número novo, anote a coorte, o XLSX/CSV fonte, e a operação pandas que o produziu.
