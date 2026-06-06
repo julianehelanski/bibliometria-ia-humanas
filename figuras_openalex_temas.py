@@ -43,15 +43,16 @@ aplicar_estilo_padrao()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DADOS_OPENALEX_DIR = os.path.join(BASE_DIR, "dados_openalex")
 
-# Teto da escala de cor (taxa de IA). Os bolsões quantitativos (Psicologias)
-# chegam a ~7%; o teto realça o contraste com o grosso interpretativo (~1%).
-TETO_COR = 5.0
-CMAP = matplotlib.colormaps["YlOrRd"]
-NORM = matplotlib.colors.Normalize(vmin=0, vmax=TETO_COR)
+# Paleta de alto contraste (plasma): roxo-escuro = pouca IA → amarelo = muita IA.
+# Mesmo em valores baixos as cores se distinguem bem (o YlOrRd ficava pálido).
+CMAP = matplotlib.colormaps["plasma"]
+TETO_TREEMAP = 5.0   # subfields chegam a ~7%
+TETO_PAINEL = 3.0    # topics top-por-volume ficam quase todos abaixo de 3%
 
 
-def _cor(taxa: float):
-    return CMAP(NORM(min(float(taxa), TETO_COR)))
+def _cor(taxa: float, teto: float = TETO_TREEMAP):
+    norm = matplotlib.colors.Normalize(vmin=0, vmax=teto)
+    return CMAP(norm(min(float(taxa), teto)))
 
 
 def _ler(nome: str) -> pd.DataFrame | None:
@@ -63,11 +64,12 @@ def _ler(nome: str) -> pd.DataFrame | None:
     return pd.read_csv(caminho)
 
 
-def _colorbar(fig, ax) -> None:
-    sm = matplotlib.cm.ScalarMappable(norm=NORM, cmap=CMAP)
+def _colorbar(fig, ax, teto: float = TETO_TREEMAP) -> None:
+    sm = matplotlib.cm.ScalarMappable(
+        norm=matplotlib.colors.Normalize(vmin=0, vmax=teto), cmap=CMAP)
     sm.set_array([])
     cb = fig.colorbar(sm, ax=ax, shrink=0.6, pad=0.01)
-    cb.set_label(f"Penetração da IA no tema (%) — escala até {TETO_COR:.0f}%+")
+    cb.set_label(f"% das publicações do tema que usam IA (escala até {teto:.0f}%+)")
 
 
 def fig_treemap(sufixo: str, top: int = 18) -> None:
@@ -156,7 +158,7 @@ def fig_painel_areas(sufixo: str, top: int = 10, areas=AREAS_SOCIAIS) -> None:
     for ax, (titulo, df) in zip(axes, dfs):
         d = df.sort_values("count_universo", ascending=False).head(top).iloc[::-1]
         ax.barh(d["topic"].astype(str), d["count_universo"],
-                color=[_cor(t) for t in d["taxa_ia_%"]])
+                color=[_cor(t, TETO_PAINEL) for t in d["taxa_ia_%"]])
         for y, (v, t) in enumerate(zip(d["count_universo"], d["taxa_ia_%"])):
             ax.text(v, y, f"  {int(v):,}".replace(",", ".") + f"  ·  IA {t:.1f}%",
                     va="center", fontsize=7.5)
@@ -164,7 +166,7 @@ def fig_painel_areas(sufixo: str, top: int = 10, areas=AREAS_SOCIAIS) -> None:
         ax.set_xlabel("publicações no universo de Humanidades (2016–2024)")
         ax.margins(x=0.22)
 
-    _colorbar(fig, list(axes))
+    _colorbar(fig, list(axes), TETO_PAINEL)
     fig.suptitle("O que as ciências sociais brasileiras estudam — e onde a IA entra\n"
                  "(barras = temas mais frequentes por área · cor = penetração da IA)",
                  fontsize=14)
