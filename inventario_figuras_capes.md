@@ -13,6 +13,8 @@ Convenções adotadas:
 - As `\label{}` seguem o padrão `fig:capes_NN_descritor` para fácil referência via `\autoref{}` ou `\Cref{}`.
 - O ambiente assume `\usepackage{graphicx}` e largura padrão `0.95\linewidth` — ajuste conforme o layout.
 
+> **Outras fontes:** este inventário cobre as figuras das fontes **CAPES** e **SciELO**. As figuras da fonte **OpenAlex** (internacional) — 15 figuras `openalex_01`…`openalex_15`, com legendas e discussão prontas — estão no inventário paralelo [`docs/inventario_figuras_openalex.tex`](docs/inventario_figuras_openalex.tex).
+
 ---
 
 ## Painel geral — corpus completo

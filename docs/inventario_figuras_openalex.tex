@@ -1,7 +1,9 @@
 % =====================================================================
-%  Discussão — OpenAlex: IA nas Humanidades em perspectiva internacional
-%  Trecho pronto para inserir na tese. Requer \usepackage{graphicx}.
-%  As figuras são geradas por figuras_openalex.py (pasta figuras/).
+%  Inventário de figuras — fonte OpenAlex (IA nas Humanidades, internacional)
+%  Paralelo a inventario_figuras_capes.md (fontes CAPES/SciELO).
+%  Trecho pronto para inserir na tese (\input ou copiar). Requer \usepackage{graphicx}.
+%  Figuras 01–09 geradas por figuras_openalex.py e figuras_openalex_mapa.py;
+%  figuras 10–15 (temáticas) por figuras_openalex_temas.py (pasta figuras/).
 %  Números: ver docs/decisoes_metodologicas.md, bloco IV (fonte canônica).
 %
 %  Convenções (idênticas às do inventario_figuras_capes.md):
@@ -275,3 +277,108 @@ intensa não se concentra numa única região do globo, mas aparece em contextos
 diversos --- da Ásia Oriental ao norte da Europa ---, reforçando que a baixa
 permeabilidade observada no Brasil é uma característica do caso nacional, e não
 um padrão geral do hemisfério ou do nível de desenvolvimento.
+
+% =====================================================================
+%  COMPOSIÇÃO TEMÁTICA — de que é feita a produção brasileira (Figuras 10–15)
+%  Responde "sobre o que o Brasil pesquisa em Humanidades?".
+%  Obs.: a Figura 12 (painel) é a versão combinada das Figuras 13–15
+%  (desmembradas); use uma OU outra, conforme o espaço da tese.
+% =====================================================================
+
+\subsection{De que é feita a produção brasileira em Ciências Humanas}
+
+Estabelecida a marginalidade da IA, cabe perguntar \emph{sobre o que}, afinal,
+o Brasil pesquisa em Humanidades. A Figura~\ref{fig:openalex_10_treemap_temas}
+decompõe o universo de 636.607 publicações nas áreas (\textit{subfields}) que o
+constituem.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figuras/openalex_10_treemap_temas.png}
+  \caption{Composição da produção brasileira em Ciências Humanas (2016--2024) por
+  área (\textit{subfield}), em mapa de árvore: a área de cada retângulo é
+  proporcional ao volume de publicações. Mostram-se as dezesseis maiores áreas e
+  um bloco agregando as demais.}
+  \label{fig:openalex_10_treemap_temas}
+  \fonte{Elaboração própria a partir do OpenAlex (2016--2024).}
+\end{figure}
+
+Dois blocos dominam a paisagem: \textit{Sociology and Political Science}
+(21,5\%) e \textit{Education} (20,3\%) somam, juntos, cerca de 42\% de toda a
+produção. A Humanidade brasileira é, portanto, em primeiro lugar, uma ciência da
+sociedade e da educação; literatura, direito, estudos urbanos e filosofia compõem
+um segundo escalão.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figuras/openalex_11_topics_temas.png}
+  \caption{Temas específicos (\textit{topics}) mais frequentes no conjunto das
+  Ciências Humanas brasileiras (2016--2024). O rótulo ``IA \%'' indica a fração
+  de cada tema que toca o campo da inteligência artificial.}
+  \label{fig:openalex_11_topics_temas}
+  \fonte{Elaboração própria a partir do OpenAlex (2016--2024).}
+\end{figure}
+
+Descendo ao nível dos temas específicos (Figura~\ref{fig:openalex_11_topics_temas}),
+e em particular ao recorte das ciências sociais
+(Figuras~\ref{fig:openalex_13_anthropology}, \ref{fig:openalex_14_sociology}
+e~\ref{fig:openalex_15_political_science}), três padrões se confirmam. Primeiro,
+a \textbf{centralidade da educação}: ``Education and Digital Technologies'' é o
+maior tema dentro da Sociologia e Ciência Política, e ``Education and Public
+Policy'' domina a Ciência Política e Relações Internacionais. Segundo, a
+\textbf{vocação histórica da Antropologia}, cujo maior tema é, de longe, ``History
+of Colonial Brazil'', seguido de colonialismo, história africana e estudos
+indígenas. Terceiro, a IA só alcança penetração relevante em \textbf{nichos
+digitais} de pequeno volume --- desinformação, redes sociais, governo eletrônico,
+``Artificial Intelligence in Law'' ---, ausente dos grandes temas que estruturam
+o campo.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figuras/openalex_12_painel_ciencias_sociais.png}
+  \caption{Temas mais frequentes nas três áreas das ciências sociais brasileiras
+  (Antropologia; Sociologia e Ciência Política; Ciência Política e Relações
+  Internacionais), 2016--2024, com a penetração da IA por tema indicada no rótulo
+  (``IA \%''). Versão em painel das Figuras~\ref{fig:openalex_13_anthropology}
+  a~\ref{fig:openalex_15_political_science}.}
+  \label{fig:openalex_12_painel_ciencias_sociais}
+  \fonte{Elaboração própria a partir do OpenAlex (2016--2024).}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\linewidth]{figuras/openalex_13_anthropology.png}
+  \caption{Antropologia (Brasil, 2016--2024): temas (\textit{topics}) mais
+  frequentes, com a fração de cada um que toca IA (``IA \%''). O campo é dominado
+  por temas histórico-coloniais; a penetração da IA é residual em todos eles.}
+  \label{fig:openalex_13_anthropology}
+  \fonte{Elaboração própria a partir do OpenAlex (2016--2024).}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\linewidth]{figuras/openalex_14_sociology_and_political_science.png}
+  \caption{Sociologia e Ciência Política (Brasil, 2016--2024): temas mais
+  frequentes, com a penetração da IA por tema (``IA \%''). Educação, solidariedade
+  social e saúde pública lideram; a IA só se destaca em temas digitais de menor
+  volume.}
+  \label{fig:openalex_14_sociology}
+  \fonte{Elaboração própria a partir do OpenAlex (2016--2024).}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\linewidth]{figuras/openalex_15_political_science_and_international_relations.png}
+  \caption{Ciência Política e Relações Internacionais (Brasil, 2016--2024): temas
+  mais frequentes, com a penetração da IA por tema (``IA \%''). Educação e
+  políticas públicas dominam; ``Artificial Intelligence in Law'' alcança alta
+  penetração, mas é tema de pequeno volume.}
+  \label{fig:openalex_15_political_science}
+  \fonte{Elaboração própria a partir do OpenAlex (2016--2024).}
+\end{figure}
+
+\paragraph{Implicação.} O exame temático reforça que a marginalidade da IA não é
+um problema de escassez, mas de \emph{natureza dos objetos}: o Brasil pesquisa,
+sobretudo, educação, sociedade, história colonial e cultura --- questões de
+tradição interpretativa, crítica e qualitativa, que (ainda) não se formulam por
+meios computacionais. A IA comparece apenas onde o próprio objeto já é digital.
