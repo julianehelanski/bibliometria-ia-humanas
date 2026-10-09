@@ -1,5 +1,8 @@
 # Análise Bibliométrica: Inteligência Artificial nas Ciências Humanas Brasileiras
 
+> **Uso na tese.** Quais figuras e tabelas da tese (capítulo 2) vêm deste repositório, com o script e os dados de origem de cada uma, estão em [`docs/USO_NA_TESE.md`](docs/USO_NA_TESE.md) (versão tabular em [`docs/uso_na_tese.csv`](docs/uso_na_tese.csv)).
+
+
 Scripts e dados utilizados na análise bibliométrica apresentada no Capítulo 2 da tese de doutorado *Tecno-etnografia de um centro de inteligência artificial: seguindo cientistas e engenheiros --- universidade afora*, no Programa de Pós-Graduação em Ciências Sociais (PPGCS) da Universidade Estadual de Campinas (Unicamp).
 
 ---

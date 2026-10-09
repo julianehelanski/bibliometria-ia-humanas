@@ -32,6 +32,9 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
 from utils import (
+    COR_CAPES,
+    COR_DESTAQUE,
+    COR_NEUTRO,
     CORES_INTERMEDIARIAS,
     DADOS_CAPES_DIR,
     FIGURAS_DIR,
@@ -39,7 +42,12 @@ from utils import (
     LABEL_GUARDA_CHUVA_CURTO,
     STOPWORDS_PT,
     aplicar_estilo_padrao,
+    dotplot,
+    eixo_ptbr,
+    estilo_editorial,
     garantir_diretorio,
+    num_ptbr,
+    pct_ptbr,
     salvar_figura,
 )
 
@@ -130,7 +138,9 @@ def texto_classificacao(df: pd.DataFrame) -> pd.Series:
 
 
 def _cor_por_humanas(label: str) -> str:
-    return COR_HUMANAS if "Humanas" in str(label) else COR_NEUTRA
+    # Base CAPES em verde; Ciências Humanas (foco) em magenta de destaque.
+    # Caixa-insensível: os rótulos vêm em maiúsculas ("CIÊNCIAS HUMANAS").
+    return COR_DESTAQUE if "humanas" in str(label).lower() else COR_CAPES
 
 
 def _plot_bolhas_grade(
@@ -221,42 +231,34 @@ def _plot_bolhas_grade(
 # ---------------------------------------------------------------------------
 def fig11_grande_area(df: pd.DataFrame, totais_universo: pd.Series | None) -> None:
     counts = df["NM_GRANDE_AREA_CONHECIMENTO"].fillna("(s/info)").value_counts().sort_values()
-    cores = [_cor_por_humanas(a) for a in counts.index]
+    labels = list(counts.index)
+    vals = list(counts.values)
     total = counts.sum()
+    cores = [_cor_por_humanas(a) for a in labels]
+    pcts = [v / total * 100 for v in vals]
+    nota = (f"CAPES · 2021–2024 · N = {num_ptbr(total)}. "
+            "Ciências Humanas em destaque (magenta).")
 
     if totais_universo is not None:
-        # Dois painéis: contagem IA + taxa interna (IA / total da área)
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 6.5), gridspec_kw={"wspace": 0.45})
+        # Dois painéis (mesma ordem): volume no corpus + taxa interna.
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 6.2), gridspec_kw={"wspace": 0.5})
     else:
         fig, ax1 = plt.subplots(figsize=(10, 6))
         ax2 = None
 
-    bars = ax1.barh(counts.index, counts.values, color=cores, edgecolor="white", linewidth=0.5)
-    for bar, val in zip(bars, counts.values):
-        ax1.text(bar.get_width() + total * 0.005,
-                 bar.get_y() + bar.get_height() / 2,
-                 f"{val:,} ({val/total*100:.1f}%)",
-                 va="center", fontsize=8)
-    ax1.set_xlabel(f"Trabalhos no campo Tecnologias IA/ML/DL (N = {total:,})")
-    ax1.set_xlim(0, counts.max() * 1.22)
+    dotplot(ax1, labels, vals, cores, pcts=pcts)
+    estilo_editorial(ax1, titulo="Volume no corpus de IA", nota=nota)
 
     if ax2 is not None:
-        taxa = pd.Series({
-            area: counts.get(area, 0) / totais_universo.get(area, np.nan) * 100
-            for area in counts.index
-        }).dropna().sort_values()
-        cores2 = [_cor_por_humanas(a) for a in taxa.index]
-        bars2 = ax2.barh(taxa.index, taxa.values, color=cores2, edgecolor="white", linewidth=0.5)
-        for bar, val in zip(bars2, taxa.values):
-            ax2.text(bar.get_width() + taxa.max() * 0.01,
-                     bar.get_y() + bar.get_height() / 2,
-                     f"{val:.1f}%",
-                     va="center", fontsize=8)
-        ax2.set_xlabel("Taxa interna: % da grande área que é sobre IA")
-        ax2.set_xlim(0, taxa.max() * 1.18)
-        ax2.set_yticklabels([])  # eixo Y duplicado, omite
+        taxa = []
+        for a in labels:
+            t = counts.get(a, 0) / totais_universo.get(a, float("nan")) * 100
+            taxa.append(0.0 if pd.isna(t) else t)
+        rot = [f"{pct_ptbr(t)}%" for t in taxa]
+        dotplot(ax2, labels, taxa, cores, rotulos=rot)
+        ax2.set_yticklabels([])  # eixo Y alinhado ao painel da esquerda
+        estilo_editorial(ax2, titulo="Taxa interna (% da área que toca IA)")
 
-    plt.tight_layout()
     out = os.path.join(FIGURAS_DIR, "capes_11_grande_area_share.png")
     salvar_figura(out)
     plt.close(fig)
@@ -288,9 +290,8 @@ def fig12_temporal_grande_area(df: pd.DataFrame) -> None:
         # Rótulo no fim de cada linha
         x_end = pivot.index[-1]
         y_end = pivot[area].iloc[-1]
-        ax.text(x_end + 0.05, y_end, f"  {area} ({y_end:,})",
-                fontsize=8, va="center",
-                color=cor, fontweight="bold" if is_humanas else "normal")
+        ax.text(x_end + 0.05, y_end, f"  {area} ({num_ptbr(y_end)})",
+                fontsize=8, va="center", color=cor)
 
     ax.set_xlabel("Ano base de defesa")
     ax.set_ylabel("Trabalhos no campo Tecnologias IA/ML/DL")
@@ -359,12 +360,12 @@ def fig14_temporal_total(df: pd.DataFrame) -> None:
         ax.bar(anos, vals, bottom=bottom, color=cores[foco], label=foco, edgecolor="white")
         for x, v, b in zip(anos, vals, bottom):
             if v > 50:
-                ax.text(x, b + v / 2, f"{int(v):,}", ha="center", va="center",
+                ax.text(x, b + v / 2, f"{num_ptbr(int(v))}", ha="center", va="center",
                         color="white", fontsize=9)
         bottom = bottom + vals
     # Total no topo
     for x, total in zip(anos, bottom):
-        ax.text(x, total + max(bottom) * 0.02, f"{int(total):,}",
+        ax.text(x, total + max(bottom) * 0.02, f"{num_ptbr(int(total))}",
                 ha="center", va="bottom", fontsize=10, fontweight="bold")
     ax.set_xlabel("Ano base de defesa")
     ax.set_ylabel("Trabalhos no campo Tecnologias IA/ML/DL")
@@ -389,7 +390,7 @@ def fig15_nivel_academico(df: pd.DataFrame) -> None:
     bars = ax.bar(serie.index, serie.values, color=cores, edgecolor="white")
     for bar, val in zip(bars, serie.values):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + total * 0.005,
-                f"{val:,}\n({val/total*100:.1f}%)",
+                f"{num_ptbr(val)}\n({pct_ptbr(val/total*100, 1)}%)",
                 ha="center", va="bottom", fontsize=9)
     ax.set_ylabel("Trabalhos no campo Tecnologias IA/ML/DL")
     ax.set_ylim(0, serie.max() * 1.18)
@@ -420,7 +421,7 @@ def fig16_top_areas_conhecimento(df: pd.DataFrame) -> None:
     for bar, val in zip(bars, serie.values):
         ax.text(bar.get_width() + serie.max() * 0.01,
                 bar.get_y() + bar.get_height() / 2,
-                f"{val:,}", va="center", fontsize=8)
+                f"{num_ptbr(val)}", va="center", fontsize=8)
     ax.set_xlabel("Trabalhos no campo Tecnologias IA/ML/DL (top 20 áreas de conhecimento)")
     ax.set_xlim(0, serie.max() * 1.12)
     # Legenda explicando cor
@@ -448,7 +449,7 @@ def fig17_top_instituicoes(df: pd.DataFrame) -> None:
     for bar, val in zip(bars, serie.values):
         ax.text(bar.get_width() + serie.max() * 0.01,
                 bar.get_y() + bar.get_height() / 2,
-                f"{val:,}", va="center", fontsize=8)
+                f"{num_ptbr(val)}", va="center", fontsize=8)
     ax.set_xlabel("Trabalhos no campo Tecnologias IA/ML/DL (top 20 IES)")
     ax.set_xlim(0, serie.max() * 1.12)
     plt.tight_layout()
@@ -470,7 +471,7 @@ def fig18_regiao_uf(df: pd.DataFrame) -> None:
     bars = ax1.bar(regiao.index, regiao.values, color=cores_r, edgecolor="white")
     for bar, val in zip(bars, regiao.values):
         ax1.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + regiao.max() * 0.01,
-                 f"{val:,}", ha="center", va="bottom", fontsize=9)
+                 f"{num_ptbr(val)}", ha="center", va="bottom", fontsize=9)
     ax1.set_title("Por região", fontsize=10)
     ax1.set_ylabel("Trabalhos no campo Tecnologias IA/ML/DL")
     ax1.set_ylim(0, regiao.max() * 1.15)
@@ -478,7 +479,7 @@ def fig18_regiao_uf(df: pd.DataFrame) -> None:
     bars = ax2.bar(uf.index, uf.values, color=COR_DEST, edgecolor="white")
     for bar, val in zip(bars, uf.values):
         ax2.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + uf.max() * 0.01,
-                 f"{val:,}", ha="center", va="bottom", fontsize=8)
+                 f"{num_ptbr(val)}", ha="center", va="bottom", fontsize=8)
     ax2.set_title("Top 15 UFs", fontsize=10)
     ax2.set_ylim(0, uf.max() * 1.15)
     plt.tight_layout()
@@ -543,7 +544,7 @@ def fig20_top_termos(df: pd.DataFrame) -> None:
     for bar, val in zip(bars, vals):
         ax.text(bar.get_width() + max(vals) * 0.01,
                 bar.get_y() + bar.get_height() / 2,
-                f"{val:,}", va="center", fontsize=8)
+                f"{num_ptbr(val)}", va="center", fontsize=8)
     ax.set_xlabel("Ocorrências em títulos (top 25, exclui termos canônicos de IA)")
     ax.set_xlim(0, max(vals) * 1.12)
     plt.tight_layout()
@@ -588,30 +589,17 @@ def fig21_subcampos_distribuicao(df: pd.DataFrame) -> None:
     for col, label in SUBCAMPO_COLS:
         counts.append(_bool_col(df, col).sum())
     total = len(df)
-    # Ordena visualmente (maior para menor por volume).
-    pares = sorted(zip([l for _, l in SUBCAMPO_COLS], counts, SUBCAMPO_CORES),
-                   key=lambda x: x[1])
+    # Ordena do menor para o maior (dot plot: maior no topo). Base CAPES (verde).
+    pares = sorted(zip([l for _, l in SUBCAMPO_COLS], counts), key=lambda x: x[1])
     labels = [p[0] for p in pares]
     vals = [p[1] for p in pares]
-    # Cor-assinatura única da base CAPES (verde); padronização por base de dados,
-    # em vez de uma cor por subcampo. Ver scielo (azul) e openalex_04 (vermelho).
-    cor_base = CORES_INTERMEDIARIAS[2]
+    pcts = [v / total * 100 for v in vals]
 
-    fig, ax = plt.subplots(figsize=(10, 5.5))
-    bars = ax.barh(labels, vals, color=cor_base, edgecolor="white", linewidth=0.5)
-    for bar, val in zip(bars, vals):
-        ax.text(bar.get_width() + max(vals) * 0.01,
-                bar.get_y() + bar.get_height() / 2,
-                f"{val:,} ({val/total*100:.1f}%)",
-                va="center", fontsize=9)
-    ax.set_xlabel(f"Trabalhos que mencionam o subcampo (N total do corpus = {total:,})")
-    ax.set_xlim(0, max(vals) * 1.18)
-    # Nota: percentuais somam mais que 100% porque um trabalho pode estar
-    # em múltiplos subcampos
-    ax.text(0.99, -0.18,
-            "Trabalhos podem estar em múltiplos subcampos; percentuais somam mais que 100%.",
-            transform=ax.transAxes, ha="right", fontsize=8, style="italic", color="#555")
-    plt.tight_layout()
+    fig, ax = plt.subplots(figsize=(10, 5.2))
+    dotplot(ax, labels, vals, COR_CAPES, pcts=pcts)
+    estilo_editorial(ax, nota=(
+        f"Trabalhos que mencionam o subcampo · N = {num_ptbr(total)}. "
+        "Um trabalho pode estar em múltiplos subcampos; percentuais somam mais que 100%."))
     out = os.path.join(FIGURAS_DIR, "capes_21_subcampos_distribuicao.png")
     salvar_figura(out)
     plt.close(fig)
@@ -663,7 +651,7 @@ def fig23_temporal_subcampos(df: pd.DataFrame) -> None:
         # Anota valor final
         x_end = serie.index[-1]
         y_end = serie.iloc[-1]
-        ax.text(x_end + 0.06, y_end, f" {y_end:,}", fontsize=8, va="center", color=cor)
+        ax.text(x_end + 0.06, y_end, f" {num_ptbr(y_end)}", fontsize=8, va="center", color=cor)
 
     ax.set_xlabel("Ano base de defesa")
     ax.set_ylabel("Trabalhos que mencionam o subcampo")

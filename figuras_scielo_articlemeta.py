@@ -40,12 +40,20 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
 from utils import (
+    CMAP_SEQUENCIAL,
+    COR_DESTAQUE,
+    COR_SCIELO,
     CORES_INTERMEDIARIAS,
     DADOS_SCIELO_DIR,
     FIGURAS_DIR,
     STOPWORDS_PT,
     aplicar_estilo_padrao,
+    dotplot,
+    eixo_ptbr,
+    estilo_editorial,
     garantir_diretorio,
+    num_ptbr,
+    pct_ptbr,
     salvar_figura,
 )
 
@@ -196,7 +204,8 @@ def texto_classificacao(df):
 
 
 def _cor_sa(label):
-    return COR_HUMANAS if "Human Sciences" == label else COR_NEUTRA
+    # Base SciELO em azul; Human Sciences (foco) em magenta de destaque.
+    return COR_DESTAQUE if "Human Sciences" == label else COR_SCIELO
 
 
 # ---------------------------------------------------------------------------
@@ -204,41 +213,34 @@ def _cor_sa(label):
 # ---------------------------------------------------------------------------
 def fig11_subject_area(df, universo):
     counts = df["subject_area_primary"].value_counts().sort_values()
+    labels = list(counts.index)
+    vals = list(counts.values)
     total = counts.sum()
-    cores = [_cor_sa(l) for l in counts.index]
+    cores = [_cor_sa(l) for l in labels]
+    pcts = [v / total * 100 for v in vals]
     univ_counts = _counts_universo(universo)
+    nota = (f"SciELO Brasil · 2021–2024 · N = {num_ptbr(total)}. "
+            "Human Sciences em destaque (magenta).")
 
     if univ_counts is not None:
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6), gridspec_kw={"wspace": 0.55})
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6), gridspec_kw={"wspace": 0.6})
     else:
         fig, ax1 = plt.subplots(figsize=(10, 6))
         ax2 = None
 
-    bars = ax1.barh(counts.index, counts.values, color=cores, edgecolor="white", linewidth=0.5)
-    for bar, val in zip(bars, counts.values):
-        ax1.text(bar.get_width() + total * 0.005,
-                 bar.get_y() + bar.get_height()/2,
-                 f"{val} ({val/total*100:.1f}%)",
-                 va="center", fontsize=9)
-    ax1.set_xlabel(f"Artigos no campo Tecnologias IA/ML/DL (N = {total})")
-    ax1.set_xlim(0, counts.max() * 1.25)
+    dotplot(ax1, labels, vals, cores, pcts=pcts)
+    estilo_editorial(ax1, titulo="Volume no corpus de IA", nota=nota)
 
     if ax2 is not None:
-        taxa = pd.Series({
-            sa: counts.get(sa, 0) / univ_counts.get(sa, np.nan) * 100
-            for sa in counts.index
-        }).dropna().sort_values()
-        cores2 = [_cor_sa(l) for l in taxa.index]
-        bars2 = ax2.barh(taxa.index, taxa.values, color=cores2, edgecolor="white", linewidth=0.5)
-        for bar, val in zip(bars2, taxa.values):
-            ax2.text(bar.get_width() + taxa.max() * 0.02,
-                     bar.get_y() + bar.get_height()/2,
-                     f"{val:.2f}%", va="center", fontsize=9)
-        ax2.set_xlabel("Taxa interna: % da subject area que é sobre o campo")
-        ax2.set_xlim(0, taxa.max() * 1.20)
+        taxa = []
+        for sa in labels:
+            t = counts.get(sa, 0) / univ_counts.get(sa, float("nan")) * 100
+            taxa.append(0.0 if pd.isna(t) else t)
+        rot = [f"{pct_ptbr(t, 2)}%" for t in taxa]
+        dotplot(ax2, labels, taxa, cores, rotulos=rot)
         ax2.set_yticklabels([])
+        estilo_editorial(ax2, titulo="Taxa interna (% da área que toca o campo)")
 
-    plt.tight_layout()
     out = os.path.join(FIGURAS_DIR, "scielo_11_subject_area_share.png")
     salvar_figura(out)
     plt.close(fig)
@@ -263,8 +265,7 @@ def fig12_temporal_subject_area(df):
         x_end = pivot.index[-1]
         y_end = pivot[sa].iloc[-1]
         ax.text(x_end + 0.05, y_end, f"  {sa} ({y_end})",
-                fontsize=8, va="center", color=cor,
-                fontweight="bold" if is_human else "normal")
+                fontsize=8, va="center", color=cor)
     ax.set_xlabel("Ano de publicação")
     ax.set_ylabel("Artigos sobre Tecnologias IA/ML/DL")
     ax.set_xticks(sorted(pivot.index))
@@ -294,8 +295,7 @@ def fig13_heatmap_sa_keyword(df):
     norm = bruto.div(bruto.sum(axis=0).replace(0, np.nan), axis=1).fillna(0) * 100
 
     fig, ax = plt.subplots(figsize=(11, 4.5))
-    cmap = mcolors.LinearSegmentedColormap.from_list("muted_red", ["#FFFFFF", COR_HUMANAS])
-    im = ax.imshow(norm.values, aspect="auto", cmap=cmap, vmin=0, vmax=norm.values.max())
+    im = ax.imshow(norm.values, aspect="auto", cmap=CMAP_SEQUENCIAL, vmin=0, vmax=norm.values.max())
     ax.set_xticks(range(len(norm.columns)))
     ax.set_xticklabels(norm.columns, rotation=40, ha="right", fontsize=8)
     ax.set_yticks(range(len(norm.index)))
@@ -305,9 +305,9 @@ def fig13_heatmap_sa_keyword(df):
             v = norm.values[i, j]
             raw = int(bruto.values[i, j])
             if raw > 0:
-                ax.text(j, i, f"{v:.0f}%\n({raw})",
+                ax.text(j, i, f"{pct_ptbr(v, 0)}%\n({raw})",
                         ha="center", va="center",
-                        color="white" if v > norm.values.max() * 0.55 else "#333",
+                        color="#333" if v > norm.values.max() * 0.6 else "white",
                         fontsize=7)
     cbar = plt.colorbar(im, ax=ax, fraction=0.025, pad=0.02)
     cbar.set_label("% do termo concentrado na subject area", fontsize=8)
@@ -373,7 +373,7 @@ def fig15_idioma(df):
     for bar, val in zip(bars, serie.values):
         ax.text(bar.get_x() + bar.get_width()/2,
                 bar.get_height() + total * 0.005,
-                f"{val}\n({val/total*100:.1f}%)",
+                f"{val}\n({pct_ptbr(val/total*100, 1)}%)",
                 ha="center", va="bottom", fontsize=9)
     ax.set_ylabel("Artigos sobre Tecnologias IA/ML/DL")
     ax.set_ylim(0, serie.max() * 1.20)
@@ -407,8 +407,8 @@ def fig16_top_periodicos(df):
     ax.set_xlim(0, serie.max() * 1.12)
     from matplotlib.patches import Patch
     ax.legend(handles=[
-        Patch(color=COR_HUMANAS, label="Periódico em Human Sciences"),
-        Patch(color=COR_NEUTRA, label="Outras subject areas"),
+        Patch(color=COR_DESTAQUE, label="Periódico em Human Sciences"),
+        Patch(color=COR_SCIELO, label="Outras subject areas"),
     ], loc="lower right", frameon=False, fontsize=8)
     # Trunca labels longas
     ax.set_yticklabels([t[:42] + "…" if len(t) > 42 else t for t in serie.index], fontsize=8)
@@ -471,22 +471,12 @@ def fig21_subcampos_dist(df):
     pares.sort(key=lambda x: x[1])
     labels = [p[0] for p in pares]
     vals = [p[1] for p in pares]
-    # Cor-assinatura única da base SciELO (azul); padronização por base de dados,
-    # em vez de uma cor por subcampo. Ver capes (verde) e openalex_04 (vermelho).
-    cor_base = CORES_INTERMEDIARIAS[3]
-    fig, ax = plt.subplots(figsize=(10, 5.5))
-    bars = ax.barh(labels, vals, color=cor_base, edgecolor="white", linewidth=0.5)
-    for bar, val in zip(bars, vals):
-        ax.text(bar.get_width() + max(vals) * 0.02,
-                bar.get_y() + bar.get_height()/2,
-                f"{val} ({val/total*100:.1f}%)",
-                va="center", fontsize=9)
-    ax.set_xlabel(f"Artigos que mencionam o subcampo (N total = {total})")
-    ax.set_xlim(0, max(vals) * 1.25)
-    ax.text(0.99, -0.18,
-            "Artigos podem estar em múltiplos subcampos; percentuais somam mais que 100%.",
-            transform=ax.transAxes, ha="right", fontsize=8, style="italic", color="#555")
-    plt.tight_layout()
+    pcts = [v / total * 100 for v in vals]
+    fig, ax = plt.subplots(figsize=(10, 5.2))
+    dotplot(ax, labels, vals, COR_SCIELO, pcts=pcts)
+    estilo_editorial(ax, nota=(
+        f"Artigos que mencionam o subcampo · N = {num_ptbr(total)}. "
+        "Um artigo pode estar em múltiplos subcampos; percentuais somam mais que 100%."))
     out = os.path.join(FIGURAS_DIR, "scielo_21_subcampos_distribuicao.png")
     salvar_figura(out)
     plt.close(fig)
@@ -509,8 +499,7 @@ def fig22_heatmap_subcampo_sa(df):
     norm = bruto.div(bruto.sum(axis=1).replace(0, np.nan), axis=0).fillna(0) * 100
 
     fig, ax = plt.subplots(figsize=(11, 4.5))
-    cmap = mcolors.LinearSegmentedColormap.from_list("muted_blue", ["#FFFFFF", COR_DEST])
-    im = ax.imshow(norm.values, aspect="auto", cmap=cmap, vmin=0, vmax=norm.values.max())
+    im = ax.imshow(norm.values, aspect="auto", cmap=CMAP_SEQUENCIAL, vmin=0, vmax=norm.values.max())
     ax.set_xticks(range(len(norm.columns)))
     ax.set_xticklabels(norm.columns, rotation=20, ha="right", fontsize=8)
     ax.set_yticks(range(len(norm.index)))
@@ -520,9 +509,9 @@ def fig22_heatmap_subcampo_sa(df):
             v = norm.values[i, j]
             raw = int(bruto.values[i, j])
             if raw > 0:
-                ax.text(j, i, f"{v:.0f}%\n({raw})",
+                ax.text(j, i, f"{pct_ptbr(v, 0)}%\n({raw})",
                         ha="center", va="center",
-                        color="white" if v > norm.values.max() * 0.5 else "#333",
+                        color="#333" if v > norm.values.max() * 0.6 else "white",
                         fontsize=7)
     cbar = plt.colorbar(im, ax=ax, fraction=0.025, pad=0.02)
     cbar.set_label("% da subject area dentro do subcampo (por linha)", fontsize=8)

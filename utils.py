@@ -41,7 +41,8 @@ def aplicar_estilo_padrao():
     plt.rcParams['savefig.edgecolor'] = 'none'
     plt.rcParams['figure.dpi'] = 100
     plt.rcParams['savefig.dpi'] = 300
-    # Tipografia: tamanhos consistentes, sem bold gratuito.
+    # Tipografia: fonte sans-serif única, tamanhos consistentes, sem bold.
+    plt.rcParams['font.family'] = 'DejaVu Sans'
     plt.rcParams['font.size'] = 10
     plt.rcParams['axes.titlesize'] = 11
     plt.rcParams['axes.labelsize'] = 10
@@ -74,6 +75,26 @@ CORES_INTERMEDIARIAS = [
     '#B0BEC5',  # 10: Light Muted Gray
     '#E0E0E0',  # 11: Very Light Gray
 ]
+
+# =============================================================================
+# Paleta padrão das figuras (decisão de 27/06/2026).
+#
+# Categórico: Okabe-Ito, à prova de daltonismo. Cada base de dados tem uma
+# cor-assinatura; a categoria em foco da tese (Humanas, Antropologia, Brasil)
+# usa o magenta de destaque; as demais barras usam cinza neutro.
+# Sequencial (heatmaps): "viridis".
+# =============================================================================
+OKABE_ITO = {
+    "preto": "#000000", "laranja": "#E69F00", "azul_claro": "#56B4E9",
+    "verde": "#009E73", "amarelo": "#F0E442", "azul": "#0072B2",
+    "vermelho": "#D55E00", "roxo": "#CC79A7", "cinza": "#999999",
+}
+COR_CAPES = "#009E73"       # verde-azulado
+COR_SCIELO = "#0072B2"      # azul
+COR_OPENALEX = "#D55E00"    # vermelho-alaranjado
+COR_DESTAQUE = "#CC79A7"    # magenta: categoria em foco (Humanas/Antropologia/Brasil)
+COR_NEUTRO = "#999999"      # cinza: demais
+CMAP_SEQUENCIAL = "viridis"  # heatmaps e escalas sequenciais
 
 
 # =============================================================================
@@ -288,6 +309,215 @@ def garantir_diretorio(caminho):
     """Cria o diretório se não existir. Retorna o caminho."""
     os.makedirs(caminho, exist_ok=True)
     return caminho
+
+
+def num_ptbr(valor) -> str:
+    """Inteiro no padrão brasileiro: ponto como separador de milhar.
+
+    Ex.: 5284 -> "5.284", 631 -> "631". Usado nos rótulos das figuras para
+    alinhar a notação numérica das imagens ao texto da tese (pt-BR).
+    """
+    return f"{int(round(valor)):,}".replace(",", ".")
+
+
+def pct_ptbr(valor, casas: int = 1) -> str:
+    """Percentual no padrão brasileiro: vírgula decimal, sem o símbolo '%'.
+
+    Ex.: 40.66 -> "40,7". O caller acrescenta o '%'. Mantém o ponto de milhar
+    pt-BR quando houver (ex.: 1234.5 -> "1.234,5").
+    """
+    return f"{valor:,.{casas}f}".replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+
+
+def _tick_ptbr(x, pos=None) -> str:
+    """Formata um valor de tick de eixo em pt-BR (milhar com ponto, decimal
+    com vírgula). Inteiros saem sem casas decimais."""
+    if float(x).is_integer():
+        return num_ptbr(int(round(x)))
+    return f"{x:g}".replace(".", ",")
+
+
+def eixo_ptbr(ax, eixo: str = "x") -> None:
+    """Aplica notação numérica pt-BR aos ticks de um eixo NUMÉRICO.
+
+    Use apenas em eixos contínuos (não categóricos). ``eixo`` aceita
+    'x', 'y' ou 'ambos'.
+    """
+    from matplotlib.ticker import FuncFormatter
+    fmt = FuncFormatter(_tick_ptbr)
+    if eixo in ("x", "ambos"):
+        ax.xaxis.set_major_formatter(fmt)
+    if eixo in ("y", "ambos"):
+        ax.yaxis.set_major_formatter(fmt)
+
+
+# ---------------------------------------------------------------------------
+# Identidade visual (decisão de 27/06/2026): marcador "bolinha + halo",
+# dot plot de Cleveland, dumbbell e estilo editorial (sem eixos/grade/molduras).
+# A bolinha é a forma comum a gráficos, bolhas e nós da rede.
+# ---------------------------------------------------------------------------
+GUIA_COR = "#e9eef2"     # linha-guia sutil
+# Tipografia padrão das figuras (decisão de 27/06/2026): sem título embutido
+# (a legenda do LaTeX titula), sem negrito, sem preto puro. Texto em cinza
+# escuro suave; notas e descritores em cinza médio. Fonte sans-serif única.
+_TXT = "#404040"         # rótulos e números (cinza escuro, não preto)
+_TXT_FRACO = "#8a8a8a"   # notas, percentuais, descritores de painel
+FONTE = "DejaVu Sans"
+PONTO_S = 200            # tamanho do marcador
+HALO_S = 520             # tamanho do halo
+HALO_ALPHA = 0.18
+
+
+def estilo_editorial(ax, titulo=None, subtitulo=None, nota=None) -> None:
+    """Remove molduras/grade/ticks. Sem título embutido: ``titulo`` e
+    ``subtitulo``, quando passados, viram descritores discretos (cinza, sem
+    negrito) para distinguir painéis; ``nota`` é a legenda curta em itálico.
+    O título de fato fica na legenda (caption) do LaTeX."""
+    for s in ax.spines.values():
+        s.set_visible(False)
+    ax.tick_params(left=False, bottom=False)
+    ax.grid(False)
+    if titulo is not None:
+        ax.text(0, 1.06, titulo, transform=ax.transAxes, fontsize=10.5,
+                color="#5a5a5a")
+    if subtitulo is not None:
+        ax.text(0, 1.015, subtitulo, transform=ax.transAxes, fontsize=9,
+                color=_TXT_FRACO)
+    if nota is not None:
+        ax.text(0, -0.14, nota, transform=ax.transAxes, fontsize=8.5,
+                style="italic", color=_TXT_FRACO)
+
+
+def _rotulo_num_pct(ax, x, i, num_str, pct_str, mx) -> None:
+    # Folga em pontos (não em unidades de dado): o número fica sempre à
+    # direita da bolinha, sem encostar, mesmo quando o eixo é curto e o
+    # marcador ocupa uma fração grande do intervalo (ex.: painéis do
+    # comparativo, com mx pequeno). Sem negrito, em cinza.
+    t_num = ax.annotate(num_str, xy=(x, i), xytext=(12, 0),
+                        textcoords="offset points", va="center", ha="left",
+                        fontsize=10, color=_TXT)
+    if pct_str is not None:
+        # Ancora o percentual à borda direita real do número (medida no
+        # desenho), com folga fixa em pontos: nunca encosta, independe da
+        # quantidade de dígitos e da escala do eixo.
+        ax.annotate(pct_str, xycoords=t_num, xy=(1, 0.5), xytext=(5, 0),
+                    textcoords="offset points", va="center", ha="left",
+                    fontsize=9.5, color=_TXT_FRACO)
+
+
+def dotplot(ax, labels, vals, cores, pcts=None, rotulos=None, halo=False,
+            rotulo=True) -> None:
+    """Dot plot de Cleveland com halo + linha-guia (marcador-identidade).
+
+    labels: categorias (eixo Y, do menor para o maior). vals: valores.
+    cores: cor por ponto (lista) ou cor única (str). pcts: percentuais para o
+    rótulo entre parênteses, ou None. rotulos: rótulo principal já formatado
+    (ex.: "14,3%") por ponto; se None, usa ``num_ptbr(val)``. Não desenha
+    título — combine com ``estilo_editorial``.
+    """
+    n = len(labels)
+    y = list(range(n))
+    mx = max(vals) if vals else 1
+    if isinstance(cores, str):
+        cores = [cores] * n
+    for i, v in enumerate(vals):
+        ax.plot([0, v], [i, i], color=GUIA_COR, linewidth=1.2, zorder=1)
+    if halo:
+        ax.scatter(vals, y, s=HALO_S, color=cores, alpha=HALO_ALPHA, zorder=2,
+                   edgecolors="none")
+    ax.scatter(vals, y, s=PONTO_S, color=cores, zorder=3, edgecolors="white",
+               linewidths=1.6)
+    if rotulo:
+        for i, v in enumerate(vals):
+            num = rotulos[i] if rotulos is not None else num_ptbr(v)
+            pct = None if pcts is None else f"({pct_ptbr(pcts[i])}%)"
+            _rotulo_num_pct(ax, v, i, num, pct, mx)
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels, fontsize=11, color=_TXT)
+    ax.set_xticks([])
+    # Folga à esquerda do 0: bolinhas com valor pequeno/zero não são cortadas
+    # pela borda do eixo.
+    ax.set_xlim(-mx * 0.03, mx * 1.45)
+    ax.set_ylim(-0.6, n - 0.4)
+
+
+def dumbbell(ax, labels, series, cores, sufixo="") -> None:
+    """Dumbbell: por categoria, um ponto por série ligado por uma linha.
+
+    labels: categorias (eixo Y). series: dict {nome: [valores por categoria]}.
+    cores: dict {nome: cor}. Mantém um eixo X discreto (valores legíveis) com
+    grade vertical sutil; usa o mesmo marcador-identidade (sem halo, para não
+    poluir a comparação). ``sufixo`` é anexado ao rótulo de cada ponto.
+    """
+    n = len(labels)
+    y = list(range(n))
+    nomes = list(series.keys())
+    todos = [v for s in series.values() for v in s]
+    mx = max(todos) if todos else 1
+    for i in range(n):
+        pontos = [series[nm][i] for nm in nomes]
+        ax.plot([min(pontos), max(pontos)], [i, i], color=GUIA_COR,
+                linewidth=2.4, zorder=1, solid_capstyle="round")
+    for nm in nomes:
+        ax.scatter(series[nm], y, s=150, color=cores[nm], zorder=3,
+                   edgecolors="white", linewidths=1.4, label=nm)
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels, fontsize=11, color=_TXT)
+    # Folga à esquerda do 0: bolinhas em valor pequeno/zero não são cortadas.
+    ax.set_xlim(-mx * 0.03, mx * 1.12)
+    ax.set_ylim(-0.6, n - 0.4)
+    for s in ax.spines.values():
+        s.set_visible(False)
+    ax.tick_params(left=False, bottom=False)
+    ax.grid(axis="x", linestyle=":", linewidth=0.6, color="#dddddd", zorder=0)
+
+
+def bolha_matriz(ax, matriz, cmap=CMAP_SEQUENCIAL, rotulos=False,
+                 s_min=40, s_max=900):
+    """Matriz como grade de bolinhas (balloon plot) no lugar de heatmap.
+
+    Em cada cruzamento linha×coluna entra uma bolinha cuja ÁREA codifica o
+    valor e cuja cor segue ``cmap`` (viridis), reforçando a magnitude.
+    Células com valor zero ficam vazias. Mantém a identidade da bolinha sem
+    abrir mão do sequencial perceptual. ``matriz`` é um DataFrame (linhas =
+    índice, colunas = colunas). Devolve o PathCollection (para colorbar)."""
+    rows = list(matriz.index)
+    cols = list(matriz.columns)
+    vmax = 1.0
+    for r in range(len(rows)):
+        for c in range(len(cols)):
+            vmax = max(vmax, float(matriz.iat[r, c]))
+    xs, ys, sizes, vals = [], [], [], []
+    for i in range(len(rows)):
+        for j in range(len(cols)):
+            v = float(matriz.iat[i, j])
+            if v <= 0:
+                continue
+            xs.append(j)
+            ys.append(i)
+            sizes.append(s_min + (s_max - s_min) * (v / vmax))  # área ∝ valor
+            vals.append(v)
+    sc = ax.scatter(xs, ys, s=sizes, c=vals, cmap=cmap, zorder=3,
+                    edgecolors="white", linewidths=0.8)
+    if rotulos:
+        for x, y, v in zip(xs, ys, vals):
+            ax.annotate(num_ptbr(v), xy=(x, y), xytext=(0, 0),
+                        textcoords="offset points", ha="center", va="center",
+                        fontsize=6.5, color="white"
+                        if v > vmax * 0.55 else _TXT)
+    ax.set_xticks(range(len(cols)))
+    ax.set_xticklabels(cols, fontsize=9, color=_TXT)
+    ax.set_yticks(range(len(rows)))
+    ax.set_yticklabels(rows, fontsize=9, color=_TXT)
+    ax.set_xlim(-0.6, len(cols) - 0.4)
+    ax.set_ylim(-0.6, len(rows) - 0.4)
+    ax.invert_yaxis()
+    ax.set_axisbelow(True)
+    ax.grid(True, color="#eef0f2", linewidth=0.8, zorder=0)
+    ax.tick_params(left=False, bottom=False)
+    for s in ax.spines.values():
+        s.set_visible(False)
+    return sc
 
 
 def salvar_figura(caminho, fig=None, **kwargs):
