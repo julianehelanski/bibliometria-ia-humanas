@@ -30,10 +30,25 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from utils import (
+    COR_CAPES,
+    COR_DESTAQUE,
+    COR_NEUTRO,
+    COR_OPENALEX,
+    COR_SCIELO,
     CORES_INTERMEDIARIAS,
     FIGURAS_DIR,
+    GUIA_COR,
+    PONTO_S,
+    _TXT,
+    _TXT_FRACO,
     aplicar_estilo_padrao,
+    dotplot,
+    dumbbell,
+    eixo_ptbr,
+    estilo_editorial,
     garantir_diretorio,
+    num_ptbr,
+    pct_ptbr,
     salvar_figura,
 )
 
@@ -43,9 +58,9 @@ aplicar_estilo_padrao()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DADOS_OPENALEX_DIR = os.path.join(BASE_DIR, "dados_openalex")
 
-COR_BRASIL = CORES_INTERMEDIARIAS[0]   # vermelho-muted (Brasil em destaque)
-COR_DEST = CORES_INTERMEDIARIAS[3]     # azul (1º lugar)
-COR_NEUTRA = CORES_INTERMEDIARIAS[9]   # cinza-azulado (demais)
+COR_BRASIL = COR_DESTAQUE   # magenta: Brasil em destaque (categoria em foco)
+COR_DEST = COR_OPENALEX     # vermelho-alaranjado: cor-assinatura da base OpenAlex
+COR_NEUTRA = COR_NEUTRO     # cinza: demais
 
 # Subcampos canônicos das outras bases (decisoes_metodologicas.md I.5 e II.5),
 # em % do respectivo corpus IA. OpenAlex é lido do resumo_BR.csv em tempo real.
@@ -79,13 +94,11 @@ def _ler_csv(nome: str) -> pd.DataFrame | None:
 
 
 def _cores(rotulos, destaque="Brazil", topo_idx=0):
-    """Cinza para todos; vermelho no Brasil; azul no 1º colocado."""
+    """Cinza para todos; magenta de destaque no Brasil (categoria em foco)."""
     cores = []
     for i, r in enumerate(rotulos):
         if isinstance(r, str) and ("brazil" in r.lower() or "brasil" in r.lower()):
             cores.append(COR_BRASIL)
-        elif i == topo_idx:
-            cores.append(COR_DEST)
         else:
             cores.append(COR_NEUTRA)
     return cores
@@ -97,15 +110,17 @@ def fig_ranking_paises(top: int = 15) -> None:
     if df is None:
         return
     df = df[df["pais_codigo"].astype(str).str.strip() != ""].copy()
+    # menor embaixo (dot plot): ordena ascendente.
     df = df.sort_values("count_ia_hum", ascending=False).head(top).iloc[::-1]
+    labels = df["pais"].astype(str).tolist()
+    vals = df["count_ia_hum"].tolist()
+    cores = _cores(labels)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-    cores = _cores(df["pais"].tolist(), topo_idx=len(df) - 1)  # topo está no fim (iloc invertido)
-    ax.barh(df["pais"].astype(str), df["count_ia_hum"], color=cores)
-    for y, v in enumerate(df["count_ia_hum"]):
-        ax.text(v, y, f" {int(v):,}".replace(",", "."), va="center", fontsize=8)
-    ax.set_xlabel("Publicações de IA nas Humanidades (2016–2024)")
-    ax.margins(x=0.12)
+    fig, ax = plt.subplots(figsize=(10, 6.5))
+    dotplot(ax, labels, vals, cores)
+    estilo_editorial(ax, nota=(
+        "Publicações de IA nas Humanidades (2016–2024), definição por conceito do "
+        "OpenAlex. Brasil em destaque (magenta)."))
     _salvar(fig, "openalex_01_ranking_paises.png")
 
 
@@ -115,40 +130,72 @@ def fig_taxa_interna_paises(top: int = 15) -> None:
     if df is None:
         return
     df = df[df["pais_codigo"].astype(str).str.strip() != ""].copy()
-    # Top por volume (mesmos países da fig 1), ordenados por taxa para leitura.
+    # Top por volume (mesmos países da fig 1), ordenados por taxa (menor embaixo).
     df = df.sort_values("count_ia_hum", ascending=False).head(top)
     df = df.sort_values("taxa_interna_%", ascending=True)
+    labels = df["pais"].astype(str).tolist()
+    vals = df["taxa_interna_%"].tolist()
+    cores = _cores(labels)
+    rot = [f"{pct_ptbr(v)}%" for v in vals]
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-    cores = _cores(df["pais"].tolist(), topo_idx=-1)
-    ax.barh(df["pais"].astype(str), df["taxa_interna_%"], color=cores)
-    for y, v in enumerate(df["taxa_interna_%"]):
-        ax.text(v, y, f" {v:.1f}%", va="center", fontsize=8)
-    ax.set_xlabel("Taxa interna: % das Humanidades do país que tocam IA")
-    ax.margins(x=0.12)
+    fig, ax = plt.subplots(figsize=(10, 6.5))
+    dotplot(ax, labels, vals, cores, rotulos=rot)
+    estilo_editorial(ax, nota=(
+        "Taxa interna: % das Humanidades do país que tocam IA (2016–2024). "
+        "Brasil em destaque (magenta)."))
     _salvar(fig, "openalex_02_taxa_interna_paises.png")
 
 
 def fig_brasil_temporal() -> None:
-    """openalex_03 — evolução anual do Brasil: volume (barras) + taxa interna (linha)."""
+    """openalex_03 — evolução anual do Brasil: volume (lollipop de bolinhas) +
+    taxa interna (linha com bolinhas), em eixos gêmeos."""
     df = _ler_csv("openalex_ia_humanas_por_ano_BR.csv")
     if df is None:
         return
     df = df.sort_values("ano")
+    anos = df["ano"].astype(int).astype(str).tolist()
+    vol = df["count_ia_hum"].astype(float).tolist()
+    taxa = df["taxa_interna_%"].astype(float).tolist()
+    x = list(range(len(anos)))
 
     fig, ax1 = plt.subplots(figsize=(10, 6))
-    ax1.bar(df["ano"].astype(int).astype(str), df["count_ia_hum"], color=COR_DEST, label="Volume")
-    ax1.set_ylabel("Publicações de IA nas Humanidades", color=COR_DEST)
-    ax1.tick_params(axis="y", labelcolor=COR_DEST)
-    for x, v in enumerate(df["count_ia_hum"]):
-        ax1.text(x, v, f"{int(v):,}".replace(",", "."), ha="center", va="bottom", fontsize=8)
 
+    # Volume: lollipop (haste fina + bolinha), no lugar das barras.
+    vmax = max(vol) if vol else 1
+    ax1.vlines(x, 0, vol, color=GUIA_COR, linewidth=1.8, zorder=1)
+    ax1.scatter(x, vol, s=PONTO_S, color=COR_DEST, edgecolors="white",
+                linewidths=1.4, zorder=3)
+    for xi, v in zip(x, vol):
+        ax1.text(xi, v + vmax * 0.025, num_ptbr(v), ha="center", va="bottom",
+                 fontsize=8.5, color=_TXT)
+    ax1.set_ylabel("volume de IA nas Humanidades", color=COR_DEST, fontsize=9)
+    ax1.tick_params(axis="y", labelcolor=COR_DEST)
+    ax1.set_ylim(0, vmax * 1.18)
+
+    # Taxa interna: linha com bolinhas no eixo direito.
     ax2 = ax1.twinx()
-    ax2.plot(df["ano"].astype(int).astype(str), df["taxa_interna_%"],
-             color=COR_BRASIL, marker="o", linewidth=2, label="Taxa interna")
-    ax2.set_ylabel("Taxa interna (%)", color=COR_BRASIL)
-    ax2.tick_params(axis="y", labelcolor=COR_BRASIL)
+    ax2.plot(x, taxa, color=COR_SCIELO, linewidth=2, zorder=2)
+    ax2.scatter(x, taxa, s=PONTO_S, color=COR_SCIELO, edgecolors="white",
+                linewidths=1.4, zorder=3)
+    tmin, tmax = min(taxa), max(taxa)
+    for xi, t in zip(x, taxa):
+        ax2.text(xi, t - (tmax - tmin) * 0.08, f"{pct_ptbr(t)}%", ha="center",
+                 va="top", fontsize=8.5, color=COR_SCIELO)
+    ax2.set_ylabel("taxa interna (%)", color=COR_SCIELO, fontsize=9)
+    ax2.tick_params(axis="y", labelcolor=COR_SCIELO)
+    ax2.set_ylim(tmin - (tmax - tmin) * 0.25, tmax + (tmax - tmin) * 0.18)
     ax2.grid(False)
+
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(anos)
+    for sp in ("top",):
+        ax1.spines[sp].set_visible(False)
+        ax2.spines[sp].set_visible(False)
+    eixo_ptbr(ax1, "y")
+    eixo_ptbr(ax2, "y")
+    ax1.text(0, -0.13, "Bolinhas = volume anual (esq.) · linha = taxa interna (dir.). "
+             "Brasil, 2016–2024.", transform=ax1.transAxes, fontsize=8.5,
+             style="italic", color=_TXT_FRACO)
 
     _salvar(fig, "openalex_03_brasil_temporal.png")
 
@@ -171,18 +218,20 @@ def fig_subcampos_3bases() -> None:
         "SciELO (corpus IA total)": SCIELO_SUB,
         "OpenAlex (Brasil, Humanas)": openalex_sub,
     }
-    x = np.arange(len(SUB_ORDER))
-    largura = 0.26
+    cores = {
+        "CAPES (corpus IA total)": COR_CAPES,
+        "SciELO (corpus IA total)": COR_SCIELO,
+        "OpenAlex (Brasil, Humanas)": COR_OPENALEX,
+    }
+    # Dumbbell: por subcampo, um ponto por base, ligados. Ordena pela média.
+    ordem = sorted(SUB_ORDER, key=lambda s: sum(b.get(s, 0) for b in bases.values()))
+    series = {nm: [bases[nm].get(s, 0) for s in ordem] for nm in bases}
 
-    fig, ax = plt.subplots(figsize=(11, 6))
-    for i, (nome, dados) in enumerate(bases.items()):
-        valores = [dados.get(s, 0) for s in SUB_ORDER]
-        ax.bar(x + (i - 1) * largura, valores, largura, label=nome,
-               color=CORES_INTERMEDIARIAS[[2, 3, 0][i]])
-    ax.set_xticks(x)
-    ax.set_xticklabels(SUB_ORDER)
-    ax.set_ylabel("% do corpus de IA da base (multi-label)")
-    ax.legend(fontsize=8)
+    fig, ax = plt.subplots(figsize=(11, 5.2))
+    dumbbell(ax, ordem, series, cores)
+    eixo_ptbr(ax, "x")
+    ax.set_xlabel("% do corpus de IA da base (multi-label)")
+    ax.legend(loc="lower right", frameon=False, fontsize=9)
     _salvar(fig, "openalex_04_subcampos_3bases.png")
 
 

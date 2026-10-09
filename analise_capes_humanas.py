@@ -30,12 +30,20 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from utils import (
+    COR_CAPES,
+    COR_DESTAQUE,
+    COR_NEUTRO,
     CORES_INTERMEDIARIAS,
     DADOS_CAPES_DIR,
     FIGURAS_DIR,
+    OKABE_ITO,
     STOPWORDS_PT,
     aplicar_estilo_padrao,
+    dotplot,
+    estilo_editorial,
     garantir_diretorio,
+    num_ptbr,
+    pct_ptbr,
     salvar_figura,
 )
 
@@ -45,12 +53,13 @@ garantir_diretorio(FIGURAS_DIR)
 CSV_IA = os.path.join(DADOS_CAPES_DIR, "capes_2021_2024_ia.csv")
 CSV_AUDIT = os.path.join(DADOS_CAPES_DIR, "capes_2021_2024_ia_auditoria.xlsx")
 
-COR_PRINCIPAL = CORES_INTERMEDIARIAS[0]
-COR_MESTRADO = CORES_INTERMEDIARIAS[3]
-COR_DOUTORADO = CORES_INTERMEDIARIAS[1]
-COR_PROFISSIONAL = CORES_INTERMEDIARIAS[2]
-COR_ANTROPOLOGIA = CORES_INTERMEDIARIAS[6]
-COR_OUTRAS = CORES_INTERMEDIARIAS[9]
+COR_PRINCIPAL = CORES_INTERMEDIARIAS[0]   # mantido para figuras fora do cap.2 (h04/h05)
+# Graus acadêmicos (capes_h02, empilhado): trio qualitativo Okabe-Ito.
+COR_MESTRADO = COR_CAPES                   # verde
+COR_DOUTORADO = OKABE_ITO["azul_claro"]    # azul-claro
+COR_PROFISSIONAL = COR_DESTAQUE            # magenta
+COR_ANTROPOLOGIA = COR_DESTAQUE            # magenta (categoria em foco em capes_h01)
+COR_OUTRAS = COR_NEUTRO                    # cinza (fallback do capes_h02)
 
 
 def carregar_humanas() -> pd.DataFrame:
@@ -65,32 +74,30 @@ def carregar_humanas() -> pd.DataFrame:
 
 
 def _cor_area(area: str) -> str:
+    # Base CAPES em verde; Antropologia (foco) em magenta de destaque.
     s = str(area).lower()
     if "antropologia" in s:
         return COR_ANTROPOLOGIA
-    return COR_OUTRAS
+    return COR_CAPES
 
 
 def figh01_areas_humanas(df: pd.DataFrame) -> None:
     serie = df["NM_AREA_CONHECIMENTO"].fillna("(s/info)").value_counts().sort_values()
-    cores = [_cor_area(a) for a in serie.index]
+    labels = list(serie.index)
+    vals = list(serie.values)
     total = serie.sum()
+    cores = [_cor_area(a) for a in labels]
+    pcts = [v / total * 100 for v in vals]
 
-    fig, ax = plt.subplots(figsize=(10, max(5, len(serie) * 0.35)))
-    bars = ax.barh(serie.index, serie.values, color=cores, edgecolor="white", linewidth=0.5)
-    for bar, val in zip(bars, serie.values):
-        ax.text(bar.get_width() + serie.max() * 0.01,
-                bar.get_y() + bar.get_height() / 2,
-                f"{val} ({val/total*100:.1f}%)", va="center", fontsize=8)
-    ax.set_xlabel(f"Trabalhos no campo Tecnologias IA/ML/DL em Ciências Humanas (N = {total})")
-    ax.set_xlim(0, serie.max() * 1.22)
-    # Legenda
+    fig, ax = plt.subplots(figsize=(10, max(5, len(serie) * 0.42)))
+    dotplot(ax, labels, vals, cores, pcts=pcts)
     from matplotlib.patches import Patch
     ax.legend(handles=[
         Patch(color=COR_ANTROPOLOGIA, label="Antropologia"),
-        Patch(color=COR_OUTRAS, label="Outras áreas de Humanas"),
+        Patch(color=COR_CAPES, label="Outras áreas de Humanas"),
     ], loc="lower right", frameon=False, fontsize=8)
-    plt.tight_layout()
+    estilo_editorial(ax, nota=(
+        f"Trabalhos no campo Tecnologias IA/ML/DL em Ciências Humanas · N = {num_ptbr(total)}."))
     out = os.path.join(FIGURAS_DIR, "capes_h01_areas_humanas.png")
     salvar_figura(out)
     plt.close(fig)
@@ -106,7 +113,6 @@ def figh02_temporal_humanas(df: pd.DataFrame) -> None:
 
     fig, ax = plt.subplots(figsize=(10, 5.5))
     anos = pivot.index.astype(int).tolist()
-    bottom = np.zeros(len(anos))
     cor_map = {
         "MESTRADO": COR_MESTRADO,
         "DOUTORADO": COR_DOUTORADO,
@@ -114,22 +120,32 @@ def figh02_temporal_humanas(df: pd.DataFrame) -> None:
     }
     ordem = ["DOUTORADO", "MESTRADO", "MESTRADO PROFISSIONAL"]
     presentes = [g for g in ordem if g in pivot.columns] + [g for g in pivot.columns if g not in ordem]
+    # Uma linha com bolinhas por grau acadêmico (trajetória de cada nível),
+    # no lugar das barras empilhadas. O rótulo do grau fica no fim da linha.
+    totais = pivot.sum(axis=1).values
     for grau in presentes:
         cor = cor_map.get(grau, COR_OUTRAS)
         vals = pivot[grau].values
-        ax.bar(anos, vals, bottom=bottom, color=cor, label=grau.title(), edgecolor="white")
-        for x, v, b in zip(anos, vals, bottom):
-            if v > 3:
-                ax.text(x, b + v / 2, f"{int(v)}", ha="center", va="center",
-                        color="white" if v > 8 else "#333", fontsize=8)
-        bottom = bottom + vals
-    for x, total in zip(anos, bottom):
-        ax.text(x, total + bottom.max() * 0.02, f"{int(total)}",
-                ha="center", va="bottom", fontsize=10, fontweight="bold")
-    ax.set_xlabel("Ano base de defesa")
-    ax.set_ylabel("Trabalhos no campo Tecnologias IA/ML/DL em Ciências Humanas")
+        ax.plot(anos, vals, color=cor, linewidth=2, zorder=2)
+        ax.scatter(anos, vals, s=140, color=cor, edgecolors="white",
+                   linewidths=1.4, zorder=3)
+        ax.text(anos[-1] + 0.06, vals[-1], f"  {grau.title()} ({num_ptbr(vals[-1])})",
+                va="center", fontsize=8.5, color=cor)
+    # Total anual em cinza discreto no topo (a curva agregada que o texto cita).
+    for x, tot in zip(anos, totais):
+        ax.text(x, max(totais) * 1.04, num_ptbr(tot), ha="center", va="bottom",
+                fontsize=8.5, color="#8a8a8a")
+    ax.text(anos[0], max(totais) * 1.10, "total no ano:", ha="left", va="bottom",
+            fontsize=8, style="italic", color="#8a8a8a")
+    ax.set_xlabel("ano base de defesa", fontsize=9, color="#6b6b6b")
+    ax.set_ylabel("trabalhos em Ciências Humanas (IA/ML/DL)", fontsize=9, color="#6b6b6b")
     ax.set_xticks(anos)
-    ax.legend(loc="upper left", frameon=False)
+    # Folga abaixo do 0: bolinhas em valor zero (ex.: Doutorado Profissional)
+    # não são cortadas pela borda inferior do eixo.
+    ax.set_ylim(-max(totais) * 0.03, max(totais) * 1.16)
+    ax.set_xlim(anos[0] - 0.15, anos[-1] + 1.4)
+    for sp in ("top", "right"):
+        ax.spines[sp].set_visible(False)
     plt.tight_layout()
     out = os.path.join(FIGURAS_DIR, "capes_h02_temporal_humanas.png")
     salvar_figura(out)
@@ -163,7 +179,7 @@ def figh04_regiao_humanas(df: pd.DataFrame) -> None:
     for bar, val in zip(bars, serie.values):
         ax.text(bar.get_x() + bar.get_width() / 2,
                 bar.get_height() + total * 0.01,
-                f"{val}\n({val/total*100:.1f}%)",
+                f"{val}\n({pct_ptbr(val/total*100, 1)}%)",
                 ha="center", va="bottom", fontsize=9)
     ax.set_ylabel("Trabalhos IA em Humanas")
     ax.set_ylim(0, serie.max() * 1.18)
