@@ -502,9 +502,15 @@ A versão antiga (`analise_comparativa.py` + `tabelas_comparativas.md`) cruzava 
 
 ---
 
-## Contribuição da IA generativa
+## Uso de inteligência artificial generativa
 
-Os scripts Python foram desenvolvidos com auxílio de **Claude** (Anthropic), assistente de inteligência artificial, a partir de especificações metodológicas da pesquisadora. A limpeza, organização e verificação dos dados, bem como a interpretação analítica dos resultados, foram realizadas integralmente pela pesquisadora.
+Desenvolvi os *scripts* deste repositório com o Claude Code e com o Claude, a partir das especificações metodológicas que defini e registrei em `docs/decisoes_metodologicas.md`. O Claude Code é a interface de linha de comando da Anthropic que dá ao modelo de linguagem acesso aos arquivos do projeto, para ler, escrever e executar *scripts*. Com eles escrevi e executei a coleta (dump da CAPES, API ArticleMeta da SciELO, OpenAlex), o classificador de subcampos (`utils.py`), as tabelas e as figuras. São minhas a definição das bases e dos recortes, as regras do classificador, as decisões sobre falsos positivos (como a do termo `transformer`), a revisão das planilhas de auditoria e a interpretação dos resultados no capítulo 2.
+
+**Modelos registrados no histórico de versões:** Claude Opus 4.7, Claude Opus 4.8, Claude Opus 5.5 e Claude Sonnet 5.5 (abril a outubro de 2026). Os *commits* mais antigos não registram a versão do modelo.
+
+**Sobre o autor `Claude` e a linha `Co-Authored-By: Claude …` nos *commits*.** Os *commits* com autor `Claude`, ou com essa linha no fim da mensagem, foram feitos em sessões do Claude Code. A marcação é gerada pela própria ferramenta e funciona como registro técnico de rastreabilidade: indica em que pontos do histórico o modelo de linguagem participou do trabalho. A autoria e a responsabilidade pelo conteúdo deste repositório são minhas. Conforme a Deliberação CONSU-A-005/2026 da Unicamp, as ferramentas de IA generativa não figuram como coautoras.
+
+A declaração formal de uso de IA generativa da tese, no modelo da Pró-Reitoria de Pós-Graduação da Unicamp, está no [Anexo 1 da tese](https://github.com/julianehelanski/tecno-etnografia-centro-ia/blob/main/ex_ane1.tex). Este texto também serve à descrição do depósito no Repositório de Dados de Pesquisa da Unicamp (REDU).
 
 ---
 
