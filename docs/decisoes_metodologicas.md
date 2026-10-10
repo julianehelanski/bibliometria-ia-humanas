@@ -371,13 +371,14 @@ Top por volume de IA-Humanas (definição conceito). Universo = todas as obras d
 
 | País | IA-Humanas | Universo | Taxa interna |
 |---|---:|---:|---:|
-| Estados Unidos | ~60.943 | 990.707 | 6,15% |
+| Estados Unidos | 119.181 | 1.621.928 | 7,35% |
+| Indonésia | 60.943 | 990.707 | 6,15% |
 | China | 51.300 | 303.733 | **16,89%** |
 | Reino Unido | 42.823 | 594.599 | 7,20% |
 | Alemanha | 27.504 | 419.966 | 6,55% |
 | **Brasil** | **9.996** | **636.607** | **1,57%** |
 
-> **Achado para a tese:** o Brasil tem o **2º maior universo de Humanidades** do top mundial (636.607, atrás só dos EUA), mas a **menor taxa interna do top-20 (1,57%)**. Confirma, em escala internacional, a "marginalidade" já vista na CAPES (0,67%): o gargalo brasileiro não é produzir pouco em Humanidades, é o quão pouco dessa produção dialoga com IA. (Nota: 2024 provavelmente subestimado por indexação incompleta no OpenAlex.)
+> **Achado para a tese:** o Brasil tem o **3º maior universo de Humanidades** do top mundial (636.607, atrás de EUA e Indonésia), mas a **menor taxa interna do top-20 (1,57%)**. Confirma, em escala internacional, a "marginalidade" já vista na CAPES (0,67%): o gargalo brasileiro não é produzir pouco em Humanidades, é o quão pouco dessa produção dialoga com IA. (Nota: 2024 provavelmente subestimado por indexação incompleta no OpenAlex.)
 
 ### IV.6. Ressalvas
 
