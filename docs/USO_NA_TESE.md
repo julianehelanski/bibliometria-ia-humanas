@@ -28,8 +28,6 @@ O mapeamento combina três bases. (1) Catálogo de Teses e Dissertações da CAP
 | capítulo 2 | Os estudos sobre inteligência artificial nas ciências humanas e sociai | `fig:openalex_brasil_temporal` | `figuras/openalex_03_brasil_temporal.png` | figuras_openalex.py | cópia na tese idêntica à do repositório |
 | capítulo 2 | Os estudos sobre inteligência artificial nas ciências humanas e sociai | `fig:openalex_subcampos_3bases` | `figuras/openalex_04_subcampos_3bases.png` | figuras_openalex.py | cópia na tese idêntica à do repositório |
 
-Nota de sincronização. Em 09/10/2026, depois da integração da branch `claude/figure-color-standardization-sgpeb8` (padronização visual feita em junho de 2026, da qual só parte tinha sido mergeada pelo PR #43), as figuras deste repositório citadas na tese são byte a byte iguais às cópias em `figuras/` do repositório da tese. O script `atualizar_figuras_tese.sh` (repositório da tese) copia a versão deste repositório para a tese pelo nome do arquivo quando uma figura for regenerada.
-
 ## Material do repositório sem uso direto na tese
 
 Das 105 figuras em `figuras/`, 92 não aparecem em `ex_cap*.tex` (variantes temporais, rankings de instituições, regiões, páginas, entre outras). Permanecem como material de auditoria, e as legendas LaTeX prontas estão em `inventario_figuras_capes.md` e `docs/inventario_figuras_openalex.tex`.
