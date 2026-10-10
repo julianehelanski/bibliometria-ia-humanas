@@ -106,4 +106,4 @@ Metadados de citação em [`CITATION.cff`](CITATION.cff).
 
 ## Licença
 
-Código sob licença [MIT](LICENSE). Os dados da CAPES, do SciELO e do OpenAlex seguem as políticas de uso de cada plataforma.
+Código sob licença [MIT](LICENSE); tabelas, planilhas de auditoria, classificações e figuras que produzi sob [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.pt-br), conforme [`LICENSE-DADOS.md`](LICENSE-DADOS.md). Os dados da CAPES, do SciELO e do OpenAlex seguem as condições de cada plataforma.
