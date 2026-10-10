@@ -3,8 +3,10 @@ title: "Bibliometria da inteligência artificial nas ciências humanas brasileir
 message: "Se você usar estes scripts ou dados, por favor cite-os."
 type: dataset
 authors:
-  - family-names: Helanski
-    given-names: Juliane
+  - family-names: Cardoso
+    given-names: Juliane Cristina Helanski
+    orcid: "https://orcid.org/0000-0001-8649-8986"
+    affiliation: "Universidade Estadual de Campinas (Unicamp), Programa de Pós-Graduação em Ciências Sociais"
 date-released: 2025-11-06
 repository-code: "https://github.com/julianehelanski/bibliometria-ia-humanas"
 license: MIT
@@ -15,3 +17,17 @@ keywords:
   - antropologia
   - SciELO
   - CAPES
+references:
+  - type: thesis
+    title: "Tecnografias de um centro de inteligência artificial: seguindo cientistas e engenheiros universidade afora"
+    authors:
+      - family-names: Cardoso
+        given-names: Juliane Cristina Helanski
+        orcid: "https://orcid.org/0000-0001-8649-8986"
+    thesis-type: "Tese (Doutorado em Ciências Sociais)"
+    institution:
+      name: "Universidade Estadual de Campinas (Unicamp), Instituto de Filosofia e Ciências Humanas"
+      city: Campinas
+      country: BR
+    year: 2026
+    repository-code: "https://github.com/julianehelanski/tecno-etnografia-centro-ia"

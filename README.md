@@ -1,6 +1,6 @@
 # Bibliometria da inteligência artificial nas ciências humanas brasileiras
 
-Este repositório reúne os dados, os *scripts* e as figuras do mapeamento bibliométrico que fiz para o capítulo 2 da minha tese de doutorado, *{tecnografia} de um centro de inteligência artificial: seguindo cientistas e engenheiros, universidade afora* (Programa de Pós-Graduação em Ciências Sociais, IFCH, Unicamp, 2026). O mapeamento mede o lugar que as ciências humanas, e a antropologia dentro delas, ocupam na produção acadêmica brasileira sobre inteligência artificial, e situa a minha pesquisa nesse terreno.
+Este repositório reúne os dados, os *scripts* e as figuras do mapeamento bibliométrico que fiz para o capítulo 2 da minha tese de doutorado, *Tecnografias de um centro de inteligência artificial: seguindo cientistas e engenheiros universidade afora* (Programa de Pós-Graduação em Ciências Sociais, IFCH, Unicamp, 2026). O mapeamento mede o lugar que as ciências humanas, e a antropologia dentro delas, ocupam na produção acadêmica brasileira sobre inteligência artificial, e situa a minha pesquisa nesse terreno.
 
 ## O que fiz
 
@@ -96,9 +96,11 @@ Os *commits* com autor `Claude`, ou com a linha `Co-Authored-By: Claude …`, fo
 
 ## Citação
 
-> HELANSKI, Juliane. *Bibliometria da inteligência artificial nas ciências humanas brasileiras*: dados e *scripts*. Campinas: Unicamp, 2026. Disponível em: https://github.com/julianehelanski/bibliometria-ia-humanas.
+> CARDOSO, Juliane Cristina Helanski. *Bibliometria da inteligência artificial nas ciências humanas brasileiras*: dados e *scripts*. Campinas: Unicamp, 2026. Disponível em: https://github.com/julianehelanski/bibliometria-ia-humanas.
 
-> HELANSKI, Juliane. *{tecnografia} de um centro de inteligência artificial*: seguindo cientistas e engenheiros, universidade afora. 2026. Tese (Doutorado em Ciências Sociais) – Instituto de Filosofia e Ciências Humanas, Universidade Estadual de Campinas, Campinas, 2026.
+> CARDOSO, Juliane Cristina Helanski. *Tecnografias de um centro de inteligência artificial*: seguindo cientistas e engenheiros universidade afora. Orientadora: Maria Suely Kofes. 2026. Tese (Doutorado em Ciências Sociais) – Instituto de Filosofia e Ciências Humanas, Universidade Estadual de Campinas, Campinas, 2026.
+
+ORCID da autora: https://orcid.org/0000-0001-8649-8986.
 
 Metadados de citação em [`CITATION.cff`](CITATION.cff).
 
