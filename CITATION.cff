@@ -8,8 +8,10 @@ authors:
     orcid: "https://orcid.org/0000-0001-8649-8986"
     affiliation: "Universidade Estadual de Campinas (Unicamp), Programa de Pós-Graduação em Ciências Sociais"
 date-released: 2025-11-06
+license:
+  - MIT
+  - CC-BY-4.0
 repository-code: "https://github.com/julianehelanski/bibliometria-ia-humanas"
-license: MIT
 keywords:
   - bibliometria
   - inteligência artificial
@@ -30,4 +32,3 @@ references:
       city: Campinas
       country: BR
     year: 2026
-    repository-code: "https://github.com/julianehelanski/tecno-etnografia-centro-ia"
