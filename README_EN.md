@@ -16,7 +16,7 @@ Not included in the REDU deposit, and where to obtain it:
 
 ## Licenses
 
-Code: MIT (LICENSE). Tables, classifications, audits and figures I produced: CC BY 4.0 (LICENSE-DADOS.md). Source metadata: CAPES (open data), SciELO (ArticleMeta API, open) and OpenAlex (CC0).
+Code: MIT (LICENSE). Tables, classifications, audits and figures I produced: CC BY-SA 4.0 (LICENSE-DADOS.md). Source metadata: CAPES (open data), SciELO (ArticleMeta API, open) and OpenAlex (CC0).
 
 ## How to cite
 
