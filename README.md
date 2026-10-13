@@ -8,7 +8,7 @@ Cruzei três bases, no mesmo período (2021 a 2024) e com o mesmo classificador:
 
 | Base | Coleta | Universo | Corpus em IA |
 |---|---|---|---|
-| Catálogo de Teses e Dissertações da CAPES | dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` (Dados Abertos CAPES) | 350.071 trabalhos | 12.995 trabalhos |
+| Catálogo de Teses e Dissertações da CAPES | dump oficial `BR-CAPES-BTD-2021A2024-2025-12-01` ([Dados Abertos CAPES](https://dadosabertos.capes.gov.br/group/catalogo-de-teses-e-dissertacoes-brasil)) | 350.071 trabalhos | 12.995 trabalhos |
 | SciELO Brasil | API ArticleMeta, todas as áreas | 98.165 artigos | 631 artigos |
 | OpenAlex | API pública, *fields* de humanidades, comparação entre países (2016 a 2024) | por país | 849 obras brasileiras |
 
@@ -36,7 +36,7 @@ A correspondência figura a figura, com o *script* de cada uma, está em [`docs/
 
 ## Dados
 
-- `dados_capes/`: os quatro arquivos anuais do dump oficial (via Git LFS), o dicionário de dados da CAPES e a planilha de auditoria dos 12.995 trabalhos (`capes_2021_2024_ia_auditoria.xlsx`).
+- `dados_capes/`: a planilha de auditoria dos 12.995 trabalhos (`capes_2021_2024_ia_auditoria.xlsx`) e as tabelas derivadas. O catálogo da CAPES é um conjunto de dados abertos, disponível no portal de Dados Abertos da CAPES (https://dadosabertos.capes.gov.br/group/catalogo-de-teses-e-dissertacoes-brasil), de onde se baixam os quatro arquivos anuais usados (2021 a 2023 na versão de 2025-03-31, 2024 na versão de 2025-12-01) e o dicionário de dados. No GitHub, os arquivos anuais estão versionados via Git LFS; no depósito do REDU, ficam só indicados pelo link.
 - `dados_scielo/`: agregado do universo por *subject area* e planilha de auditoria dos 631 artigos (`scielo_brasil_ia_subcampos_auditoria.xlsx`). Os CSV completos do universo e o *cache* da API são regeneráveis pelo *script* e não estão versionados.
 - `dados_openalex/`: corpus brasileiro, séries por ano e por país e planilha de auditoria.
 
