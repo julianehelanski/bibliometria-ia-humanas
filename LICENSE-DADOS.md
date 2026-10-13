@@ -5,3 +5,5 @@ O código deste repositório está sob a licença MIT (arquivo [`LICENSE`](LICEN
 ## Exceções
 
 - Os dados de origem seguem as condições de cada fonte: o Catálogo de Teses e Dissertações da CAPES é dado aberto do governo federal; os metadados do SciELO e do OpenAlex seguem as políticas de uso de cada plataforma (o OpenAlex os disponibiliza sob CC0).
+
+Texto legal da licença CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/legalcode.pt
