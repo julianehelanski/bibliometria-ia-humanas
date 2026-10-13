@@ -37,10 +37,14 @@ A correspondência figura a figura, com o *script* de cada uma, está em [`docs/
 ## Dados
 
 - `dados_capes/`: a planilha de auditoria dos 12.995 trabalhos (`capes_2021_2024_ia_auditoria.xlsx`) e as tabelas derivadas. O catálogo da CAPES é um conjunto de dados abertos, disponível no portal de Dados Abertos da CAPES (https://dadosabertos.capes.gov.br/group/catalogo-de-teses-e-dissertacoes-brasil), de onde se baixam os quatro arquivos anuais usados (2021 a 2023 na versão de 2025-03-31, 2024 na versão de 2025-12-01) e o dicionário de dados. No GitHub, os arquivos anuais estão versionados via Git LFS; no depósito do REDU, ficam só indicados pelo link.
-- `dados_scielo/`: agregado do universo por *subject area* e planilha de auditoria dos 631 artigos (`scielo_brasil_ia_subcampos_auditoria.xlsx`). Os CSV completos do universo e o *cache* da API são regeneráveis pelo *script* e não estão versionados.
-- `dados_openalex/`: corpus brasileiro, séries por ano e por país e planilha de auditoria.
+- `dados_scielo/`: o universo de *Human Sciences* do SciELO Brasil 2021–2024 com a minha classificação por subcampo (`scielo_humanas_universo.csv`), que documenta a base sobre a qual calculei a taxa de 0,49%; o agregado do universo por *subject area*; e a planilha de auditoria dos 631 artigos (`scielo_brasil_ia_subcampos_auditoria.xlsx`). Os metadados vêm da API ArticleMeta do SciELO (https://articlemeta.scielo.org), que é aberta. Os CSV do universo de todas as áreas e o *cache* da API são regeneráveis pelo *script* e não estão versionados.
+- `dados_openalex/`: corpus brasileiro (849 obras) com a minha classificação, séries por ano e por país e planilha de auditoria. Os metadados vêm da API pública do OpenAlex (https://openalex.org), distribuídos sob CC0.
 
-Os dados da CAPES são abertos; os do SciELO e do OpenAlex seguem as políticas de uso de cada plataforma.
+As três fontes são abertas. Referências das fontes:
+
+- COORDENAÇÃO DE APERFEIÇOAMENTO DE PESSOAL DE NÍVEL SUPERIOR (CAPES). *Catálogo de Teses e Dissertações – Brasil*, 2021 a 2024. Brasília: CAPES, 2025. Dados abertos. Disponível em: https://dadosabertos.capes.gov.br/group/catalogo-de-teses-e-dissertacoes-brasil.
+- SCIELO. *ArticleMeta API*. São Paulo: SciELO, [s. d.]. Disponível em: https://articlemeta.scielo.org.
+- PRIEM, Jason; PIWOWAR, Heather; ORR, Richard. OpenAlex: a fully-open index of scholarly works, authors, venues, institutions, and concepts. *arXiv*, 2022. DOI: https://doi.org/10.48550/arXiv.2205.01833.
 
 ## Como reproduzir
 
